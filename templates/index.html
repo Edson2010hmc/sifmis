@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Passagem de Serviço</title>
+<link rel="stylesheet" href="/static/css/styles.css?v=2"/>
+</head>
+<body>
+<header class="app-header">
+  <img src="/static/assets/logo.png" class="logo" alt="logo"/>
+  <div class="titles">
+    <h2>PASSAGEM DE SERVIÇO</h2>
+    <small id="subTitle">Fiscalização SUB/OPSUB/MIS</small>
+    
+  </div>
+ <div class="userbox">
+      <div class="user-info">
+        <span id="userName" class="tag"></span>
+        <span id="userProfile" class="profile-admin" style="display:none;">ADMINISTRADOR</span>
+      </div>
+</div>
+</header>
+<!--MENU DE NAVEGAÇÃO--------------------------------------------------------------------------------------------------->
+<nav class="topnav">
+  <button class="tablink active" data-tab="consultas">Inicio</button>
+  <button class="tablink" data-tab="cadastros">Cadastros</button>
+  <span id="profile" class="msg-prof"></span>
+</nav>
+
+<main>
+  <section id="tab-consultas" class="tab active">
+    <div class="filters fadein">
+      <div class="field"><label>Início</label><input type="date" id="fInicio"></div>
+      <div class="field"><label>Fim</label><input type="date" id="fFim"></div>
+      <button id="btnBuscar" class="btn">Buscar</button>
+      <button id="btnNova" class="btn secondary">Nova PS</button>
+      <span id="msgNovaPS" class="msg-erro"></span>
+    </div>
+    <div class="list-container fadein"><ul id="listaPS"></ul></div>
+  </section>
+  <!----CABEÇALHO DA PASSAGEM DE SERVIÇO---------------------------------------------------------------------------------->
+  <section id="tab-passagem" class="tab">
+    <div id="psPlaceholder" class="placeholder">MÓDULO PASSAGEM DE SERVIÇO</div>
+    <div id="psForm" class="psform hidden">
+      <div class="ps-header card fadein">
+        <div class="row">
+          <div class="col"><label>Número PS</label><input type="text" id="fNumero"></div>
+          <div class="col"><label>Data Emissão</label><input type="date" id="fData"></div>
+          <div class="col"><label>Embarcação</label><input type="text" id="fEmb"></div>
+        </div>
+        <div class="row">
+          <div class="col"><label>Inicio Quinzena</label><input type="date" id="fInicioPS"></div>
+          <div class="col"><label>Fim Quinzena</label><input type="date" id="fFimPS"></div>
+          <div class="col"><label>Status da PS</label><input type="text" id="fStatus" disabled></div>
+        </div>
+        <div class="row">
+          <div class="col"><label>Fiscal Embarcando</label><select id="fEmbC"><option value="">— selecione —</option></select></div>
+          <div class="col"><label>Fiscal Desembarcando</label><input type="text" id="fDesCNome" placeholder="Seu nome completo"></div>
+          <div class="col"><label>&nbsp;</label><button id="btnDadosEmb" class="btn small">Dados & Especificações</button></div>
+        </div>
+        <div class="btns">
+          <button id="btnSalvar" class="btn">Salva rascunho</button>
+          <button id="btnFinalizar" class="btn">Finalizar (PDF)</button>
+          <button id="btnCopiar" class="btn secondary">Copiar para nova (14d)</button>
+          <button id="btnExcluirRasc" class="btn secondary">Excluir rascunho</button> <!-- NOVO -->
+        </div>
+      </div>
+      <!-----------------------------------------------SEÇÕES DA PASSAGEM DE SERVIÇO------------------------------------------------------>
+      <div class="tabs-sub">
+        <button class="sublink active" data-sub="porto">Porto</button>
+        <button class="sublink" data-sub="rotina">Rotina</button>
+        <button class="sublink" data-sub="sms">SMS</button>
+        <button class="sublink" data-sub="pendencias">Pendências</button>
+        <button class="sublink" data-sub="os">OS</button>
+        <button class="sublink" data-sub="gerais">Gerais</button>
+        <button class="sublink" data-sub="historico">Histórico</button>
+      </div>
+
+
+<!---------------SEÇÃO PORTO-------------------------------------------------------------------------------------------------------->
+<!---------------SEÇÃO PORTO EM FORMATO ACCORDION-------------------------------------------------------------------------------------------------------->
+
+
+    
+<div class="subtab active" id="sub-porto">
+<div class="card"><h2>1. PORTO</h2></div>
+<!-- 1.1 Troca de Turma -->
+<div class="accordion-item">
+  <div class="accordion-header" data-target="trocaturma">
+    <span>1.1 Troca de Turma</span>
+    <span class="toggle">▼</span>
+  </div>
+  <div class="accordion-content" id="acc-trocaturma">
+    <div class="col">
+      
+  <div style="display:flex; gap:12px; align-items:flex-start;">
+  <div style="flex:0 0 auto;">
+    <label>Porto *</label><input id="ttPorto" type="text" maxlength="100" style="width:400px;">
+  </div>
+  <div style="flex:0 0 auto;">
+    <label>Terminal *</label><input id="ttTerminal" type="text" maxlength="100" style="width:400px;">
+  </div>
+</div>
+         
+      <label>OS *</label><input id="ttOS" type="text" maxlength="50" style="width:160px;">
+      
+    <div style="display:flex; gap:12px; align-items:flex-start;">
+  <div style="flex:0 0 auto;">
+    <label>Atracação (hh:mm) *</label><input width="100" id="ttAtracacao" type="time" style="width:100px;">
+  </div>
+  <div style="flex:0 0 auto;">
+    <label>Duração *</label><input id="ttDuracao" type="number" step="1" min="0" style="width:100px;">
+  
+  </div>
+</div>
+  
+  
+  
+  
+  
+  
+      <label>Observações</label><textarea id="ttObs" maxlength="4000" rows="8" style="width:100%;resize:vertical;overflow:auto;"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- 1.2 Manutenção Preventiva -->
+<div class="accordion-item">
+  <div class="accordion-header" data-target="manutprev">
+    <span>1.2 Manutenção Preventiva</span>
+    <span class="toggle">▼</span>
+  </div>
+<div class="accordion-content" id="acc-manutprev">
+  <div class="col">
+    <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
+      <input id="mpNaoPrevisto" type="checkbox">
+      Não previsto para esse porto
+    </label>
+    
+    <div id="containerCamposManutPrev" style="display:block;">
+      <div style="display:flex; gap:12px; align-items:flex-start;">
+        <div style="flex:0 0 auto;">
+          <label>Franquia solicitada (min)</label><input id="mpFranquia" type="number" step="1" min="0" style="width:160px;">
+        </div>
+        <div style="flex:0 0 auto;">
+          <label>Saldo de franquia (min)</label> <input id="mpSaldo" type="number" step="1" min="0" style="width:160px;">
+        </div>
+      </div>
+
+      <label>OS</label><input id="mpOS" type="text" maxlength="50" style="width:160px;">
+      
+      <label>RADE (anexo)</label>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <input id="mpRADE" type="file" style="width:400px" accept="application/pdf,image/*">
+        <span id="linkDownloadRade"></span>
+      </div>
+      
+      <label>Observações</label><textarea id="mpObs" maxlength="4000" rows="8" style="width:100%;resize:vertical;overflow:auto;"></textarea>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 1.3 Abastecimento -->
+<div class="accordion-item">
+  <div class="accordion-header" data-target="abastecimento">
+    <span>1.3 Abastecimento</span>
+    <span class="toggle">▼</span>
+  </div>
+  <div class="accordion-content" id="acc-abastecimento">
+  <div class="col">
+    <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
+      <input id="abNaoPrevisto" type="checkbox"> Não previsto para esse porto
+    </label>
+    
+    <div id="containerCamposAbast" style="display:block;">
+      <label>OS</label><input id="abOS" type="text" maxlength="50" style="width:160px;">
+
+      <div style="display:flex; gap:12px; align-items:flex-start;">
+        <div style="flex:0 0 auto;">
+          <label>Previsão de Inicio</label>
+          <input type="datetime-local" id="prevInicioAbast" style="width:200px;">
+        </div>
+        
+        <div style="flex:0 0 auto;">
+          <label>Qtde. M³</label><input id="abQtd" type="number" step="1" min="0" style="width:100px;">
+        </div>
+        
+        <div style="flex:0 0 auto;">
+          <label>Duração Prevista (h)</label><input id="abDuracao" type="number" step="1" min="0" style="width:100px;">
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px; align-items:flex-start;">
+        <div style="flex:0 0 auto;">
+          <label>Último Abastecimento</label><input type="date" id="ultimoAbast" style="width:180px;" disabled>
+        </div>
+        
+        <div style="flex:0 0 auto;">
+          <label>Qtde. M³</label>
+          <input id="ultAbastQtd" type="number" step="1" min="0" style="width:100px;" disabled>
+          <span id="msgUltAbast"></span>
+        </div>
+      </div>
+      
+      <label>Anexo</label>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <input id="abAnexo" type="file" style="width:400px" accept="application/pdf,image/*">
+        <span id="linkDownloadAbast"></span>
+      </div>
+      
+      <label>Observações</label>
+      <textarea id="abObs" maxlength="4000" rows="8" style="width:100%;resize:vertical;overflow:auto;"></textarea>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 1.4 Inspeção Normativa -->
+<div class="accordion-item">
+  <div class="accordion-header" data-target="anvisa">
+    <span>1.4 Inspeção Normativa</span>
+    <span class="toggle">▼</span>
+  </div>
+  <div class="accordion-content" id="acc-anvisa">
+    <div class="col">
+      <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
+        <input id="anNaoPrevisto" type="checkbox"> Não previsto para esse porto
+      </label>
+      
+      <div id="containerSubtabelaInspNorm" style="display:block;">
+        <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
+          <div style="flex:0 0 auto;">
+            <label>Descrição</label><select id="inspNorDesc" style="width:200px;"><option value="">— selecione —</option></select>
+          </div>
+          <div style="flex:0 0 auto;">
+            <label>OS</label><input id="inspNorOS" type="text" maxlength="50" style="width:160px;">
+          </div>
+          <div style="flex:0 0 auto; margin-top:20px;">
+            <button id="btnAddInspNorm" class="btn small">Adicionar</button>
+          </div>
+        </div>
+        
+        <table id="tblInspNorm" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+          <thead>
+            <tr style="background:#f0f0f0;">
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">Descrição</th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">OS</th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:center; width:100px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      
+      <label>Observações</label>
+      <textarea id="anObs" maxlength="4000" rows="8" style="width:100%;resize:vertical;overflow:auto;"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- 1.5 Inspeções/Auditorias Petrobras -->
+<div class="accordion-item">
+  <div class="accordion-header" data-target="petrobras">
+    <span>1.5 Inspeções/Auditorias Petrobras</span>
+    <span class="toggle">▼</span>
+  </div>
+  <div class="accordion-content" id="acc-petrobras">
+  <div class="col">
+    <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
+      <input id="ipNaoPrevisto" type="checkbox"> Não previsto para esse porto
+    </label>
+    
+    <div id="containerSubtabelaInspPetr" style="display:block;">
+      <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
+        <div style="flex:0 0 auto;">
+          <label>Descrição</label>
+          <select id="inspPetrDesc" style="width:200px;">
+            <option value="">— selecione —</option>
+          </select>
+        </div>
+        <div style="flex:0 0 auto;">
+          <label>Auditor/Visitante</label>
+          <input id="ipAud" type="text" maxlength="30" style="width:250px;">
+        </div>
+        <div style="flex:0 0 auto;">
+          <label>Gerência</label>
+          <input id="ipGer" type="text" maxlength="30" style="width:250px;">
+        </div>
+        <div style="flex:0 0 auto; margin-top:20px;">
+          <button id="btnAddInspPetr" class="btn small">Adicionar</button>
+        </div>
+      </div>
+      
+      <table id="tblInspPetr" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+        <thead>
+          <tr style="background:#f0f0f0;">
+            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Descrição</th>
+            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Auditor/Visitante</th>
+            <th style="border:1px solid #ddd; padding:8px; text-align:left;">Gerência</th>
+            <th style="border:1px solid #ddd; padding:8px; text-align:center; width:100px;">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    
+    <label>Observações</label>
+    <textarea id="ipObs" maxlength="4000" rows="8" style="width:100%;resize:vertical;overflow:auto;"></textarea>
+  </div>
+</div>
+</div>
+
+<!-- 1.6 Embarque de Equipes -->
+  <div class="accordion-item">
+  <div class="accordion-header" data-target="embequipes">
+    <span>1.6 Embarque de Equipes</span>
+    <span class="toggle">▼</span>
+  </div>
+  <div class="accordion-content" id="acc-embequipes">
+    <div class="col">
+      <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
+        <input id="eqNaoPrevisto" type="checkbox"> Não previsto para esse porto
+      </label>
+      
+      <div id="containerSubtabelaEmbEquip" style="display:block;">
+        <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
+          <div style="flex:0 0 auto;">
+            <label>Descrição</label>
+            <select id="embEquipDesc" style="width:200px;">
+              <option value="">— selecione —</option>
+            </select>
+          </div>
+          <div style="flex:0 0 auto;">
+            <label>Nome</label>
+            <input id="eqNome" type="text" maxlength="30" style="width:250px;">
+          </div>
+          <div style="flex:0 0 auto;">
+            <label>Função</label>
+            <input id="eqFuncao" type="text" maxlength="30" style="width:250px;">
+          </div>
+          <div style="flex:0 0 auto;">
+            <label>Empresa</label>
+            <input id="eqEmpresa" type="text" maxlength="30" style="width:250px;">
+          </div>
+          <div style="flex:0 0 auto; margin-top:20px;">
+            <button id="btnAddEmbEquip" class="btn small">Adicionar</button>
+          </div>
+        </div>
+        
+        <table id="tblEmbEquip" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+          <thead>
+            <tr style="background:#f0f0f0;">
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">Descrição</th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">Nome</th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">Função</th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">Empresa</th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:center; width:100px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      
+      <label>Observações</label>
+      <textarea id="eqObs" maxlength="4000" rows="8" style="width:100%;resize:vertical;overflow:auto;"></textarea>
+    </div>
+  </div>
+</div>
+
+
+<!-- 1.7 OS Mobilização/Desmobilização -->
+<div class="accordion-item">
+  <div class="accordion-header" data-target="osmobdesm">
+    <span>1.7 OS Mobilização/Desmobilização</span>
+    <span class="toggle">▼</span>
+  </div>
+  <div class="accordion-content" id="acc-osmobdesm">
+    <div class="col">
+      <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
+        <input id="omNaoPrevisto" type="checkbox"> Não previsto para esse porto
+      </label>
+      
+      <div id="containerSubtabelaMobD" style="display:block;">
+        <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
+          <div style="flex:0 0 auto;">
+            <label>OS</label>
+            <input id="mobDOS" type="text" maxlength="12" style="width:160px;">
+          </div>
+          <div style="flex:0 0 auto;">
+            <label>Descrição</label>
+            <input id="mobDDesc" type="text" maxlength="300" style="width:400px;">
+          </div>
+          <div style="flex:0 0 auto; margin-top:20px;">
+            <button id="btnAddMobD" class="btn small">Adicionar</button>
+          </div>
+        </div>
+        
+        <table id="tblMobD" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+          <thead>
+            <tr style="background:#f0f0f0;">
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">OS</th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:left;">Descrição</th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:center; width:100px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      
+      <label>Observações</label>
+      <textarea id="omObs" maxlength="4000" rows="8" style="width:100%;resize:vertical;overflow:auto;"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- 1.8 Embarque de Materiais -->
+<div class="accordion-item">
+  <div class="accordion-header" data-target="embmateriais">
+    <span>1.8 Embarque de Materiais</span>
+    <span class="toggle">▼</span>
+  </div>
+  <div class="accordion-content" id="acc-embmateriais">
+    <div class="col">
+      <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
+        <input id="emNaoPrevisto" type="checkbox"> Não previsto para esse porto
+      </label>
+    </div>
+    <table id="tblEM">
+      <thead><tr><th>Origem</th><th>OS</th><th>Destino</th><th>RT</th><th>Observações</th><th>Anexo</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="row">
+      <div class="col"><button id="btnAddEM" class="btn secondary">Adicionar linha</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- 1.9 Desembarque de Materiais -->
+<div class="accordion-item">
+  <div class="accordion-header" data-target="desmateriais">
+    <span>1.9 Desembarque de Materiais</span>
+    <span class="toggle">▼</span>
+  </div>
+  <div class="accordion-content" id="acc-desmateriais">
+    <div class="col">
+      <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
+        <input id="dmNaoPrevisto" type="checkbox"> Não previsto para esse porto
+      </label>
+    </div>
+    <table id="tblDM">
+      <thead><tr><th>OS</th><th>Origem</th><th>Destino</th><th>RT</th><th>Observações</th><th>Anexo</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="row">
+      <div class="col"><button id="btnAddDM" class="btn secondary">Adicionar linha</button></div>
+    </div>
+  </div>
+</div>
+
+
+
+</div> <!-- FIM DA SEÇÃO PORTO -->
+
+
+      <!---------------SEÇÃO ROTINA-------------------------------------------------------------------------------------------------------->
+      <div class="subtab" id="sub-rotina"><div class="card"><h3>Rotina – campos prontos</h3></div></div>
+
+
+
+
+      <!---------------SEÇÃO SMS-------------------------------------------------------------------------------------------------------->
+      <div class="subtab" id="sub-sms"><div class="card"><h3>SMS – campos prontos</h3></div></div>
+
+
+
+
+      <!---------------SEÇÃO PENDENCIAS-------------------------------------------------------------------------------------------------------->
+      <div class="subtab" id="sub-pendencias"><div class="card"><h3>Pendências – campos prontos</h3></div></div>
+
+
+
+      <!---------------SEÇÃO ORDENS DE SERVIÇO-------------------------------------------------------------------------------------------------------->
+      <div class="subtab" id="sub-os"><div class="card"><h3>OS – campos prontos</h3></div></div>
+
+
+
+
+      <!---------------SEÇÃO INFORMAÇÕES GERAIS-------------------------------------------------------------------------------------------------------->
+      <div class="subtab" id="sub-gerais"><div class="card"><h3>Gerais – campos prontos</h3></div></div>
+
+
+
+
+
+      <!---------------SEÇÃO LOG-------------------------------------------------------------------------------------------------------->
+      <div class="subtab" id="sub-historico"><div class="card"><h3>Histórico – (AuditLog no back)</h3></div></div>
+    </div>
+  </section>
+
+
+
+
+
+  <!---------------CADASTROS  ADM-------------------------------------------------------------------------------------------------------->
+ <section id="tab-cadastros" class="tab">
+  <div class="accordion">
+    
+    <!-- ========== ACCORDION ITEM: FISCAIS ========== -->
+    <div class="accordion-item">
+      <div class="accordion-header" data-target="fiscais">
+        <h3>👤Usuários</h3>
+        <span class="toggle">▼</span>
+      </div>
+      <div class="accordion-content active" id="acc-fiscais">
+        <div class="card fadein">
+          <div class="col"><label>Chave</label><input id="cad_f_ch" type="text" maxlength="4" style="width:80px"></div>
+          <div class="col"><label>Nome</label><input id="cad_f_nome" type="text" style="width:400px"></div>
+          <div class="col"><label>Celular</label><input id="cad_f_celular" type="text" maxlength="15" style="width:180px"></div>
+          <div class="col"><label>E-mail</label><input id="cad_f_email" type="email" style="width:300px"></div>
+          <div class="col" style="display:flex; gap:16px; align-items:center; margin-top:8px">
+            <label style="display:inline-flex; align-items:center; gap:6px">
+              <input id="cad_f_perfFisc" type="checkbox"> Perfil Fiscal
+            </label>
+            <label style="display:inline-flex; align-items:center; gap:6px">
+              <input id="cad_f_perfAdm" type="checkbox"> Perfil ADM
+            </label>
+          </div>
+          <div class="row" style="align-items:flex-end; gap:8px; margin-top:8px">
+            <div class="col" style="min-width:300px">
+              <label>Usuários cadastrados</label>
+              <select id="cad_f_list"><option value="">— selecione —</option></select>
+            </div>
+            <div class="col" style="flex:0 0 auto; display:flex; gap:8px">
+              <button id="btnSaveFiscal" class="btn ghost">Salvar</button>
+              <button id="btnFiscalEditar" class="btn ghost" disabled>Editar</button>
+              <button id="btnFiscalExcluir" class="btn ghost" disabled>Excluir</button>
+              <div class="col" id="fiscEditActions" style="flex:0 0 auto; display:none; gap:8px">
+                <button id="btnFiscalConfirma" class="btn">Confirmar</button>
+                <button id="btnFiscalCancela" class="btn ghost">Cancelar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ========== FIM: FISCAIS ========== -->
+
+    <!-- ========== ACCORDION ITEM: EMBARCAÇÕES ========== -->
+    <div class="accordion-item">
+      <div class="accordion-header" data-target="embarcacoes">
+        <h3>🚢 Embarcações</h3>
+        <span class="toggle">▼</span>
+      </div>
+      <div class="accordion-content" id="acc-embarcacoes">
+        <div class="card fadein">
+          <div class="col">
+            <label>Tipo</label>
+            <select id="cad_e_tipo" style="width:200px"><option value="">— selecione —</option></select>
+          </div>
+          <div class="col"><label>Nome</label><input id="cad_e_nome" type="text" style="width:400px"></div>
+          <div class="col">
+            <label>Modal</label>
+            <select id="cad_e_modal" style="width:200px"><option value="">— selecione —</option></select>
+          </div>
+          <div class="col"><label>Primeiro Porto</label><input id="cad_e_primeira" type="date" style="width:200px"></div>
+          <div class="col"><label>E-mail Petrobras</label><input id="cad_e_email" type="email" style="width:300px"></div>
+          <div class="col"><label>Fretadora</label><input id="cad_e_emprNav" type="text" style="width:300px"></div>
+          <div class="col"><label>ICJ Fretadora</label><input id="cad_e_icjEmprNav" type="text" maxlength="20" style="width:200px"></div>
+          <div class="col"><label>Empresa Serviços Técnicos</label><input id="cad_e_emprServ" type="text" style="width:300px"></div>
+          <div class="col"><label>ICJ Empresa Serviços Técnicos</label><input id="cad_e_icjEmprServ" type="text" maxlength="20" style="width:200px"></div>
+          <div class="row" style="align-items:flex-end; gap:8px; margin-top:8px">   
+            <div class="col" style="min-width:300px">
+              <label>Embarcações cadastradas</label>
+              <select id="cad_e_list"><option value="">— selecione —</option></select>
+            </div>
+            <div class="col" style="flex:0 0 auto; display:flex; gap:8px">
+              <button id="btnSaveEmb" class="btn ghost">Salvar</button>
+              <button id="btnEmbEditar" class="btn ghost" disabled>Editar</button>
+              <button id="btnEmbExcluir" class="btn ghost" disabled>Excluir</button>
+              <div class="col" id="embEditActions" style="flex:0 0 auto; display:none; gap:8px">
+                <button id="btnEmbConfirma" class="btn">Confirmar</button>
+                <button id="btnEmbCancela" class="btn ghost">Cancelar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ========== FIM: EMBARCAÇÕES ========== -->
+
+    <!-- ========== ACCORDION ITEM: PASSAGENS DE SERVIÇO (ADM) ========== -->
+    <div class="accordion-item">
+      <div class="accordion-header" data-target="passagens">
+        <h3>📄 Passagens de Serviço</h3>
+        <span class="toggle">▼</span>
+      </div>
+      <div class="accordion-content" id="acc-passagens">
+        <div class="card fadein">
+          <div class="row" style="align-items:flex-end; gap:8px">
+            <div class="col" style="min-width:340px">
+              <label>Passagens de Serviço (todas)</label>
+              <select id="admin_ps_list">
+                <option value="">— selecione —</option>
+              </select>
+              <div class="muted" id="admin_ps_hint" style="margin-top:6px">Selecione uma PS para poder excluir.</div>
+            </div>
+            <div class="col" style="flex:0 0 auto">
+              <button id="btnAdminPSDelete" class="btn ghost" disabled>Excluir</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ========== FIM: PASSAGENS DE SERVIÇO ========== -->
+
+    <!-- ========== PARA ADICIONAR NOVO CARD ========== 
+    <div class="accordion-item">
+      <div class="accordion-header" data-target="NOME_DO_TARGET">
+        <h3>🔧 Título do Card</h3>
+        <span class="toggle">▼</span>
+      </div>
+      <div class="accordion-content" id="acc-NOME_DO_TARGET">
+        <div class="card fadein">
+          CONTEÚDO DO CARD AQUI
+        </div>
+      </div>
+    </div>
+    ========== FIM DO TEMPLATE ========== -->
+
+  </div>
+</section>
+
+  <!-- Modal: Selecionar Embarcação para Nova PS ------------------------------------------------------------------------------>
+<div id="modalNovaPS" class="modal hidden" aria-hidden="true">
+  <div class="modal-content">
+    <h3>Selecionar embarcação</h3>
+
+    <div class="field">
+      <label for="selEmbNova">Embarcação</label>
+      <select id="selEmbNova">
+        <option value="">— selecione —</option>
+        <!-- opções serão preenchidas via app.js (EMB) -->
+      </select>
+    </div>
+
+    <div class="btns" style="margin-top:8px">
+      <button id="btnModalNovaConfirmar" class="btn" disabled>Confirmar</button>
+      <button id="btnModalNovaCancelar" class="btn secondary" type="button">Cancelar</button>
+    </div>
+
+    <div id="msgModalNovaPS" class="msg-erro"></div>
+  </div>
+</div>
+
+</main>
+
+
+<!-- === MÓDULOS IMPLEMENTADOS === -->
+<!-- Autenticação -->
+
+
+<!-- === SCRIPTS === -->
+ <script src="/static/js/auth.js"></script>
+ <script src="/static/js/fiscais.js"></script>
+ <script src="/static/js/embarcacoes.js"></script>
+ <script src="/static/js/cad-passagens.js"></script>
+ <script src="/static/js/passagens.js"></script>
+ <script src="/static/js/troca-turma.js"></script>
+ <script src="/static/js/manut-prev.js"></script>
+ <script src="/static/js/abast.js"></script>
+ <script src="/static/js/insp-norm.js"></script>
+ <script src="/static/js/insp-petr.js"></script>
+ <script src="/static/js/emb-equip.js"></script>
+ <script src="/static/js/mob-desm.js"></script> 
+ <script src="/static/js/app.js"></script>
+</body>
+</html>

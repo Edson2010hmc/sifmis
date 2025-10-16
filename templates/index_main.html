@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>SIFMIS - Sistema Integrado Fiscalização MIS</title>
+<link rel="stylesheet" href="/static/css/styles.css?v=2"/>
+</head>
+<body>
+<header class="app-header">
+  <img src="/static/assets/logo.png" class="logo" alt="logo"/>
+  <div class="titles">
+    <h2>SIFMIS - SISTEMA INTEGRADO FISCALIZAÇÃO MIS</h2>
+    <small id="subTitle">Fiscalização SUB/OPSUB/MIS</small>
+  </div>
+  <div class="userbox">
+    <div class="user-info">
+      <span id="userName" class="tag"></span>
+      <span id="userProfile" class="profile-admin" style="display:none;">ADMINISTRADOR</span>
+    </div>
+  </div>
+</header>
+
+<!-- MENU DE NAVEGAÇÃO PRINCIPAL -->
+<nav class="topnav">
+  <button class="tablink" data-module="passagens">Passagem de Serviço</button>
+  <button class="tablink" data-module="anomalias">Informe de Anomalia</button>
+  <button class="tablink" data-module="protocolo">Protocolo Aprox e CLM</button>
+  <button class="tablink" data-module="inventario">Inventário de Materiais</button>
+  <button class="tablink" data-module="cadastros">Cadastros</button>
+</nav>
+
+<main>
+  <!-- PLACEHOLDER CENTRAL (futuro dashboard) -->
+  <section id="hub-placeholder" class="fadein" style="text-align:center; padding:60px 20px;">
+    <div style="max-width:600px; margin:0 auto;">
+      <h1 style="color:#0b7a66; font-size:28px; margin-bottom:20px;">
+        Bem-vindo ao SIFMIS
+      </h1>
+      <p style="color:#6b6b6b; font-size:16px; line-height:1.6; margin-bottom:30px;">
+        Sistema Integrado de Fiscalização MIS<br>
+        Selecione um dos módulos acima para começar.
+      </p>
+      
+      <!-- CARDS DE ACESSO RÁPIDO -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-top:40px;">
+        
+        <div class="card" style="cursor:pointer; transition:transform 0.2s;" onclick="navegarModulo('passagens')">
+          <h3 style="color:#0b7a66; margin:0 0 8px 0;">📋</h3>
+          <h4 style="margin:0 0 4px 0;">Passagem de Serviço</h4>
+          <small style="color:#6b6b6b;">Criar e gerenciar PS</small>
+        </div>
+        
+        <div class="card" style="cursor:pointer; transition:transform 0.2s; opacity:0.6;">
+          <h3 style="color:#0b7a66; margin:0 0 8px 0;">⚠️</h3>
+          <h4 style="margin:0 0 4px 0;">Informe de Anomalia</h4>
+          <small style="color:#6b6b6b;">Em breve</small>
+        </div>
+        
+        <div class="card" style="cursor:pointer; transition:transform 0.2s; opacity:0.6;">
+          <h3 style="color:#0b7a66; margin:0 0 8px 0;">📊</h3>
+          <h4 style="margin:0 0 4px 0;">Protocolo Aprox e CLM</h4>
+          <small style="color:#6b6b6b;">Em breve</small>
+        </div>
+        
+        <div class="card" style="cursor:pointer; transition:transform 0.2s; opacity:0.6;">
+          <h3 style="color:#0b7a66; margin:0 0 8px 0;">📦</h3>
+          <h4 style="margin:0 0 4px 0;">Inventário de Materiais</h4>
+          <small style="color:#6b6b6b;">Em breve</small>
+        </div>
+        
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- SCRIPT DE NAVEGAÇÃO -->
+<script src="/static/js/auth.js"></script>
+<script>
+// Navegação entre módulos
+function navegarModulo(modulo) {
+  const rotas = {
+    'passagens': '/passagens/',
+    'anomalias': '/anomalias/',
+    'protocolo': '/protocolo/',
+    'inventario': '/inventario/',
+    'cadastros': '/cadastros/'
+  };
+  
+  const url = rotas[modulo];
+  if (url) {
+    window.location.href = url;
+  } else {
+    alert('Módulo em desenvolvimento');
+  }
+}
+
+// Configurar cliques nos botões do menu
+document.querySelectorAll('.tablink').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const modulo = this.getAttribute('data-module');
+    navegarModulo(modulo);
+  });
+});
+
+// Efeito hover nos cards
+document.querySelectorAll('.card').forEach(card => {
+  if (card.style.opacity !== '0.6') {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-4px)';
+      this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+    });
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0)';
+      this.style.boxShadow = 'none';
+    });
+  }
+});
+
+// Autenticação (reutiliza módulo existente)
+if (typeof AuthModule !== 'undefined' && AuthModule.validarUsuario) {
+  AuthModule.validarUsuario();
+}
+</script>
+</body>
+</html>

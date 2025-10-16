@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.Python
+venv/
+.venv/
+ENV/
+
+# Django
+*.log
+db.sqlite3
+/storage/
+/media/
+
+# IDE
+.vscode/
+.idea/
+run_admin.bat
+run_admin.py
+run_server.bat
+run_server.py
