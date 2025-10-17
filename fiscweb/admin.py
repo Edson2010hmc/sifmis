@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import FiscaisCad,BarcosCad,ModalBarco # Seção cadastro
+from .models_cadastro import FiscaisCad,BarcosCad,ModalBarco # Seção cadastro
 from .models import PassServ, PortoTrocaTurma,PortoManutPrev,PortoAbast,PortoInspNorm,subTabPortoInspNorm,PortoInspPetr,subTabPortoInspPetr,PortoEmbEquip,subTabPortoEmbEquip,PortoEmbMat,subTabPortoEmbMat,PortoDesMat,PortoMobD # Seção 1
 from .models import anocSMS #Seção 2
 from .models import inoPendContr #Seção 3

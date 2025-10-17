@@ -14,7 +14,8 @@ from django.views.decorators.http import require_http_methods
 import json
 from django.http.multipartparser import MultiPartParser
 from django.core.files.uploadhandler import MemoryFileUploadHandler
-from .models import FiscaisCad,BarcosCad,ModalBarco,PassServ
+from .models_cadastro import FiscaisCad,BarcosCad,ModalBarco
+from .models import PassServ
 from .models import PortoTrocaTurma
 from .models import PortoManutPrev
 from .models import PortoAbast

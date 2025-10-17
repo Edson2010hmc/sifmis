@@ -2,11 +2,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # API Index
-
-    
+    #======================================PAGINAS HTML
     path('', views.index_main, name='index_main'),
-    
     path('passagens/', views.passagens, name='passagens'),
     path('anomalias/', views.anomalias, name='anomalias'),
     path('protocolo/', views.protocolo, name='protocolo'),
