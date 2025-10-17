@@ -477,66 +477,200 @@ def enviar_informe(request, informe_id):
             return valor or ''
 
             # Montar tabela de pessoas apenas se a relação do evento envolver pessoas
-        tabela_pessoas = ""
-        if (informe.relacaoEvento or "").strip().upper() == "PESSOAS":
-            linha_pessoas = []
+# fiscweb/views_anom.py - Trecho da função enviar_informe()
+# Substitua apenas a seção de montagem do corpo do e-mail
+
+# ... código anterior mantido ...
+
+        # 6) Montar tabela de pessoas apenas se a relação do evento envolver pessoas
+        tabela_pessoas_html = ""
+        if (informe.relacaoEvento or "").strip().upper() == "PESSOAS" and pessoas.exists():
+            linhas_html = []
             for p in pessoas:
-                linha_pessoas.append(
-                    f"{p.nome}\t{p.idade}\t{p.funcao}\t{p.tempoExpFuncao}\t{p.tempoExpEmpresa}\t"
-                    f"{p.duracaoUltimaFolga}\t{p.necessarioDesembarque}\t{p.resgateAeromedico}\t{(p.situacaoAtual or '')}"
-                )
-            if linha_pessoas:
-                tabela_pessoas = (
-                    "Nome\tIdade\tFunção\tTempo de experiência na função\tTempo de experiência na empresa\t"
-                    "Duração da última folga\tNecessário Desembarque\tResgate Aeromédico?\tSituação Atual (estado de Saúde)\n"
-                    + "\n".join(linha_pessoas)
-                )
+                linhas_html.append(f"""
+                    <tr>
+                        <td style="padding:8px; border:1px solid #ddd;">{p.nome}</td>
+                        <td style="padding:8px; border:1px solid #ddd; text-align:center;">{p.idade}</td>
+                        <td style="padding:8px; border:1px solid #ddd;">{p.funcao}</td>
+                        <td style="padding:8px; border:1px solid #ddd; text-align:center;">{p.tempoExpFuncao}</td>
+                        <td style="padding:8px; border:1px solid #ddd; text-align:center;">{p.tempoExpEmpresa}</td>
+                        <td style="padding:8px; border:1px solid #ddd; text-align:center;">{p.duracaoUltimaFolga}</td>
+                        <td style="padding:8px; border:1px solid #ddd; text-align:center;">{p.necessarioDesembarque}</td>
+                        <td style="padding:8px; border:1px solid #ddd; text-align:center;">{p.resgateAeromedico}</td>
+                        <td style="padding:8px; border:1px solid #ddd;">{p.situacaoAtual or ''}</td>
+                    </tr>
+                """)
+            
+            tabela_pessoas_html = f"""
+                <div style="margin:20px 0;">
+                    <h3 style="color:#0b7a66; margin-bottom:10px;">PESSOAS ENVOLVIDAS</h3>
+                    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                        <thead>
+                            <tr style="background-color:#0b7a66; color:white;">
+                                <th style="padding:10px; border:1px solid #0b7a66; text-align:left;">Nome</th>
+                                <th style="padding:10px; border:1px solid #0b7a66; text-align:center;">Idade</th>
+                                <th style="padding:10px; border:1px solid #0b7a66; text-align:left;">Função</th>
+                                <th style="padding:10px; border:1px solid #0b7a66; text-align:center;">Tempo Exp. Função</th>
+                                <th style="padding:10px; border:1px solid #0b7a66; text-align:center;">Tempo Exp. Empresa</th>
+                                <th style="padding:10px; border:1px solid #0b7a66; text-align:center;">Última Folga</th>
+                                <th style="padding:10px; border:1px solid #0b7a66; text-align:center;">Desembarque?</th>
+                                <th style="padding:10px; border:1px solid #0b7a66; text-align:center;">Resgate Aéreo?</th>
+                                <th style="padding:10px; border:1px solid #0b7a66; text-align:left;">Situação Atual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {''.join(linhas_html)}
+                        </tbody>
+                    </table>
+                </div>
+            """
 
+        # 7) Montar corpo do e-mail em HTML
+        corpo_html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 20px;">
+    
+    <!-- Cabeçalho -->
+    <div style="background-color:#0b7a66; color:white; padding:20px; text-align:center; border-radius:8px 8px 0 0;">
+        <h1 style="margin:0; font-size:24px;">INFORME DE ANOMALIA</h1>
+        <p style="margin:5px 0 0 0; font-size:16px; font-weight:bold;">{tipo_legivel}</p>
+    </div>
 
-        # 7) Montar corpo do e-mail no formato especificado
-        corpo = f"""INFORME DE ANOMALIA
-        Tipo:  {tipo_legivel}
-        Site/Instalação: {informe.siteInstalacao or ''}
-        Empresa: {informe.empresa or ''}
-        Subcontratada: {informe.subcontratada or ''}   {'[ x ] Não Aplicável' if informe.subcontratadaNaoAplicavel else ''}
+    <!-- Corpo principal -->
+    <div style="background-color:#f8f9fa; padding:20px; border:1px solid #ddd; border-top:none;">
+        
+        <!-- Identificação -->
+        <div style="background-color:white; padding:15px; margin-bottom:15px; border-left:4px solid #0b7a66;">
+            <h3 style="color:#0b7a66; margin-top:0;">IDENTIFICAÇÃO</h3>
+            <table style="width:100%; font-size:14px;">
+                <tr>
+                    <td style="padding:5px 10px; font-weight:bold; width:180px;">Site/Instalação:</td>
+                    <td style="padding:5px 10px;">{informe.siteInstalacao or ''}</td>
+                </tr>
+                <tr style="background-color:#f8f9fa;">
+                    <td style="padding:5px 10px; font-weight:bold;">Empresa:</td>
+                    <td style="padding:5px 10px;">{informe.empresa or ''}</td>
+                </tr>
+                <tr>
+                    <td style="padding:5px 10px; font-weight:bold;">Subcontratada:</td>
+                    <td style="padding:5px 10px;">{informe.subcontratada or ''} {'<strong>[ x ] Não Aplicável</strong>' if informe.subcontratadaNaoAplicavel else ''}</td>
+                </tr>
+            </table>
+        </div>
 
-        Data: {informe.dataEvento or ''}
-        Horário: {informe.horarioEvento or ''}
-        Município/UF: {informe.municipioUF or ''} {(' - ' + (informe.municipioOutro or '')) if (getattr(informe, 'municipioUF', '') == 'OUTRO') else ''}
+        <!-- Data e Local -->
+        <div style="background-color:white; padding:15px; margin-bottom:15px; border-left:4px solid #0b7a66;">
+            <h3 style="color:#0b7a66; margin-top:0;">DATA E LOCAL</h3>
+            <table style="width:100%; font-size:14px;">
+                <tr>
+                    <td style="padding:5px 10px; font-weight:bold; width:180px;">Data do Evento:</td>
+                    <td style="padding:5px 10px;">{informe.dataEvento or ''}</td>
+                </tr>
+                <tr style="background-color:#f8f9fa;">
+                    <td style="padding:5px 10px; font-weight:bold;">Horário:</td>
+                    <td style="padding:5px 10px;">{informe.horarioEvento or ''}</td>
+                </tr>
+                <tr>
+                    <td style="padding:5px 10px; font-weight:bold;">Município/UF:</td>
+                    <td style="padding:5px 10px;">{informe.municipioUF or ''} {(' - ' + (informe.municipioOutro or '')) if (getattr(informe, 'municipioUF', '') == 'OUTRO') else ''}</td>
+                </tr>
+            </table>
+        </div>
 
-        Descrição :
-        {informe.descricao or ''}
+        <!-- Descrição -->
+        <div style="background-color:white; padding:15px; margin-bottom:15px; border-left:4px solid #0b7a66;">
+            <h3 style="color:#0b7a66; margin-top:0;">DESCRIÇÃO</h3>
+            <p style="margin:0; white-space:pre-wrap; font-size:14px;">{informe.descricao or ''}</p>
+        </div>
 
-        Relação do evento
-        {informe.relacaoEvento or ''}
+        <!-- Relação do Evento -->
+        <div style="background-color:white; padding:15px; margin-bottom:15px; border-left:4px solid #0b7a66;">
+            <h3 style="color:#0b7a66; margin-top:0;">RELAÇÃO DO EVENTO</h3>
+            <p style="margin:0; font-size:14px; font-weight:bold;">{informe.relacaoEvento or ''}</p>
+        </div>
 
-        {tabela_pessoas}
+        <!-- Tabela de Pessoas (se houver) -->
+        {tabela_pessoas_html}
 
-        Ações adotadas:
-        {informe.acoesAdotadas or ''}
+        <!-- Ações Adotadas -->
+        <div style="background-color:white; padding:15px; margin-bottom:15px; border-left:4px solid #0b7a66;">
+            <h3 style="color:#0b7a66; margin-top:0;">AÇÕES ADOTADAS</h3>
+            <p style="margin:0; white-space:pre-wrap; font-size:14px;">{informe.acoesAdotadas or ''}</p>
+        </div>
 
-        Ordem de Serviço:  {informe.ordemServico1 or ''}   {informe.ordemServico2 or ''}
+        <!-- Ordem de Serviço -->
+        <div style="background-color:white; padding:15px; margin-bottom:15px; border-left:4px solid #0b7a66;">
+            <h3 style="color:#0b7a66; margin-top:0;">ORDEM DE SERVIÇO</h3>
+            <p style="margin:0; font-size:14px;">
+                <strong>OS 1:</strong> {informe.ordemServico1 or ''}
+                {f'<span style="margin-left:30px;"><strong>OS 2:</strong> {informe.ordemServico2}</span>' if informe.ordemServico2 else ''}
+            </p>
+        </div>
 
-        Operação/Instalação Paralisada?  {(informe.operacaoParalisada or '')}
+        <!-- Operação/Instalação -->
+        <div style="background-color:white; padding:15px; margin-bottom:15px; border-left:4px solid #0b7a66;">
+            <h3 style="color:#0b7a66; margin-top:0;">OPERAÇÃO/INSTALAÇÃO</h3>
+            <table style="width:100%; font-size:14px;">
+                <tr>
+                    <td style="padding:5px 10px; font-weight:bold; width:280px;">Operação/Instalação Paralisada?</td>
+                    <td style="padding:5px 10px;">{informe.operacaoParalisada or ''}</td>
+                </tr>
+            </table>
+        </div>
 
-        Embarcação operou com sistema degradado? {mostra_emb_campo(getattr(informe, 'sistemaDegradado', ''))}    Embarcação derivou? {mostra_emb_campo(getattr(informe, 'embarcacaoDerivou', ''))}
+        <!-- Informações da Embarcação (se aplicável) -->
+        <div style="background-color:white; padding:15px; margin-bottom:15px; border-left:4px solid #0b7a66;">
+            <h3 style="color:#0b7a66; margin-top:0;">INFORMAÇÕES DA EMBARCAÇÃO</h3>
+            <table style="width:100%; font-size:14px;">
+                <tr>
+                    <td style="padding:5px 10px; font-weight:bold; width:280px;">Embarcação operou com sistema degradado?</td>
+                    <td style="padding:5px 10px;">{mostra_emb_campo(getattr(informe, 'sistemaDegradado', ''))}</td>
+                </tr>
+                <tr style="background-color:#f8f9fa;">
+                    <td style="padding:5px 10px; font-weight:bold;">Embarcação derivou?</td>
+                    <td style="padding:5px 10px;">{mostra_emb_campo(getattr(informe, 'embarcacaoDerivou', ''))}</td>
+                </tr>
+                <tr>
+                    <td style="padding:5px 10px; font-weight:bold;">Embarcação perdeu posição?</td>
+                    <td style="padding:5px 10px;">{mostra_emb_campo(getattr(informe, 'embarcacaoPerdeuPosicao', ''))}</td>
+                </tr>
+            </table>
+        </div>
 
-        Embarcação perdeu posição ? {mostra_emb_campo(getattr(informe, 'embarcacaoPerdeuPosicao', ''))}
+        <!-- Informações Complementares -->
+        {f'''
+        <div style="background-color:white; padding:15px; margin-bottom:15px; border-left:4px solid #0b7a66;">
+            <h3 style="color:#0b7a66; margin-top:0;">INFORMAÇÕES COMPLEMENTARES</h3>
+            <p style="margin:0; white-space:pre-wrap; font-size:14px;">{informe.informacoesComplementares}</p>
+        </div>
+        ''' if informe.informacoesComplementares else ''}
 
-        INFORMAÇÕES COMPLEMENTARES
-        {informe.informacoesComplementares or ''}
+    </div>
 
+    <!-- Rodapé/Assinatura -->
+    <div style="background-color:#f8f9fa; padding:20px; border:1px solid #ddd; border-top:none; border-radius:0 0 8px 8px; text-align:center;">
+        <p style="margin:0; font-size:14px; line-height:1.8;">
+            <strong>Atenciosamente,</strong><br>
+            {getattr(request, 'user', None) and getattr(request.user, 'get_username', lambda: '')() or ''}<br>
+            <span style="color:#0b7a66; font-weight:bold;">Fiscal Offshore – Petróleo Brasileiro S/A</span><br>
+            {barco.tipoBarco} {barco.nomeBarco}<br>
+            <a href="mailto:{barco.emailPetr}" style="color:#0b7a66; text-decoration:none;">{barco.emailPetr}</a>
+        </p>
+    </div>
 
-        Atte
-        {getattr(request, 'user', None) and getattr(request.user, 'get_username', lambda: '')() or ''}
-        Fiscal Offshore – Petróleo Brasileiro S/A
-        {barco.tipoBarco}  {barco.nomeBarco}
-        {barco.emailPetr}
+</body>
+</html>
         """
 
         # 8) Enviar e-mail (SMTP sem autenticação)
         msg = EmailMessage()
-        msg.set_content(corpo)
+        msg.set_content("Este e-mail requer visualização em HTML.")  # Fallback texto puro
+        msg.add_alternative(corpo_html, subtype='html')  # Versão HTML
         msg['Subject'] = assunto
         msg['From'] = from_addr
         msg['To'] = to_addr
@@ -548,17 +682,16 @@ def enviar_informe(request, informe_id):
             s.send_message(msg)
             s.quit()
         except Exception as e:
-            # Sem console.log; log mínimo no servidor:
             print(f"[EMAIL][ERRO] Falha no envio do informe {informe.id}: {e}")
             return JsonResponse({'success': False, 'error': 'Falha ao enviar e-mail'}, status=500)
 
         # 9) Atualizar campos de envio no Informe
         agora = timezone.localtime()
-        informe.dataEnvio = agora.date()
-        informe.horaEnvio = agora.time()
+        informe.dataEnvioInforme = agora.date()
+        informe.horaEnvioInforme = agora.time()
         destinatarios_total = [to_addr] + cc_list
-        informe.destinatarios = ";".join(destinatarios_total)
-        informe.save(update_fields=['dataEnvio', 'horaEnvio', 'destinatarios'])
+        informe.destInforme = ";".join(destinatarios_total)
+        informe.save(update_fields=['dataEnvioInforme', 'horaEnvioInforme', 'destInforme'])
 
         print(f"[EMAIL][OK] Informe {informe.id} enviado para {to_addr} CC={cc_list}")
         return JsonResponse({'success': True})

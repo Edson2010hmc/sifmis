@@ -102,4 +102,17 @@ class BarcosCad(models.Model):
 
         super().save(*args, **kwargs)
     
-#==================================SUBTABELA CADASTRO BARCOS TELEFONES===============#
+#==================================SUBTABELA CADASTRO BARCOS TELEFONES============================#
+
+
+
+
+
+
+
+
+
+
+
+#================================SUBTABELA DE CADASTRO DE UEPs - EMAILS E RAMAIS=================
+
