@@ -32,10 +32,32 @@ def index_main(request):
     """
     return render(request, 'index_main.html')
 
-#===============================================RENDERIZA TELA PASSGEM DE SERVIÇO================================
-def index(request):
-    """Renderiza a página principal"""
-    return render(request, 'index.html')
+#===============================================RENDERIZA TELA PASSAGEM DE SERVIÇO================================
+def passagens(request):
+    """Renderiza a página de Passagens de Serviço"""
+    return render(request, 'index_ps.html')
+
+#===============================================RENDERIZA TELA CADASTROS================================
+def cadastros(request):
+    """Renderiza a página de Cadastros"""
+    return render(request, 'index_cad.html')
+
+#===============================================RENDERIZA TELA INFORMES================================
+def anomalias(request):
+    """Renderiza a página de Informes de Anomalia"""
+    return render(request, 'index_anom.html')
+
+#===============================================RENDERIZA TELA PA E CLM================================
+def protocolo(request):
+    """Renderiza a página de Protocolos e CLM"""
+    return render(request, 'index_pa_clm.html')
+
+#===============================================RENDERIZA TELA INVENTARIO DE MATERIAIS================================
+def inventario(request):
+    """Renderiza a página de Inventario de Materiais"""
+    return render(request, 'index_invmater.html')
+
+
 
 #===============================================CAPTURA CREDENCIAL WINDOWS - USERNAME=================================================
 @csrf_exempt

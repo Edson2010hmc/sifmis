@@ -5,7 +5,13 @@ urlpatterns = [
     # API Index
 
     
-    path('', views.index, name='index'),
+    path('', views.index_main, name='index_main'),
+    
+    path('passagens/', views.passagens, name='passagens'),
+    path('anomalias/', views.anomalias, name='anomalias'),
+    path('protocolo/', views.protocolo, name='protocolo'),
+    path('inventario/', views.inventario, name='inventario'),
+    path('cadastros/', views.cadastros, name='cadastros'),
 
     #========================================AUTENTICAÇÃO E AUTORIZAÇÃO=================================
     # API Validação de Usuário

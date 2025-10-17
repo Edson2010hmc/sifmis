@@ -67,7 +67,7 @@ main { padding:12px; }
     flex-direction: column;
     gap: 2px;
     line-height: 1.2;
-    text-align: center; /* CENTRALIZA TODAS AS LINHAS */
+    text-align: center; 
 }
 
 /* Linha 1: [num][ano] [tipo] [nome embarc] - fonte 12 */

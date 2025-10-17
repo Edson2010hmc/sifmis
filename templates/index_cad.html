@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Cadastros</title>
+<link rel="stylesheet" href="/static/css/styles.css?v=2"/>
+</head>
+<body>
+<header class="app-header">
+  <img src="/static/assets/logo.png" class="logo" alt="logo"/>
+  <div class="titles">
+    <h1>SIRF-MIS  CADASTROS</h1>
+    <small id="subTitle">Fiscalização SUB/OPSUB/MIS</small>
+  </div>
+  <div class="userbox">
+    <div class="user-info">
+      <span id="userName" class="tag"></span>
+      <span id="userProfile" class="profile-admin" style="display:none;">ADMINISTRADOR</span>
+    </div>
+  </div>
+</header>
+
+<nav class="topnav">
+  <button class="tablink" onclick="window.location.href='/'">⬅ Voltar</button>
+</nav>
+
+<main>
+  <section class="tab active">
+    <div class="accordion">
+      
+      <!-- ========== ACCORDION ITEM: FISCAIS ========== -->
+      <div class="accordion-item">
+        <div class="accordion-header" data-target="fiscais">
+          <h3>👤 Usuários</h3>
+          <span class="toggle">▼</span>
+        </div>
+        <div class="accordion-content" id="acc-fiscais">
+          <div class="card fadein">
+            <div class="col"><label>Chave</label><input id="cad_f_ch" type="text" maxlength="4" style="width:80px"></div>
+            <div class="col"><label>Nome</label><input id="cad_f_nome" type="text" style="width:400px"></div>
+            <div class="col"><label>Celular</label><input id="cad_f_celular" type="text" maxlength="15" style="width:180px"></div>
+            <div class="col"><label>E-mail</label><input id="cad_f_email" type="email" style="width:300px"></div>
+            <div class="col" style="display:flex; gap:16px; align-items:center; margin-top:8px">
+              <label style="display:inline-flex; align-items:center; gap:6px">
+                <input id="cad_f_perfFisc" type="checkbox"> Perfil Fiscal
+              </label>
+              <label style="display:inline-flex; align-items:center; gap:6px">
+                <input id="cad_f_perfAdm" type="checkbox"> Perfil ADM
+              </label>
+            </div>
+            <div class="row" style="align-items:flex-end; gap:8px; margin-top:8px">
+              <div class="col" style="min-width:300px">
+                <label>Usuários cadastrados</label>
+                <select id="cad_f_list"><option value="">— selecione —</option></select>
+              </div>
+              <div class="col" style="flex:0 0 auto; display:flex; gap:8px">
+                <button id="btnSaveFiscal" class="btn ghost">Salvar</button>
+                <button id="btnFiscalEditar" class="btn ghost" disabled>Editar</button>
+                <button id="btnFiscalExcluir" class="btn ghost" disabled>Excluir</button>
+                <div class="col" id="fiscEditActions" style="flex:0 0 auto; display:none; gap:8px">
+                  <button id="btnFiscalConfirma" class="btn">Confirmar</button>
+                  <button id="btnFiscalCancela" class="btn ghost">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== ACCORDION ITEM: EMBARCAÇÕES ========== -->
+      <div class="accordion-item">
+        <div class="accordion-header" data-target="embarcacoes">
+          <h3>🚢 Embarcações</h3>
+          <span class="toggle">▼</span>
+        </div>
+        <div class="accordion-content" id="acc-embarcacoes">
+          <div class="card fadein">
+            <div class="col">
+              <label>Tipo</label>
+              <select id="cad_e_tipo" style="width:200px"><option value="">— selecione —</option></select>
+            </div>
+            <div class="col"><label>Nome</label><input id="cad_e_nome" type="text" style="width:400px"></div>
+            <div class="col">
+              <label>Modal</label>
+              <select id="cad_e_modal" style="width:200px"><option value="">— selecione —</option></select>
+            </div>
+            <div class="col"><label>Primeiro Porto</label><input id="cad_e_primeira" type="date" style="width:200px"></div>
+            <div class="col"><label>E-mail Petrobras</label><input id="cad_e_email" type="email" style="width:300px"></div>
+            <div class="col"><label>Fretadora</label><input id="cad_e_emprNav" type="text" style="width:300px"></div>
+            <div class="col"><label>ICJ Fretadora</label><input id="cad_e_icjEmprNav" type="text" maxlength="20" style="width:200px"></div>
+            <div class="col"><label>Empresa Serviços Técnicos</label><input id="cad_e_emprServ" type="text" style="width:300px"></div>
+            <div class="col"><label>ICJ Empresa Serviços Técnicos</label><input id="cad_e_icjEmprServ" type="text" maxlength="20" style="width:200px"></div>
+            <div class="row" style="align-items:flex-end; gap:8px; margin-top:8px">   
+              <div class="col" style="min-width:300px">
+                <label>Embarcações cadastradas</label>
+                <select id="cad_e_list"><option value="">— selecione —</option></select>
+              </div>
+              <div class="col" style="flex:0 0 auto; display:flex; gap:8px">
+                <button id="btnSaveEmb" class="btn ghost">Salvar</button>
+                <button id="btnEmbEditar" class="btn ghost" disabled>Editar</button>
+                <button id="btnEmbExcluir" class="btn ghost" disabled>Excluir</button>
+                <div class="col" id="embEditActions" style="flex:0 0 auto; display:none; gap:8px">
+                  <button id="btnEmbConfirma" class="btn">Confirmar</button>
+                  <button id="btnEmbCancela" class="btn ghost">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== ACCORDION ITEM: PASSAGENS DE SERVIÇO (ADM) ========== -->
+      <div class="accordion-item">
+        <div class="accordion-header" data-target="passagens">
+          <h3>📄 Passagens de Serviço</h3>
+          <span class="toggle">▼</span>
+        </div>
+        <div class="accordion-content" id="acc-passagens">
+          <div class="card fadein">
+            <div class="row" style="align-items:flex-end; gap:8px">
+              <div class="col" style="min-width:340px">
+                <label>Passagens de Serviço (todas)</label>
+                <select id="admin_ps_list">
+                  <option value="">— selecione —</option>
+                </select>
+                <div class="muted" id="admin_ps_hint" style="margin-top:6px">Selecione uma PS para poder excluir.</div>
+              </div>
+              <div class="col" style="flex:0 0 auto">
+                <button id="btnAdminPSDelete" class="btn ghost" disabled>Excluir</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<script src="/static/js/auth.js"></script>
+<script src="/static/js/fiscais.js"></script>
+<script src="/static/js/embarcacoes.js"></script>
+<script src="/static/js/cad-passagens.js"></script>
+<script src="/static/js/cadastros.js"></script>
+</body>
+</html>
