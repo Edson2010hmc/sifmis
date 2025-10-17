@@ -56,7 +56,12 @@ class BarcosCad(models.Model):
                         ('DSV' , 'DSV'),
                         ('TUP' , 'TUP'),
                                           ]
-           
+    
+    celular_validator = RegexValidator(
+        regex=r'^\(\d{2}\)\d{4,5}-\d{4}$',
+        message='Celular deve estar no formato: (99)99999-9999'
+    )
+                   
     tipoBarco = models.CharField(max_length=6,choices=barcoTipoChoice, verbose_name='Tipo')
     nomeBarco = models.CharField(max_length=50, verbose_name='Nome',unique=True)
     modalSelec = models.ForeignKey(ModalBarco,on_delete=models.SET_NULL,null=True, blank=True,verbose_name='Seleciona Modal')    
@@ -67,8 +72,15 @@ class BarcosCad(models.Model):
     icjEmprNav = models.CharField(max_length=20,verbose_name='ICJ Empresa Navegação', unique=True)
     emprServ = models.CharField(max_length=80,verbose_name='Empresa Serviço')
     icjEmprServ = models.CharField(max_length=20,verbose_name='ICJ Empresa Serviço', unique=True)
-
-     
+    gerOper = models.CharField(max_length=25,verbose_name='Gerência Operacional')
+    emaiCiop = models.EmailField(max_length=40, verbose_name='E-mail Controle CIOp',unique=True)
+    chaveAto = models.CharField(max_length=4,verbose_name='Chave ATO', unique=True)
+    nomeAto = models.CharField(max_length=25,verbose_name='Nome ATO do barco')
+    contAto = models.CharField(max_length=15,validators=[celular_validator],blank=True,verbose_name='Celular ATO' )
+    chaveSto = models.CharField(max_length=4,verbose_name='Chave STO do Barco', unique=True)
+    nomeSto = models.CharField(max_length=25,verbose_name='Nome STO do barco')
+    contSto = models.CharField(max_length=15,validators=[celular_validator],blank=True,verbose_name='Celular STO' )
+    
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
     
