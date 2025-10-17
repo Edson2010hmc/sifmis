@@ -6,6 +6,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
 from datetime import datetime
+from django.utils import timezone
+from email.message import EmailMessage
+import smtplib
 
 from .models_anom import InformeAnomalia, SubTabPessoasAnomalia
 from .models_cad import BarcosCad
@@ -407,3 +410,155 @@ def buscar_empresas_embarcacao(request, embarcacao_id):
             'success': False,
             'error': str(e)
         }, status=400)
+
+#========================================== ENVIAR INFORME ==========================================
+@csrf_exempt
+def enviar_informe(request, informe_id):
+        """
+        Envia o Informe de Anomalia por e-mail, preenchendo:
+        - Assunto: #### IMPORTANTE #### - INFORME DE ANOMALIA {TIPO} {NOME DA EMBARCAÇÃO}
+        - From: emailPetr (BarcosCad)
+        - To:   emailCiop (BarcosCad)
+        - Cc:   emailAto; emailSto; emailFiscContr (ignorar vazios)
+        Atualiza em Informe: dataEnvio, horaEnvio, destinatarios.
+        """
+        if request.method != 'POST':
+            return JsonResponse({'success': False, 'error': 'Método não permitido'}, status=405)
+
+        # 1) Carregar Informe
+        try:
+            informe = InformeAnomalia.objects.get(id=informe_id)
+        except InformeAnomalia.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Informe não encontrado'}, status=404)
+
+        # 2) Vincular Barco via siteInstalacao: "[tipo] [Nome...]"
+        site = (informe.siteInstalacao or '').strip()
+        if not site:
+            return JsonResponse({'success': False, 'error': 'siteInstalacao vazio no Informe'}, status=400)
+
+        # separar primeiro token (tipoBarco) do restante (nomeBarco)
+        partes = site.split(' ', 1)
+        if len(partes) != 2:
+            return JsonResponse({'success': False, 'error': 'siteInstalacao fora do padrão [tipo] [nome]'}, status=400)
+        tipo_txt, nome_txt = partes[0].strip(), partes[1].strip()
+
+        try:
+            barco = BarcosCad.objects.get(tipoBarco=tipo_txt, nomeBarco=nome_txt)
+        except BarcosCad.DoesNotExist:
+            # fallback: tentar concatenação direta no banco (casos de espaços múltiplos/capitalização)
+            barco = BarcosCad.objects.filter(tipoBarco=tipo_txt, nomeBarco__iexact=nome_txt).first()
+            if not barco:
+                return JsonResponse({'success': False, 'error': 'Embarcação não encontrada para o siteInstalacao informado'}, status=404)
+
+        # 3) Resolver endereços de e-mail
+        from_addr = (barco.emailPetr or '').strip()
+        to_addr   = (barco.emailCiop or '').strip()
+        cc_list_raw = [(barco.emailAto or '').strip(),
+                    (barco.emailSto or '').strip(),
+                    (barco.emailFiscContr or '').strip()]
+        cc_list = [e for e in cc_list_raw if e]
+
+        if not from_addr or not to_addr:
+            return JsonResponse({'success': False, 'error': 'Remetente (emailPetr) ou destinatário (emailCiop) ausente no cadastro da embarcação'}, status=400)
+
+        # 4) Montar assunto
+        tipo_legivel = informe.get_tipo_display() if hasattr(informe, 'get_tipo_display') else (informe.tipo or '')
+        assunto = f"#### IMPORTANTE #### - INFORME DE ANOMALIA {tipo_legivel} {barco.nomeBarco}"
+
+        # 5) Obter subtabela de pessoas (se houver)
+        pessoas = SubTabPessoasAnomalia.objects.filter(idxAnomalia=informe).order_by('id')
+
+        # 6) Normalizações de campos "visível/oculto"
+        # Regra: se relacaoEvento != 'EMBARCACAO', os três campos ficam como "N/A"
+        rel = (informe.relacaoEvento or '').upper()
+        def mostra_emb_campo(valor):
+            if rel != 'EMBARCACAO':
+                return 'N/A'
+            return valor or ''
+
+            # Montar tabela de pessoas apenas se a relação do evento envolver pessoas
+        tabela_pessoas = ""
+        if (informe.relacaoEvento or "").strip().upper() == "PESSOAS":
+            linha_pessoas = []
+            for p in pessoas:
+                linha_pessoas.append(
+                    f"{p.nome}\t{p.idade}\t{p.funcao}\t{p.tempoExpFuncao}\t{p.tempoExpEmpresa}\t"
+                    f"{p.duracaoUltimaFolga}\t{p.necessarioDesembarque}\t{p.resgateAeromedico}\t{(p.situacaoAtual or '')}"
+                )
+            if linha_pessoas:
+                tabela_pessoas = (
+                    "Nome\tIdade\tFunção\tTempo de experiência na função\tTempo de experiência na empresa\t"
+                    "Duração da última folga\tNecessário Desembarque\tResgate Aeromédico?\tSituação Atual (estado de Saúde)\n"
+                    + "\n".join(linha_pessoas)
+                )
+
+
+        # 7) Montar corpo do e-mail no formato especificado
+        corpo = f"""INFORME DE ANOMALIA
+        Tipo:  {tipo_legivel}
+        Site/Instalação: {informe.siteInstalacao or ''}
+        Empresa: {informe.empresa or ''}
+        Subcontratada: {informe.subcontratada or ''}   {'[ x ] Não Aplicável' if informe.subcontratadaNaoAplicavel else ''}
+
+        Data: {informe.dataEvento or ''}
+        Horário: {informe.horarioEvento or ''}
+        Município/UF: {informe.municipioUF or ''} {(' - ' + (informe.municipioOutro or '')) if (getattr(informe, 'municipioUF', '') == 'OUTRO') else ''}
+
+        Descrição :
+        {informe.descricao or ''}
+
+        Relação do evento
+        {informe.relacaoEvento or ''}
+
+        {tabela_pessoas}
+
+        Ações adotadas:
+        {informe.acoesAdotadas or ''}
+
+        Ordem de Serviço:  {informe.ordemServico1 or ''}   {informe.ordemServico2 or ''}
+
+        Operação/Instalação Paralisada?  {(informe.operacaoParalisada or '')}
+
+        Embarcação operou com sistema degradado? {mostra_emb_campo(getattr(informe, 'sistemaDegradado', ''))}    Embarcação derivou? {mostra_emb_campo(getattr(informe, 'embarcacaoDerivou', ''))}
+
+        Embarcação perdeu posição ? {mostra_emb_campo(getattr(informe, 'embarcacaoPerdeuPosicao', ''))}
+
+        INFORMAÇÕES COMPLEMENTARES
+        {informe.informacoesComplementares or ''}
+
+
+        Atte
+        {getattr(request, 'user', None) and getattr(request.user, 'get_username', lambda: '')() or ''}
+        Fiscal Offshore – Petróleo Brasileiro S/A
+        {barco.tipoBarco}  {barco.nomeBarco}
+        {barco.emailPetr}
+        """
+
+        # 8) Enviar e-mail (SMTP sem autenticação)
+        msg = EmailMessage()
+        msg.set_content(corpo)
+        msg['Subject'] = assunto
+        msg['From'] = from_addr
+        msg['To'] = to_addr
+        if cc_list:
+            msg['Cc'] = ", ".join(cc_list)
+
+        try:
+            s = smtplib.SMTP('smtp.petrobras.com.br', 25)
+            s.send_message(msg)
+            s.quit()
+        except Exception as e:
+            # Sem console.log; log mínimo no servidor:
+            print(f"[EMAIL][ERRO] Falha no envio do informe {informe.id}: {e}")
+            return JsonResponse({'success': False, 'error': 'Falha ao enviar e-mail'}, status=500)
+
+        # 9) Atualizar campos de envio no Informe
+        agora = timezone.localtime()
+        informe.dataEnvio = agora.date()
+        informe.horaEnvio = agora.time()
+        destinatarios_total = [to_addr] + cc_list
+        informe.destinatarios = ";".join(destinatarios_total)
+        informe.save(update_fields=['dataEnvio', 'horaEnvio', 'destinatarios'])
+
+        print(f"[EMAIL][OK] Informe {informe.id} enviado para {to_addr} CC={cc_list}")
+        return JsonResponse({'success': True})

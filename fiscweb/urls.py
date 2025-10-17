@@ -97,5 +97,6 @@ path('api/informes/<int:informe_id>/', views_anom.informe_anomalia_detail, name=
 path('api/informes/<int:informe_id>/pessoas/', views_anom.subtab_pessoas_list, name='subtab_pessoas_list'),
 path('api/pessoas/<int:pessoa_id>/', views_anom.subtab_pessoas_detail, name='subtab_pessoas_detail'),
 path('api/embarcacoes/<int:embarcacao_id>/empresas/', views_anom.buscar_empresas_embarcacao, name='buscar_empresas_embarcacao'),
+path('api/informes/<int:informe_id>/enviar/', views_anom.enviar_informe, name='enviar_informe'),
 
 ]

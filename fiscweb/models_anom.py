@@ -71,9 +71,9 @@ class InformeAnomalia(models.Model):
     embarcacaoDerivou = models.CharField(max_length=3,verbose_name='Embarcação derivou?',blank=True,null=True)
     embarcacaoPerdeuPosicao = models.CharField(max_length=3,verbose_name='Embarcação perdeu posição?',blank=True,null=True )
     informacoesComplementares = models.TextField(max_length=2000,verbose_name='Informações Complementares',blank=True)
-    dataEnvioInforme = models.DateField(verbose_name='Data do envio' )    
-    horaEnvioInforme = models.TimeField(verbose_name='Hora do envio' )
-    destInforme = models.TextField(max_length=400,verbose_name='Destinatários do Informe')
+    dataEnvioInforme = models.DateField(verbose_name='Data do envio',blank=True,null=True )    
+    horaEnvioInforme = models.TimeField(verbose_name='Hora do envio',blank=True,null=True )
+    destInforme = models.TextField(max_length=400,verbose_name='Destinatários do Informe',blank=True,null=True )
     
     # Metadados
     criado_em = models.DateTimeField(auto_now_add=True)

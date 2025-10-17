@@ -47,6 +47,51 @@ const AnomaliaModule = (() => {
     btnLimpar: document.getElementById('btnLimparAnomalia')
   };
 
+
+  // ==== Botão "Enviar Informe" ====
+function criarBotaoEnviarInforme(idInforme) {
+  if (!idInforme) return;
+
+  let btn = document.getElementById('btnEnviarInforme');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'btnEnviarInforme';
+    btn.type = 'button';
+    btn.textContent = 'Enviar Informe';
+    btn.className = 'btn btn-primary';
+
+    // posiciona ao lado do botão Salvar
+    if (elementos.btnSalvar && elementos.btnSalvar.parentNode) {
+      elementos.btnSalvar.parentNode.appendChild(btn);
+    } else {
+      (document.querySelector('form') || document.body).appendChild(btn);
+    }
+  }
+
+  // vincula a ação ao ID mais recente
+  btn.onclick = async () => {
+    try {
+      btn.disabled = true;
+      const resp = await fetch(`/api/informes/${idInforme}/enviar/`, { method: 'POST' });
+      if (!resp.ok) {
+        alert('Falha ao enviar o informe.');
+        return;
+      }
+      const data = await resp.json().catch(() => ({}));
+      if (data && data.success) {
+        alert('Informe enviado com sucesso.');
+      } else {
+        alert('Falha ao enviar o informe.');
+      }
+    } catch (_) {
+      alert('Falha ao enviar o informe.');
+    } finally {
+      btn.disabled = false;
+    }
+  };
+}
+
+
   // ===== INICIALIZAR =====
   function init() {
     configurarEventos();
@@ -415,6 +460,7 @@ function aplicarNaoAplicavelCamposEmbarcacao(aplicarNA) {
       }
 
       informeAtualId = result.data.id;
+      criarBotaoEnviarInforme(informeAtualId);
 
       // Salvar pessoas se relação for PESSOAS
       if (elementos.relacaoEvento.value === 'PESSOAS') {
@@ -498,6 +544,11 @@ function aplicarNaoAplicavelCamposEmbarcacao(aplicarNA) {
     elementos.tblPessoas.innerHTML = '';
     limparCamposPessoa();
   }
+
+
+
+
+
 
   // ===== EXPORTAR FUNÇÕES PÚBLICAS =====
   return {
