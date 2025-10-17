@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
- 
 #=================================TABELAS DE APOIO - MODELO MODAL BARCO==============================================#
 class ModalBarco(models.Model):
     """Modelo para cadastro de Modais de barcos """

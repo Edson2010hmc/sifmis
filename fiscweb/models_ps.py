@@ -1,4 +1,4 @@
-# /fiscweb/models.py
+# /fiscweb/models_ps.py
 # Rev 0
 import os
 from django.db import models
@@ -7,6 +7,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+
 
 #================== SIGNAL PARA DELETAR ANEXOS DE REGISTROS EXCLUIDOS==================
 @receiver(post_delete)
