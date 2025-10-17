@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Informe de Anomalia</title>
 <link rel="stylesheet" href="/static/css/styles.css?v=2"/>
+<!-- Estilos agora estão em /static/css/styles.css -->
 </head>
 <body>
 <header class="app-header">
   <img src="/static/assets/logo.png" class="logo" alt="logo"/>
   <div class="titles">
-    <h1>SIRF-MIS - EMITIR INFORME DE ANOMALIA</h1>
+    <h1>SIRF-MIS - INFORME DE ANOMALIA</h1>
     <small id="subTitle">Fiscalização SUB/OPSUB/MIS</small>
   </div>
   <div class="userbox">
@@ -23,10 +24,13 @@
 
 <nav class="topnav">
   <button class="tablink" onclick="window.location.href='/'">⬅ Voltar</button>
+  <button class="tablink active" data-tab="tab-novo-informe">Novo Informe</button>
+  <button class="tablink" data-tab="tab-consultar-informes">Consultar Informes</button>
 </nav>
 
 <main>
-  <section class="tab active">
+  <!-- TAB 1: NOVO INFORME -->
+  <section class="tab active" id="tab-novo-informe">
     <div class="card">
        <div class="col">
         <label>Tipo</label>
@@ -237,7 +241,60 @@
       </div>
     </div>
   </section>
+
+  <!-- TAB 2: CONSULTAR INFORMES -->
+  <section class="tab" id="tab-consultar-informes">
+    <div class="card">
+      <h2 style="color:#0b7a66; margin-bottom:20px;">Consultar Informes Enviados</h2>
+      
+      <!-- Filtro por Embarcação -->
+      <div style="display:flex; gap:12px; align-items:flex-end; margin-bottom:20px;">
+        <div class="col" style="flex:1;">
+          <label>Filtrar por Embarcação</label>
+          <select id="filtroEmbarcacao" style="width:100%; max-width:400px;">
+            <option value="">— Todas as embarcações —</option>
+          </select>
+        </div>
+        <button id="btnFiltrar" class="btn">Filtrar</button>
+        <button id="btnLimparFiltro" class="btn secondary">Limpar Filtro</button>
+      </div>
+
+      <!-- Tabela de Informes -->
+      <table class="informes-table">
+        <thead>
+          <tr>
+            <th style="width:100px;">Data</th>
+            <th style="width:80px;">Hora</th>
+            <th style="width:180px;">Tipo</th>
+            <th>Embarcação</th>
+            <th style="width:100px;">Status</th>
+            <th style="width:100px; text-align:center;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaInformes">
+          <tr>
+            <td colspan="6" style="text-align:center; padding:40px; color:#999;">
+              Nenhum informe encontrado
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 </main>
+
+<!-- MODAL DE VISUALIZAÇÃO -->
+<div id="modalVisualizarInforme" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 style="margin:0;">Visualizar Informe de Anomalia</h2>
+      <button class="modal-close" onclick="AnomaliaModule.fecharModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modalInformeConteudo">
+      <!-- Conteúdo será inserido via JavaScript -->
+    </div>
+  </div>
+</div>
 
 <script src="/static/js/auth.js"></script>
 <script src="/static/js/anomalia.js"></script>

@@ -47,8 +47,7 @@ const AnomaliaModule = (() => {
     btnLimpar: document.getElementById('btnLimparAnomalia')
   };
 
-
-  // ==== Botão "Enviar Informe" ====
+// ==== Botão "Enviar Informe" ====
 function criarBotaoEnviarInforme(idInforme) {
   if (!idInforme) return;
 
@@ -80,6 +79,9 @@ function criarBotaoEnviarInforme(idInforme) {
       const data = await resp.json().catch(() => ({}));
       if (data && data.success) {
         alert('Informe enviado com sucesso.');
+        
+        // NOVO: Limpar formulário após envio bem-sucedido
+        limparAposEnvio();
       } else {
         alert('Falha ao enviar o informe.');
       }
@@ -89,6 +91,71 @@ function criarBotaoEnviarInforme(idInforme) {
       btn.disabled = false;
     }
   };
+}
+
+// ===== LIMPAR FORMULÁRIO (versão original - com confirmação) =====
+function limpar() {
+  if (informeAtualId) {
+    if (!confirm('Deseja realmente limpar o formulário?')) {
+      return;
+    }
+  }
+
+  executarLimpeza();
+}
+
+// ===== LIMPAR APÓS ENVIO (sem confirmação) =====
+function limparAposEnvio() {
+  executarLimpeza();
+}
+
+// ===== EXECUTAR LIMPEZA (lógica centralizada) =====
+function executarLimpeza() {
+  informeAtualId = null;
+  pessoasSubtabela = [];
+  pessoasParaDeletar = [];
+
+  // Limpar campos principais
+  elementos.tipo.value = '';
+  elementos.siteInstalacao.value = '';
+  elementos.empresa.innerHTML = '<option value="">— selecione —</option>';
+  elementos.subcontratada.value = '';
+  elementos.subcontratadaNA.checked = false;
+  elementos.subcontratada.disabled = false;
+  elementos.descricao.value = '';
+  elementos.relacaoEvento.value = '';
+  elementos.acoesAdotadas.value = '';
+  elementos.os1.value = '';
+  elementos.os2.value = '';
+  elementos.operacaoParalisada.value = '';
+  elementos.municipioUF.value = '';
+  elementos.municipioOutro.value = '';
+  elementos.containerMunicipioOutro.style.display = 'none';
+  elementos.infoComplementares.value = '';
+
+  // Limpar campos de embarcação
+  elementos.sistemaDegradado.value = '';
+  elementos.embarcacaoDerivou.value = '';
+  elementos.embarcacaoPerdeuPosicao.value = '';
+
+  // Limpar subtabela de pessoas
+  limparCamposPessoa();
+  renderizarTabelaPessoas();
+
+  // Resetar data/hora para atual
+  setDataHoraAtual();
+
+  // Ocultar campos condicionais
+  elementos.containerSubtabelaPessoas.style.display = 'none';
+  elementos.containerCamposEmbarcacao.style.display = 'none';
+
+  // Remover botão de enviar se existir
+  const btnEnviar = document.getElementById('btnEnviarInforme');
+  if (btnEnviar) {
+    btnEnviar.remove();
+  }
+
+  
 }
 
 
@@ -284,8 +351,6 @@ function aplicarNaoAplicavelCamposEmbarcacao(aplicarNA) {
     }
   }
 }
-
-
 
   // ===== ADICIONAR PESSOA À SUBTABELA =====
   function adicionarPessoa() {
@@ -547,10 +612,30 @@ function aplicarNaoAplicavelCamposEmbarcacao(aplicarNA) {
 
 
 
+// ===== VISUALIZAR INFORME (ABRIR MODAL)===================== 
+async function visualizarInforme(informeId) {
+  try {
+    // Buscar HTML formatado do backend
+    const response = await fetch(`/api/informes/${informeId}/html/`);
+    const result = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+    
+    // Inserir HTML diretamente no modal
+    document.getElementById('modalInformeConteudo').innerHTML = result.html;
+    
+    // Abrir modal
+    document.getElementById('modalVisualizarInforme').classList.add('active');
+    
+  } catch (error) {
+    alert('Erro ao carregar informe: ' + error.message);
+  }
+}
 
 
-
-  // ===== EXPORTAR FUNÇÕES PÚBLICAS =====
+// ===== EXPORTAR FUNÇÕES PÚBLICAS =====
   return {
     init,
     removerPessoa
