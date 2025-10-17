@@ -7,12 +7,15 @@ from .models_ps import anocSMS #Seção 2
 from .models_ps import inoPendContr #Seção 3
 from .models_ps import iapo, smsLvMang,smsLvSeg
 
+from .models_anom import InformeAnomalia, SubTabPessoasAnomalia
 
+
+#======================= MODULO CADASTROS================================
 admin.site.register(FiscaisCad)
 admin.site.register(BarcosCad)
 admin.site.register(ModalBarco)
   
-
+#============================MODULO PASSAGEM DE SERVIÇO=================
 admin.site.register(PassServ)
 admin.site.register(PortoTrocaTurma)
 admin.site.register(PortoManutPrev) 
@@ -28,7 +31,6 @@ admin.site.register(subTabPortoInspPetr)
 admin.site.register(subTabPortoEmbEquip)
 admin.site.register(subTabPortoEmbMat)
 
-
 admin.site.register(anocSMS)
 admin.site.register(inoPendContr)
 admin.site.register(iapo)
@@ -37,3 +39,6 @@ admin.site.register(smsLvSeg)
 
 
 
+#=============================MODULO INFORME DE ANOMALIA===========================
+admin.site.register(InformeAnomalia)
+admin.site.register(SubTabPessoasAnomalia)

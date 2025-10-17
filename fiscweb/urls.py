@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from . import views_cad
 from . import views_ps
-
+from . import views_anom
 
 
 
@@ -21,7 +21,7 @@ urlpatterns = [
     path('api/get-current-user/', views.get_current_user, name='get_current_user'),
 
 
-    #===========================================CADASTROS========================================
+    #===========================================MODULO CADASTROS========================================
     # API Usuarios
     path('api/fiscais/', views_cad.fiscais_list, name='fiscais_list'), #filtro por perfil
     path('api/fiscais/<int:fiscal_id>/', views_cad.fiscais_detail, name='fiscais_detail'),
@@ -36,7 +36,7 @@ urlpatterns = [
     path('api/modais/', views_cad.modais_list, name='modais_list'),
 
 
-    #===========================================PASSAGEM DE SERVIÇO=================================
+    #===========================================MODULO PASSAGEM DE SERVIÇO=================================
     # API Passagem de Serviço
     path('api/verificar-rascunho/', views_ps.verificar_rascunho, name='verificar_rascunho'),
     path('api/verificar-rascunho-embarcacao/', views_ps.verificar_rascunho_embarcacao, name='verificar_rascunho_embarcacao'),
@@ -83,12 +83,19 @@ urlpatterns = [
     path('api/mob-desm/<int:mob_desm_id>/subtab/', views_ps.subtab_mob_desm_list, name='subtab_mob_desm_list'),
     path('api/mob-desm-item/<int:item_id>/', views_ps.subtab_mob_desm_detail, name='subtab_mob_desm_detail'),
 
-
-
-
 # API Finalizar Passagem de Serviço
     path('api/passagens/<int:ps_id>/finalizar/', views_ps.finalizar_passagem, name='finalizar_passagem'),   
 
 # API Gerar PDF da Passagem de Serviço
     path('api/passagens/<int:ps_id>/gerar-pdf/', views_ps.gerar_pdf_passagem, name='gerar_pdf_passagem'),
+
+
+#=================================MODULO INFORME DE ANOMALIA==============================
+
+path('api/informes/', views_anom.informe_anomalia_list, name='informe_anomalia_list'),
+path('api/informes/<int:informe_id>/', views_anom.informe_anomalia_detail, name='informe_anomalia_detail'),
+path('api/informes/<int:informe_id>/pessoas/', views_anom.subtab_pessoas_list, name='subtab_pessoas_list'),
+path('api/pessoas/<int:pessoa_id>/', views_anom.subtab_pessoas_detail, name='subtab_pessoas_detail'),
+path('api/embarcacoes/<int:embarcacao_id>/empresas/', views_anom.buscar_empresas_embarcacao, name='buscar_empresas_embarcacao'),
+
 ]

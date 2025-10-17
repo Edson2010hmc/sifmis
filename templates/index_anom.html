@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Cadastros</title>
+<title>Informe de Anomalia</title>
 <link rel="stylesheet" href="/static/css/styles.css?v=2"/>
 </head>
 <body>
 <header class="app-header">
   <img src="/static/assets/logo.png" class="logo" alt="logo"/>
   <div class="titles">
-    <h1>SIRF-MIS  EMITIR INFORME DE ANOMALIA</h1>
+    <h1>SIRF-MIS - EMITIR INFORME DE ANOMALIA</h1>
     <small id="subTitle">Fiscalização SUB/OPSUB/MIS</small>
   </div>
   <div class="userbox">
@@ -27,17 +27,219 @@
 
 <main>
   <section class="tab active">
+    <div class="card">
+       <div class="col">
+        <label>Tipo</label>
+        <select id="anTipo" style="width:250px">
+          <option value="">— selecione —</option>
+          <option value="DESVIO">Desvio</option>
+          <option value="NAO_CONFORMIDADE">Não Conformidade</option>
+          <option value="INCIDENTE_ALTO_POTENCIAL">Incidente Alto Potencial</option>
+          <option value="ACIDENTE">Acidente</option>
+        </select>
+      </div>
 
+      <div class="col">
+        <label>Site/Instalação</label>
+        <select id="anSiteInstalacao" style="width:400px">
+          <option value="">— selecione —</option>
+        </select>
+      </div>
 
+      <div class="col">
+        <label>Empresa</label>
+        <select id="anEmpresa" style="width:400px">
+          <option value="">— selecione —</option>
+        </select>
+      </div>
 
+      <div class="col">
+        <label>Subcontratada</label>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <input id="anSubcontratada" type="text" maxlength="50" style="width:400px">
+          <label style="display:inline-flex; align-items:center; gap:6px; margin:0;">
+            <input id="anSubcontratadaNA" type="checkbox"> Não Aplicável
+          </label>
+        </div>
+      </div>
 
+      <div style="display:flex; gap:12px; align-items:flex-start;">
+        <div class="col" style="flex:0 0 auto;">
+          <label>Data</label>
+          <input id="anData" type="date" style="width:160px">
+        </div>
+        <div class="col" style="flex:0 0 auto;">
+          <label>Horário</label>
+          <input id="anHorario" type="time" style="width:120px">
+        </div>
+      </div>
 
+      <div class="col">
+        <label>Município/UF</label>
+        <select id="anMunicipioUF" style="width:300px">
+          <option value="">— selecione —</option>
+          <option value="RIO_DE_JANEIRO_RJ">Rio de Janeiro – RJ</option>
+          <option value="MACAE_RJ">Macaé – RJ</option>
+          <option value="SAO_JOAO_DA_BARRA_RJ">S. João da Barra – RJ</option>
+          <option value="VITORIA_ES">Vitória – ES</option>
+          <option value="BACIA_CAMPOS_OFFSHORE">Bacia de Campos – Offshore</option>
+          <option value="BACIA_SANTOS_OFFSHORE">Bacia de Santos – Offshore</option>
+          <option value="OUTRO">Outro</option>
+        </select>
+      </div>
+
+      <div class="col" id="containerMunicipioOutro" style="display:none;">
+        <input id="anMunicipioOutro" type="text" maxlength="50" style="width:400px" placeholder="Especifique o município">
+      </div>
+
+      <div class="col">
+        <label>Descrição</label>
+        <textarea id="anDescricao" maxlength="2000" rows="6" style="width:100%; resize:vertical;"></textarea>
+      </div>
+
+      <div class="col">
+        <label>Relação do Evento</label>
+        <select id="anRelacaoEvento" style="width:200px">
+          <option value="">— selecione —</option>
+          <option value="PESSOAS">Pessoas</option>
+          <option value="EMBARCACAO">Embarcação</option>
+          <option value="OPERACAO">Operação</option>
+        </select>
+      </div>
+
+      <!-- Subtabela de Pessoas -->
+      <div id="containerSubtabelaPessoas" style="display:none; margin-top:20px;">
+        <h3>Pessoas Envolvidas</h3>
+        
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-bottom:12px;">
+          <div class="col">
+            <label>Nome</label>
+            <input id="pessoaNome" type="text" maxlength="50" style="width:100%">
+          </div>
+          <div class="col">
+            <label>Idade</label>
+            <input id="pessoaIdade" type="text" maxlength="4" style="width:100%">
+          </div>
+          <div class="col">
+            <label>Função</label>
+            <input id="pessoaFuncao" type="text" maxlength="30" style="width:100%">
+          </div>
+          <div class="col">
+            <label>Tempo exp. função</label>
+            <input id="pessoaTempoFuncao" type="text" maxlength="15" style="width:100%">
+          </div>
+          <div class="col">
+            <label>Tempo exp. empresa</label>
+            <input id="pessoaTempoEmpresa" type="text" maxlength="15" style="width:100%">
+          </div>
+          <div class="col">
+            <label>Duração última folga</label>
+            <input id="pessoaUltimaFolga" type="text" maxlength="12" style="width:100%">
+          </div>
+          <div class="col">
+            <label>Necessário Desembarque?</label>
+            <select id="pessoaDesembarque" style="width:100%">
+              <option value="">— selecione —</option>
+              <option value="SIM">Sim</option>
+              <option value="NAO">Não</option>
+            </select>
+          </div>
+          <div class="col">
+            <label>Resgate Aeromédico?</label>
+            <select id="pessoaResgateAero" style="width:100%">
+              <option value="">— selecione —</option>
+              <option value="SIM">Sim</option>
+              <option value="NAO">Não</option>
+            </select>
+          </div>
+          <div class="col" style="grid-column: span 3;">
+            <label>Situação Atual (estado de saúde)</label>
+            <textarea id="pessoaSituacao" maxlength="500" rows="3" style="width:100%; resize:vertical;"></textarea>
+          </div>
+        </div>
+        
+        <button id="btnAddPessoa" class="btn small">Adicionar Pessoa</button>
+        
+        <table id="tblPessoas" style="width:100%; border-collapse:collapse; margin-top:12px;">
+          <thead>
+            <tr style="background:#f0f0f0;">
+              <th style="border:1px solid #ddd; padding:8px;">Nome</th>
+              <th style="border:1px solid #ddd; padding:8px;">Idade</th>
+              <th style="border:1px solid #ddd; padding:8px;">Função</th>
+              <th style="border:1px solid #ddd; padding:8px;">Desembarque?</th>
+              <th style="border:1px solid #ddd; padding:8px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="col">
+        <label>Ações Adotadas</label>
+        <textarea id="anAcoesAdotadas" maxlength="2000" rows="6" style="width:100%; resize:vertical;"></textarea>
+      </div>
+
+      <div class="col">
+        <label>Ordem de Serviço</label>
+        <div style="display:flex; gap:12px;">
+          <input id="anOS1" type="text" maxlength="13" style="width:150px">
+          <input id="anOS2" type="text" maxlength="50" style="width:400px">
+        </div>
+      </div>
+
+      <div class="col">
+        <label>Operação/Instalação Paralisada?</label>
+        <select id="anOperacaoParalisada" style="width:150px">
+          <option value="">— selecione —</option>
+          <option value="SIM">Sim</option>
+          <option value="NAO">Não</option>
+        </select>
+      </div>
+
+      <!-- Campos específicos de Embarcação -->
+      <div id="containerCamposEmbarcacao" style="display:none;">
+        <div class="col">
+          <label>Embarcação operou com sistema degradado?</label>
+          <select id="anSistemaDegradado" style="width:150px">
+            <option value="">— selecione —</option>
+            <option value="SIM">Sim</option>
+            <option value="NAO">Não</option>
+          </select>
+        </div>
+
+        <div class="col">
+          <label>Embarcação derivou?</label>
+          <select id="anEmbarcacaoDerivou" style="width:150px">
+            <option value="">— selecione —</option>
+            <option value="SIM">Sim</option>
+            <option value="NAO">Não</option>
+          </select>
+        </div>
+
+        <div class="col">
+          <label>Embarcação perdeu posição?</label>
+          <select id="anEmbarcacaoPerdeuPosicao" style="width:150px">
+            <option value="">— selecione —</option>
+            <option value="SIM">Sim</option>
+            <option value="NAO">Não</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col">
+        <label>Informações Complementares</label>
+        <textarea id="anInfoComplementares" maxlength="2000" rows="6" style="width:100%; resize:vertical;"></textarea>
+      </div>
+
+      <div class="btns" style="margin-top:20px;">
+        <button id="btnSalvarAnomalia" class="btn">Salvar</button>
+        <button id="btnLimparAnomalia" class="btn secondary">Limpar</button>
+      </div>
+    </div>
   </section>
 </main>
 
 <script src="/static/js/auth.js"></script>
-
-
-
+<script src="/static/js/anomalia.js"></script>
 </body>
 </html>
