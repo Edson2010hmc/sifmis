@@ -128,7 +128,7 @@ const AnomaliaModule = (() => {
       result.data.forEach(barco => {
         const option = document.createElement('option');
         option.value = barco.id;
-        option.textContent = `${barco.TipoBarco} ${barco.nomeBarco}`;
+        option.textContent = `${barco.tipoBarco} ${barco.nomeBarco}`;
         elementos.siteInstalacao.appendChild(option);
       });
 
@@ -138,28 +138,46 @@ const AnomaliaModule = (() => {
   }
 
   // ===== CARREGAR EMPRESAS DA EMBARCAÇÃO =====
-  async function carregarEmpresas(embarcacaoId) {
-    try {
-      const response = await fetch(`/api/embarcacoes/${embarcacaoId}/empresas/`);
-      const result = await response.json();
+async function carregarEmpresas(embarcacaoId) {
+  // Limpa e mantém placeholder
+  elementos.empresa.innerHTML = '<option value="">— selecione —</option>';
 
-      if (!result.success) {
-        throw new Error(result.error);
-      }
+  if (!embarcacaoId) return;
 
-      elementos.empresa.innerHTML = '<option value="">— selecione —</option>';
-      
-      result.data.forEach(empresa => {
-        const option = document.createElement('option');
-        option.value = empresa;
-        option.textContent = empresa;
-        elementos.empresa.appendChild(option);
-      });
-
-    } catch (error) {
-      alert('Erro ao carregar empresas: ' + error.message);
+  try {
+    const response = await fetch(`/api/barcos/${embarcacaoId}/`);
+    if (!response.ok) {
+      // Silencioso no front (pywebview); apenas aborta
+      return;
     }
+
+    const result = await response.json();
+    if (!result || result.success !== true || !result.data) return;
+
+    const { emprServ, emprNav } = result.data;
+
+    const empresas = [emprServ, emprNav]
+      .filter(e => typeof e === 'string' && e.trim().length > 0);
+
+    // Evita duplicatas e preserva ordem: emprServ, depois emprNav
+    const vistos = new Set();
+    for (const nome of empresas) {
+      const valor = nome.trim();
+      if (vistos.has(valor)) continue;
+      vistos.add(valor);
+
+      const opt = document.createElement('option');
+      opt.value = valor;
+      opt.textContent = valor;
+      elementos.empresa.appendChild(opt);
+    }
+  } catch (_) {
+    // Não usar console.log; manter silencioso no front
+    return;
   }
+}
+
+
 
   // ===== TOGGLE CAMPOS POR RELAÇÃO DO EVENTO =====
   function toggleCamposPorRelacao(relacao) {
@@ -176,16 +194,53 @@ const AnomaliaModule = (() => {
       elementos.sistemaDegradado.disabled = false;
       elementos.embarcacaoDerivou.disabled = false;
       elementos.embarcacaoPerdeuPosicao.disabled = false;
+      aplicarNaoAplicavelCamposEmbarcacao(false);
     } else {
-      elementos.containerCamposEmbarcacao.style.display = 'none';
-      elementos.sistemaDegradado.value = '';
-      elementos.embarcacaoDerivou.value = '';
-      elementos.embarcacaoPerdeuPosicao.value = '';
+      elementos.containerCamposEmbarcacao.style.display = 'block';
+      aplicarNaoAplicavelCamposEmbarcacao(true);
+      //elementos.sistemaDegradado.value = '';
+      //elementos.embarcacaoDerivou.value = '';
+      //elementos.embarcacaoPerdeuPosicao.value = '';
       elementos.sistemaDegradado.disabled = true;
       elementos.embarcacaoDerivou.disabled = true;
       elementos.embarcacaoPerdeuPosicao.disabled = true;
     }
   }
+
+// Aplica/retira a opção "N/A" nos campos de embarcação
+function aplicarNaoAplicavelCamposEmbarcacao(aplicarNA) {
+  const selects = [
+    elementos.sistemaDegradado,
+    elementos.embarcacaoDerivou,
+    elementos.embarcacaoPerdeuPosicao
+  ];
+
+  for (const sel of selects) {
+    // Sempre visível (conforme PASSO 1 já aplicado)
+    elementos.containerCamposEmbarcacao.style.display = 'block';
+
+    if (aplicarNA) {
+      // Se não existir a opção "NA", cria dinamicamente
+      let na = Array.from(sel.options).find(o => o.value === 'NA');
+      if (!na) {
+        na = document.createElement('option');
+        na.value = 'NA';
+        na.textContent = 'N/A';
+        sel.insertBefore(na, sel.firstChild); // fica no topo para seleção direta
+      }
+      sel.value = 'NA';
+      sel.disabled = true;
+    } else {
+      // Em "Embarcação": remove "NA" se estiver presente e reabilita
+      const na = Array.from(sel.options).find(o => o.value === 'NA');
+      if (na) na.remove();
+      sel.disabled = false;
+      if (sel.value === 'NA') sel.value = ''; // libera para usuário escolher
+    }
+  }
+}
+
+
 
   // ===== ADICIONAR PESSOA À SUBTABELA =====
   function adicionarPessoa() {
@@ -264,10 +319,7 @@ const AnomaliaModule = (() => {
   async function salvar() {
     try {
       // Validações básicas
-      if (!elementos.tipo.value) {
-        alert('Selecione o tipo de anomalia');
-        return;
-      }
+
 
       if (!elementos.siteInstalacao.value) {
         alert('Selecione a instalação');
@@ -278,6 +330,40 @@ const AnomaliaModule = (() => {
         alert('Selecione a empresa');
         return;
       }
+
+      if (!elementos.data.value) {
+        alert('Informe a data do evento');
+        return;
+      }
+
+       if (!elementos.horario.value) {
+        alert('Informe a Hora do evento');
+        return;
+      }
+
+       if (!elementos.municipioUF.value) {
+        alert('Informe o Municipio/UF');
+        return;
+      }
+
+       if (!elementos.descricao.value) {
+        alert('Descreva o evento');
+        return;
+      }
+
+       if (!elementos.relacaoEvento.value) {
+        alert('Sinalize a relação do evento');
+        return;
+      }
+       if (!elementos.acoesAdotadas.value) {
+        alert('Informe as ações adotadas');
+        return;
+      }
+       if (!elementos.operacaoParalisada.value) {
+        alert('Sinalize o status da operação');
+        return;
+      }
+
 
       // Obter texto da embarcação selecionada
       const siteInstalacaoTexto = elementos.siteInstalacao.options[elementos.siteInstalacao.selectedIndex].text;

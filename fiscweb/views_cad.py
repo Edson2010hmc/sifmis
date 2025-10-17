@@ -228,8 +228,10 @@ def barcos_list(request):
         try:
             barcos = BarcosCad.objects.all().values(
                 'id', 'tipoBarco', 'nomeBarco', 'modalBarco', 'modalSelec_id',
-                'emailPetr', 'dataPrimPorto', 'emprNav', 'icjEmprNav',
-                'emprServ', 'icjEmprServ', 'criado_em', 'atualizado_em'
+                'emailPetr','emailFiscContr',  'dataPrimPorto', 'emprNav', 'icjEmprNav',
+                'emprServ', 'icjEmprServ', 'gerOper', 'emailCiop', 'chaveAto',
+                'nomeAto', 'emailAto', 'contAto', 'chaveSto', 'nomeSto', 'emailSto', 
+                'contSto','criado_em', 'atualizado_em'
             )
             barcos_list = list(barcos)
             
@@ -271,11 +273,22 @@ def barcos_list(request):
                 nomeBarco=data.get('nomeBarco'),
                 modalSelec=modal_selec,
                 emailPetr=data.get('emailPetr'),
+                emailFiscContr=data.get('emailFiscContr'),
                 dataPrimPorto=data.get('dataPrimPorto'),
                 emprNav=data.get('emprNav'),
                 icjEmprNav=data.get('icjEmprNav'),
                 emprServ=data.get('emprServ'),
-                icjEmprServ=data.get('icjEmprServ')
+                icjEmprServ=data.get('icjEmprServ'),
+                gerOper=data.get('gerOper'),
+                emailCiop=data.get('emailCiop'),
+                chaveAto=data.get('chaveAto'),
+                nomeAto=data.get('nomeAto'),
+                emailAto=data.get('emailAto'),
+                contAto=data.get('contAto'),
+                chaveSto=data.get('chaveSto'),
+                nomeSto=data.get('nomeSto'),
+                emailSto=data.get('emailSto'),
+                contSto=data.get('contSto'),
             )
             
             print(f"[API] POST /barcos - Barco criado com ID: {barco.id}")
@@ -289,11 +302,22 @@ def barcos_list(request):
                     'nomeBarco': barco.nomeBarco,
                     'modalBarco': barco.modalBarco,
                     'emailPetr': barco.emailPetr,
+                    'emailFiscContr': barco.emailFiscContr,
                     'dataPrimPorto': str(barco.dataPrimPorto),
                     'emprNav': barco.emprNav,
                     'icjEmprNav': barco.icjEmprNav,
                     'emprServ': barco.emprServ,
-                    'icjEmprServ': barco.icjEmprServ
+                    'icjEmprServ': barco.icjEmprServ,
+                    'gerOper': barco.gerOper,
+                    'emailCiop': barco.emailCiop,
+                    'chaveAto': barco.chaveAto,
+                    'nomeAto': barco.nomeAto,
+                    'emailAto': barco.emailAto,
+                    'contAto': barco.contAto,
+                    'chaveSto': barco.chaveSto,
+                    'nomeSto': barco.nomeSto,
+                    'emailSto': barco.emailSto,
+                    'contSto': barco.contSto,
                 }
             }, status=201)
             
@@ -333,11 +357,22 @@ def barcos_detail(request, barco_id):
                 'modalBarco': barco.modalBarco,
                 'modalSelec_id': barco.modalSelec.id if barco.modalSelec else None,
                 'emailPetr': barco.emailPetr,
+                'emailFiscContr': barco.emailFiscContr,
                 'dataPrimPorto': str(barco.dataPrimPorto),
                 'emprNav': barco.emprNav,
                 'icjEmprNav': barco.icjEmprNav,
                 'emprServ': barco.emprServ,
                 'icjEmprServ': barco.icjEmprServ,
+                'gerOper': barco.gerOper,
+                'emailCiop': barco.emailCiop,
+                'chaveAto': barco.chaveAto,
+                'nomeAto': barco.nomeAto,
+                'emailAto': barco.emailAto,
+                'contAto': barco.contAto,
+                'chaveSto': barco.chaveSto,
+                'nomeSto': barco.nomeSto,
+                'emailSto': barco.emailSto,
+                'contSto': barco.contSto,
                 'criado_em': barco.criado_em,
                 'atualizado_em': barco.atualizado_em
             }
@@ -365,11 +400,22 @@ def barcos_detail(request, barco_id):
             barco.tipoBarco = data.get('tipoBarco', barco.tipoBarco)
             barco.nomeBarco = data.get('nomeBarco', barco.nomeBarco)
             barco.emailPetr = data.get('emailPetr', barco.emailPetr)
+            barco.emailFiscContr = data.get('emailFiscContr', barco.emailFiscContr)
             barco.dataPrimPorto = data.get('dataPrimPorto', barco.dataPrimPorto)
             barco.emprNav = data.get('emprNav', barco.emprNav)
             barco.icjEmprNav = data.get('icjEmprNav', barco.icjEmprNav)
             barco.emprServ = data.get('emprServ', barco.emprServ)
             barco.icjEmprServ = data.get('icjEmprServ', barco.icjEmprServ)
+            barco.gerOper = data.get('gerOper', barco.gerOper)
+            barco.emailCiop = data.get('emailCiop', barco.emailCiop)
+            barco.chaveAto = data.get('chaveAto', barco.chaveAto)
+            barco.nomeAto = data.get('nomeAto', barco.nomeAto)
+            barco.emailAto = data.get('emailAto', barco.emailAto)
+            barco.contAto = data.get('contAto', barco.contAto)
+            barco.chaveSto = data.get('chaveSto', barco.chaveSto)
+            barco.nomeSto = data.get('nomeSto', barco.nomeSto)
+            barco.emailSto = data.get('emailSto', barco.emailSto)
+            barco.contSto = data.get('contSto', barco.contSto)  
             barco.save()
             
             print(f"[API] PUT /barcos/{barco_id} - Atualizado com sucesso")
@@ -383,11 +429,22 @@ def barcos_detail(request, barco_id):
                     'nomeBarco': barco.nomeBarco,
                     'modalBarco': barco.modalBarco,
                     'emailPetr': barco.emailPetr,
+                    'emailFiscContr': barco.emailFiscContr,
                     'dataPrimPorto': str(barco.dataPrimPorto),
                     'emprNav': barco.emprNav,
                     'icjEmprNav': barco.icjEmprNav,
                     'emprServ': barco.emprServ,
-                    'icjEmprServ': barco.icjEmprServ
+                    'icjEmprServ': barco.icjEmprServ,
+                    'gerOper': barco.gerOper,
+                    'emailCiop': barco.emailCiop,
+                    'chaveAto': barco.chaveAto,
+                    'nomeAto': barco.nomeAto,
+                    'emailAto': barco.emailAto,
+                    'contAto': barco.contAto,
+                    'chaveSto': barco.chaveSto,
+                    'nomeSto': barco.nomeSto,
+                    'emailSto': barco.emailSto,
+                    'contSto': barco.contSto
                 }
             })
             

@@ -41,6 +41,12 @@ class InformeAnomalia(models.Model):
         ('SIM', 'Sim'),
         ('NAO', 'Não'),
     ]
+
+    SIMNAOEMB_CHOICES = [
+        ('SIM', 'Sim'),
+        ('NAO', 'Não'),
+        ('N/A', 'N/A'),
+    ]
     
     # Campos principais
     tipo = models.CharField( max_length=30, choices=TIPO_CHOICES,verbose_name='Tipo',blank=True
@@ -65,7 +71,10 @@ class InformeAnomalia(models.Model):
     embarcacaoDerivou = models.CharField(max_length=3,verbose_name='Embarcação derivou?',blank=True,null=True)
     embarcacaoPerdeuPosicao = models.CharField(max_length=3,verbose_name='Embarcação perdeu posição?',blank=True,null=True )
     informacoesComplementares = models.TextField(max_length=2000,verbose_name='Informações Complementares',blank=True)
-        
+    dataEnvioInforme = models.DateField(verbose_name='Data do envio' )    
+    horaEnvioInforme = models.TimeField(verbose_name='Hora do envio' )
+    destInforme = models.TextField(max_length=400,verbose_name='Destinatários do Informe')
+    
     # Metadados
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
@@ -86,6 +95,8 @@ class SubTabPessoasAnomalia(models.Model):
         ('SIM', 'Sim'),
         ('NAO', 'Não'),
     ]
+
+ 
     
     # Relacionamento com tabela principal
     idxAnomalia = models.ForeignKey(InformeAnomalia,on_delete=models.CASCADE,related_name='pessoas',verbose_name='Informe de Anomalia Pessoas')
