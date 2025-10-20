@@ -5,6 +5,8 @@ const AnomaliaModule = (() => {
   let informeAtualId = null;
   let pessoasSubtabela = [];
   let pessoasParaDeletar = [];
+  let informesCache = [];
+  let informesFiltrados = [];
 
   // Referências aos elementos DOM
   const elementos = {
@@ -159,12 +161,15 @@ function executarLimpeza() {
 }
 
 
-  // ===== INICIALIZAR =====
-  function init() {
-    configurarEventos();
-    carregarEmbarcacoes();
-    setDataHoraAtual();
-  }
+  // ===== INICIALIZAR ==========================
+ function init() {
+  configurarEventos();
+  configurarNavegacaoTabs();
+  configurarEventosConsulta();
+  carregarEmbarcacoes();
+  carregarEmbarcacoesFiltro();
+  setDataHoraAtual();
+}
 
   // ===== CONFIGURAR EVENTOS =====
   function configurarEventos() {
@@ -615,6 +620,12 @@ function aplicarNaoAplicavelCamposEmbarcacao(aplicarNA) {
 // ===== VISUALIZAR INFORME (ABRIR MODAL)===================== 
 async function visualizarInforme(informeId) {
   try {
+    // VALIDAÇÃO: Só permite abrir modal na aba de consulta
+    const abaConsulta = document.getElementById('tab-consultar-informes');
+    if (!abaConsulta || !abaConsulta.classList.contains('active')) {
+      return; // Silenciosamente bloqueia se não estiver na aba correta
+    }
+    
     // Buscar HTML formatado do backend
     const response = await fetch(`/api/informes/${informeId}/html/`);
     const result = await response.json();
@@ -635,11 +646,192 @@ async function visualizarInforme(informeId) {
 }
 
 
-// ===== EXPORTAR FUNÇÕES PÚBLICAS =====
-  return {
-    init,
-    removerPessoa
-  };
+// ===== CONFIGURAR NAVEGAÇÃO ENTRE TABS =====
+function configurarNavegacaoTabs() {
+  const tablinks = document.querySelectorAll('.tablink[data-tab]');
+  
+  tablinks.forEach(link => {
+    link.addEventListener('click', function() {
+      const targetTab = this.getAttribute('data-tab');
+      
+      // FECHAR MODAL ao trocar de aba
+      const modal = document.getElementById('modalVisualizarInforme');
+      if (modal && modal.classList.contains('active')) {
+        modal.classList.remove('active');
+      }
+      
+      tablinks.forEach(l => l.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      this.classList.add('active');
+      document.getElementById(targetTab).classList.add('active');
+      
+      if (targetTab === 'tab-consultar-informes') {
+        carregarInformes();
+      }
+    });
+  });
+}
+
+// ===== CARREGAR EMBARCAÇÕES PARA FILTRO =====
+async function carregarEmbarcacoesFiltro() {
+  try {
+    const response = await fetch('/api/barcos/');
+    const result = await response.json();
+    
+    if (!result.success) return;
+    
+    const select = document.getElementById('filtroEmbarcacao');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">— Todas as embarcações —</option>';
+    
+    result.data.forEach(barco => {
+      const option = document.createElement('option');
+      option.value = `${barco.tipoBarco} ${barco.nomeBarco}`;
+      option.textContent = `${barco.tipoBarco} ${barco.nomeBarco}`;
+      select.appendChild(option);
+    });
+    
+  } catch (error) {
+    // Silencioso
+  }
+}
+
+// ===== CONFIGURAR EVENTOS DE CONSULTA =====
+function configurarEventosConsulta() {
+  const btnFiltrar = document.getElementById('btnFiltrar');
+  const btnLimparFiltro = document.getElementById('btnLimparFiltro');
+  
+  if (btnFiltrar) {
+    btnFiltrar.addEventListener('click', filtrarInformes);
+  }
+  
+  if (btnLimparFiltro) {
+    btnLimparFiltro.addEventListener('click', limparFiltro);
+  }
+}
+
+// ===== CARREGAR TODOS OS INFORMES =====
+async function carregarInformes() {
+  try {
+    const response = await fetch('/api/informes/');
+    const result = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+    
+    informesCache = result.data || [];
+    informesFiltrados = [...informesCache];
+    
+    informesFiltrados.sort((a, b) => {
+      const dataA = new Date(a.dataEvento + ' ' + (a.horarioEvento || '00:00'));
+      const dataB = new Date(b.dataEvento + ' ' + (b.horarioEvento || '00:00'));
+      return dataB - dataA;
+    });
+    
+    renderizarTabelaInformes();
+    
+  } catch (error) {
+    alert('Erro ao carregar informes: ' + error.message);
+  }
+}
+
+// ===== FILTRAR INFORMES POR EMBARCAÇÃO =====
+function filtrarInformes() {
+  const filtroEmbarcacao = document.getElementById('filtroEmbarcacao').value;
+  
+  if (!filtroEmbarcacao) {
+    informesFiltrados = [...informesCache];
+  } else {
+    informesFiltrados = informesCache.filter(informe => {
+      return informe.siteInstalacao && informe.siteInstalacao.includes(filtroEmbarcacao);
+    });
+  }
+  
+  informesFiltrados.sort((a, b) => {
+    const dataA = new Date(a.dataEvento + ' ' + (a.horarioEvento || '00:00'));
+    const dataB = new Date(b.dataEvento + ' ' + (b.horarioEvento || '00:00'));
+    return dataB - dataA;
+  });
+  
+  renderizarTabelaInformes();
+}
+
+// ===== LIMPAR FILTRO =====
+function limparFiltro() {
+  document.getElementById('filtroEmbarcacao').value = '';
+  filtrarInformes();
+}
+
+// ===== RENDERIZAR TABELA DE INFORMES =====
+function renderizarTabelaInformes() {
+  const tbody = document.getElementById('tabelaInformes');
+  tbody.innerHTML = '';
+  
+  if (informesFiltrados.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center; padding:40px; color:#999;">
+          Nenhum informe encontrado
+        </td>
+      </tr>
+    `;
+    return;
+  }
+  
+  informesFiltrados.forEach(informe => {
+    const tr = document.createElement('tr');
+    
+    const data = new Date(informe.dataEvento);
+    const dataFormatada = data.toLocaleDateString('pt-BR');
+    
+    const tipoMap = {
+      'DESVIO': 'Desvio',
+      'NAO_CONFORMIDADE': 'Não Conformidade',
+      'INCIDENTE_ALTO_POTENCIAL': 'Incidente Alto Potencial',
+      'ACIDENTE': 'Acidente'
+    };
+    //const tipoFormatado = tipoMap[informe.tipo] || informe.tipo;
+    
+    //const status = informe.dataEnvioInforme ? 
+     // '<span class="badge badge-enviado">ENVIADO</span>' : 
+    //  '<span class="badge badge-rascunho">RASCUNHO</span>';
+    
+    tr.innerHTML = `
+      <td>${dataFormatada}</td>
+      <td>${informe.horarioEvento || '--:--'}</td>
+      <td>${informe.siteInstalacao || ''}</td>
+      <td style="text-align:center;">
+        <button class="btn-visualizar" onclick="AnomaliaModule.visualizarInforme(${informe.id})">
+          Visualizar
+        </button>
+      </td>
+    `;
+    
+    tbody.appendChild(tr);
+  });
+}
+
+// ===== FECHAR MODAL =====
+function fecharModal() {
+  document.getElementById('modalVisualizarInforme').classList.remove('active');
+}
+
+
+// ============================================================
+// RETURN
+// ============================================================
+
+return {
+  init,
+  removerPessoa,
+  visualizarInforme,
+  fecharModal
+};
 
 })();
 

@@ -14,10 +14,21 @@ const EmbarcacoesModule = (() => {
     modal: document.getElementById('cad_e_modal'),
     primeira: document.getElementById('cad_e_primeira'),
     email: document.getElementById('cad_e_email'),
+    emailFiscContr: document.getElementById('cad_e_email_fiscal'),
     emprNav: document.getElementById('cad_e_emprNav'),
     icjEmprNav: document.getElementById('cad_e_icjEmprNav'),
     emprServ: document.getElementById('cad_e_emprServ'),
     icjEmprServ: document.getElementById('cad_e_icjEmprServ'),
+    gerOper: document.getElementById('cad_e_gerOper'),
+    emailCiop: document.getElementById('cad_e_emailCiop'),
+    chaveAto: document.getElementById('cad_e_chaveAto'),
+    nomeAto: document.getElementById('cad_e_nomeAto'),
+    emailAto: document.getElementById('cad_e_emailAto'),
+    contAto: document.getElementById('cad_e_contAto'),
+    chaveSto: document.getElementById('cad_e_chaveSto'),
+    nomeSto: document.getElementById('cad_e_nomeSto'),
+    emailSto: document.getElementById('cad_e_emailSto'),
+    contSto: document.getElementById('cad_e_contSto'),
     lista: document.getElementById('cad_e_list'),
     btnSalvar: document.getElementById('btnSaveEmb'),
     btnEditar: document.getElementById('btnEmbEditar'),
@@ -355,10 +366,21 @@ const EmbarcacoesModule = (() => {
       modalSelec_id: elementos.modal.value || null,
       dataPrimPorto: elementos.primeira.value,
       emailPetr: elementos.email.value.trim(),
+      emailFiscContr: elementos.emailFiscContr.value.trim(),
       emprNav: elementos.emprNav.value.trim(),
       icjEmprNav: elementos.icjEmprNav.value.trim(),
       emprServ: elementos.emprServ.value.trim(),
-      icjEmprServ: elementos.icjEmprServ.value.trim()
+      icjEmprServ: elementos.icjEmprServ.value.trim(),
+      gerOper: elementos.gerOper.value.trim(),
+      emailCiop: elementos.emailCiop.value.trim(),
+      chaveAto: elementos.chaveAto.value.trim(),
+      nomeAto: elementos.nomeAto.value.trim(),
+      emailAto: elementos.emailAto.value.trim(),
+      contAto: elementos.contAto.value.trim(),
+      chaveSto: elementos.chaveSto.value.trim(),
+      nomeSto: elementos.nomeSto.value.trim(),
+      emailSto: elementos.emailSto.value.trim(),
+      contSto: elementos.contSto.value.trim()
     };
   }
 
@@ -387,11 +409,12 @@ const EmbarcacoesModule = (() => {
     if (dados.emailPetr) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(dados.emailPetr)) {
-        alert('E-mail Petrobras inválido');
+        alert('E-mail inválido');
         elementos.email.focus();
         return false;
       }
     }
+
 
     return true;
   }
@@ -403,10 +426,24 @@ const EmbarcacoesModule = (() => {
     elementos.modal.value = barco.modalSelec_id || '';
     elementos.primeira.value = barco.dataPrimPorto || '';
     elementos.email.value = barco.emailPetr || '';
+    elementos.emailFiscContr.value = barco.emailFiscContr || '';
     elementos.emprNav.value = barco.emprNav || '';
     elementos.icjEmprNav.value = barco.icjEmprNav || '';
     elementos.emprServ.value = barco.emprServ || '';
     elementos.icjEmprServ.value = barco.icjEmprServ || '';
+    elementos.gerOper.value = barco.gerOper || '';
+    elementos.emailCiop.value = barco.emailCiop || '';
+    elementos.chaveAto.value = barco.chaveAto || '';
+    elementos.nomeAto.value = barco.nomeAto || '';
+    elementos.emailAto.value = barco.emailAto || '';
+    elementos.contAto.value = barco.contAto || '';
+    elementos.chaveSto.value = barco.chaveSto || '';
+    elementos.nomeSto.value = barco.nomeSto || '';
+    elementos.emailSto.value = barco.emailSto || '';
+    elementos.contSto.value = barco.contSto || '';
+    
+    
+    habilitarCampos(false);
   }
 
   // ===== LIMPAR FORMULÁRIO =====
@@ -416,10 +453,21 @@ const EmbarcacoesModule = (() => {
     elementos.modal.value = '';
     elementos.primeira.value = '';
     elementos.email.value = '';
+    elementos.emailFiscContr.value = '';
     elementos.emprNav.value = '';
     elementos.icjEmprNav.value = '';
     elementos.emprServ.value = '';
     elementos.icjEmprServ.value = '';
+    elementos.gerOper.value = '';
+    elementos.emailCiop.value = '';
+    elementos.chaveAto.value = '';
+    elementos.nomeAto.value = '';
+    elementos.emailAto.value = '';
+    elementos.contAto.value = '';
+    elementos.chaveSto.value = '';
+    elementos.nomeSto.value = '';
+    elementos.emailSto.value = '';
+    elementos.contSto.value = '';
     
     habilitarCampos(true);
   }
@@ -431,10 +479,23 @@ const EmbarcacoesModule = (() => {
     elementos.modal.disabled = !habilitar;
     elementos.primeira.disabled = !habilitar;
     elementos.email.disabled = !habilitar;
+    elementos.emailFiscContr.disabled = !habilitar;
     elementos.emprNav.disabled = !habilitar;
     elementos.icjEmprNav.disabled = !habilitar;
+
     elementos.emprServ.disabled = !habilitar;
     elementos.icjEmprServ.disabled = !habilitar;
+    elementos.gerOper.disabled = !habilitar;
+    elementos.emailCiop.disabled = !habilitar;
+    elementos.chaveAto.disabled = !habilitar;
+    elementos.nomeAto.disabled = !habilitar;
+    elementos.emailAto.disabled = !habilitar;
+    elementos.contAto.disabled = !habilitar;
+    elementos.chaveSto.disabled = !habilitar;
+    elementos.nomeSto.disabled = !habilitar;
+    elementos.emailSto.disabled = !habilitar;
+    elementos.contSto.disabled = !habilitar;
+
   }
 
    // ===== REINICIAR FORMULÁRIO =====

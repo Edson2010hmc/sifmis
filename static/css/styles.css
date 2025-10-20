@@ -185,7 +185,7 @@ main { padding:12px; }
 /* ========== ESTILOS PARA MODAL DE VISUALIZAÇÃO DE INFORME ========== */
 
 .modal-overlay {
-  display: none;
+  display: none !important; /* FORÇAR escondido */
   position: fixed;
   top: 0;
   left: 0;
@@ -194,10 +194,12 @@ main { padding:12px; }
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 9999;
   overflow-y: auto;
+  visibility: hidden; /* GARANTIR invisível */
 }
 
 .modal-overlay.active {
-  display: flex;
+  display: flex !important; /* FORÇAR visível quando ativo */
+  visibility: visible !important;
   justify-content: center;
   align-items: flex-start;
   padding: 40px 20px;

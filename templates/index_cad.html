@@ -77,20 +77,78 @@
         <div class="accordion-content" id="acc-embarcacoes">
           <div class="card fadein">
             <div class="col">
-              <label>Tipo</label>
-              <select id="cad_e_tipo" style="width:200px"><option value="">— selecione —</option></select>
-            </div>
-            <div class="col"><label>Nome</label><input id="cad_e_nome" type="text" style="width:400px"></div>
-            <div class="col">
-              <label>Modal</label>
-              <select id="cad_e_modal" style="width:200px"><option value="">— selecione —</option></select>
-            </div>
-            <div class="col"><label>Primeiro Porto</label><input id="cad_e_primeira" type="date" style="width:200px"></div>
-            <div class="col"><label>E-mail Petrobras</label><input id="cad_e_email" type="email" style="width:300px"></div>
-            <div class="col"><label>Fretadora</label><input id="cad_e_emprNav" type="text" style="width:300px"></div>
-            <div class="col"><label>ICJ Fretadora</label><input id="cad_e_icjEmprNav" type="text" maxlength="20" style="width:200px"></div>
-            <div class="col"><label>Empresa Serviços Técnicos</label><input id="cad_e_emprServ" type="text" style="width:300px"></div>
-            <div class="col"><label>ICJ Empresa Serviços Técnicos</label><input id="cad_e_icjEmprServ" type="text" maxlength="20" style="width:200px"></div>
+              <div style="display:flex; gap:15px 18px; align-items:flex-start;">
+                  <div style="flex:0 0 auto;">
+                    <label>Tipo</label><select id="cad_e_tipo" style="width:200px"><option value="">— selecione —</option></select>
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>Nome</label><input id="cad_e_nome" type="text" style="width:500px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>Modal</label>
+                     <select id="cad_e_modal" style="width:200px"><option value="">— selecione —</option></select>
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>Primeiro Porto</label><input id="cad_e_primeira" type="date" style="width:200px">
+                  </div>
+                </div>
+
+              <div style="display:flex; gap:15px 18px; align-items:flex-start;">
+                  <div style="flex:0 0 auto;">
+                    <label>Fretadora</label><input id="cad_e_emprNav" type="text" style="width:300px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>ICJ Fretadora</label><input id="cad_e_icjEmprNav" type="text" maxlength="20" style="width:200px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>Empresa Serviços Técnicos</label><input id="cad_e_emprServ" type="text" style="width:300px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>ICJ Empresa Serviços Técnicos</label><input id="cad_e_icjEmprServ" type="text" maxlength="20" style="width:200px">
+                  </div>
+                </div>
+            
+                <div style="display:flex; gap:15px 18px; align-items:flex-start;">
+                  <div style="flex:0 0 auto;">
+                    <label>Gerencia Operacional</label><input id="cad_e_gerOper" type="text" style="width:300px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>Email CIOp</label><input id="cad_e_emailCiop" type="text" style="width:300px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>E-mail CC Petrobras</label><input id="cad_e_email" type="text" style="width:300px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>Email Contratada Fiscal</label><input id="cad_e_email_fiscal" type="text" style="width:300px">
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:15px 18px; align-items:flex-start;">
+                  <div style="flex:0 0 auto;">
+                    <label>Chave ATO</label><input id="cad_e_chaveAto" type="text" style="width:100px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>Nome ATO</label><input id="cad_e_nomeAto" type="text" style="width:300px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>e-mail ATO</label><input id="cad_e_emailAto" type="text" style="width:300px">
+                  </div>
+                 </div>
+
+                <div style="display:flex; gap:15px 18px; align-items:flex-start;">
+                  <div style="flex:0 0 auto;">
+                    <label>Chave STO</label><input id="cad_e_chaveSto" type="text" style="width:100px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>Nome STO</label><input id="cad_e_nomeSto" type="text" style="width:300px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>e-mail STO</label><input id="cad_e_emailSto" type="text" style="width:300px">
+                  </div>
+                 </div>
+
+            <div class="col"></div>
+
             <div class="row" style="align-items:flex-end; gap:8px; margin-top:8px">   
               <div class="col" style="min-width:300px">
                 <label>Embarcações cadastradas</label>

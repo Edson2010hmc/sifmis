@@ -996,7 +996,7 @@ def enviar_informe(request, informe_id):
                     <h3 style="color:#0b7a66; margin-top:0;">ORDEM DE SERVIÇO</h3>
                     <p style="margin:0; font-size:14px;">
                         <strong>OS 1:</strong> {informe.ordemServico1 or ''}
-                        {f'<span style="margin-left:30px;"><strong>OS 2:</strong> {informe.ordemServico2}</span>' if informe.ordemServico2 else ''}
+                        {f'<span style="margin-left:30px;">{informe.ordemServico2}</span>'}
                     </p>
                 </div>
 
