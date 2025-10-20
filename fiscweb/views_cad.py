@@ -15,7 +15,7 @@ import json
 from django.http.multipartparser import MultiPartParser
 from django.core.files.uploadhandler import MemoryFileUploadHandler
 
-from .models_cad import FiscaisCad,BarcosCad,ModalBarco
+from .models_cad import FiscaisCad, BarcosCad, ModalBarco, contatoUep, subTabcontatosUeps
 
 from .models_ps import PassServ
 from .models_ps import PortoTrocaTurma
@@ -231,7 +231,9 @@ def barcos_list(request):
                 'emailPetr','dataPrimPorto', 'emprNav', 'icjEmprNav',
                 'emprServ', 'icjEmprServ', 'emailFiscContr',  'gerOper', 'emailCiop', 'chaveAto',
                 'nomeAto', 'emailAto', 'contAto', 'chaveSto', 'nomeSto', 'emailSto', 
-                'contSto','criado_em', 'atualizado_em'
+                'contSto', 'RamalBrOper', 'TelExtoper', 'emailOper', 'RamalBrPassad',
+                'TelExtpassad', 'contPassad', 'emailPassad', 'listEmailAssDig',
+                'criado_em', 'atualizado_em'
             )
             barcos_list = list(barcos)
             
@@ -289,6 +291,14 @@ def barcos_list(request):
                 nomeSto=data.get('nomeSto'),
                 emailSto=data.get('emailSto'),
                 contSto=data.get('contSto'),
+                RamalBrOper=data.get('RamalBrOper'),
+                TelExtoper=data.get('TelExtoper'),
+                emailOper=data.get('emailOper'),
+                RamalBrPassad=data.get('RamalBrPassad'),
+                TelExtpassad=data.get('TelExtpassad'),
+                contPassad=data.get('contPassad'),
+                emailPassad=data.get('emailPassad'),
+                listEmailAssDig=data.get('listEmailAssDig'),
             )
             
             print(f"[API] POST /barcos - Barco criado com ID: {barco.id}")
@@ -318,6 +328,14 @@ def barcos_list(request):
                     'nomeSto': barco.nomeSto,
                     'emailSto': barco.emailSto,
                     'contSto': barco.contSto,
+                    'RamalBrOper': barco.RamalBrOper,
+                    'TelExtoper': barco.TelExtoper,
+                    'emailOper': barco.emailOper,
+                    'RamalBrPassad': barco.RamalBrPassad,
+                    'TelExtpassad': barco.TelExtpassad,
+                    'contPassad': barco.contPassad,
+                    'emailPassad': barco.emailPassad,
+                    'listEmailAssDig': barco.listEmailAssDig
                 }
             }, status=201)
             
@@ -350,7 +368,7 @@ def barcos_detail(request, barco_id):
         print(f"[API] GET /barcos/{barco_id} - {barco.nomeBarco}")
         return JsonResponse({
             'success': True,
-            'data': {
+                        'data': {
                 'id': barco.id,
                 'tipoBarco': barco.tipoBarco,
                 'nomeBarco': barco.nomeBarco,
@@ -373,6 +391,14 @@ def barcos_detail(request, barco_id):
                 'nomeSto': barco.nomeSto,
                 'emailSto': barco.emailSto,
                 'contSto': barco.contSto,
+                'RamalBrOper': barco.RamalBrOper,
+                'TelExtoper': barco.TelExtoper,
+                'emailOper': barco.emailOper,
+                'RamalBrPassad': barco.RamalBrPassad,
+                'TelExtpassad': barco.TelExtpassad,
+                'contPassad': barco.contPassad,
+                'emailPassad': barco.emailPassad,
+                'listEmailAssDig': barco.listEmailAssDig,
                 'criado_em': barco.criado_em,
                 'atualizado_em': barco.atualizado_em
             }
@@ -415,7 +441,15 @@ def barcos_detail(request, barco_id):
             barco.chaveSto = data.get('chaveSto', barco.chaveSto)
             barco.nomeSto = data.get('nomeSto', barco.nomeSto)
             barco.emailSto = data.get('emailSto', barco.emailSto)
-            barco.contSto = data.get('contSto', barco.contSto)  
+            barco.contSto = data.get('contSto', barco.contSto)
+            barco.RamalBrOper = data.get('RamalBrOper', barco.RamalBrOper)
+            barco.TelExtoper = data.get('TelExtoper', barco.TelExtoper)
+            barco.emailOper = data.get('emailOper', barco.emailOper)
+            barco.RamalBrPassad = data.get('RamalBrPassad', barco.RamalBrPassad)
+            barco.TelExtpassad = data.get('TelExtpassad', barco.TelExtpassad)
+            barco.contPassad = data.get('contPassad', barco.contPassad)
+            barco.emailPassad = data.get('emailPassad', barco.emailPassad)
+            barco.listEmailAssDig = data.get('listEmailAssDig', barco.listEmailAssDig)
             barco.save()
             
             print(f"[API] PUT /barcos/{barco_id} - Atualizado com sucesso")
@@ -444,7 +478,15 @@ def barcos_detail(request, barco_id):
                     'chaveSto': barco.chaveSto,
                     'nomeSto': barco.nomeSto,
                     'emailSto': barco.emailSto,
-                    'contSto': barco.contSto
+                    'contSto': barco.contSto,
+                    'RamalBrOper': barco.RamalBrOper,
+                    'TelExtoper': barco.TelExtoper,
+                    'emailOper': barco.emailOper,
+                    'RamalBrPassad': barco.RamalBrPassad,
+                    'TelExtpassad': barco.TelExtpassad,
+                    'contPassad': barco.contPassad,
+                    'emailPassad': barco.emailPassad,
+                    'listEmailAssDig': barco.listEmailAssDig
                 }
             })
             
@@ -519,3 +561,307 @@ def modais_list(request):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
+#================================================ CONTATOS UEP - API REST=================================================
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def uep_contatos_list(request, uep_id):
+    """
+    GET: Lista todos os contatos de uma UEP específica
+    POST: Cria um novo contato para uma UEP
+    """
+    
+    # Verificar se a UEP existe
+    try:
+        uep = contatoUep.objects.get(id=uep_id)
+    except contatoUep.DoesNotExist:
+        print(f"[API ERROR] UEP ID {uep_id} não encontrada")
+        return JsonResponse({
+            'success': False,
+            'error': 'UEP não encontrada'
+        }, status=404)
+    
+    if request.method == 'GET':
+        try:
+            contatos = subTabcontatosUeps.objects.filter(idxcontatoUep=uep).values(
+                'id', 'tipoContato', 'chaveCompartilhada', 'emailExterno', 
+                'ramalBR', 'telExterno'
+            )
+            contatos_list = list(contatos)
+            
+            print(f"[API] GET /ueps/{uep_id}/contatos - Retornando {len(contatos_list)} contatos")
+            
+            return JsonResponse({
+                'success': True,
+                'data': contatos_list,
+                'count': len(contatos_list)
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] GET /ueps/{uep_id}/contatos - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+    
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            print(f"[API] POST /ueps/{uep_id}/contatos - Criando contato: {data.get('tipoContato')}")
+            
+            contato = subTabcontatosUeps.objects.create(
+                idxcontatoUep=uep,
+                tipoContato=data.get('tipoContato'),
+                chaveCompartilhada=data.get('chaveCompartilhada'),
+                emailExterno=data.get('emailExterno'),
+                ramalBR=data.get('ramalBR'),
+                telExterno=data.get('telExterno')
+            )
+            
+            print(f"[API] POST /ueps/{uep_id}/contatos - Contato criado com ID: {contato.id}")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Contato criado com sucesso',
+                'data': {
+                    'id': contato.id,
+                    'tipoContato': contato.tipoContato,
+                    'chaveCompartilhada': contato.chaveCompartilhada,
+                    'emailExterno': contato.emailExterno,
+                    'ramalBR': contato.ramalBR,
+                    'telExterno': contato.telExterno
+                }
+            }, status=201)
+            
+        except Exception as e:
+            print(f"[API ERROR] POST /ueps/{uep_id}/contatos - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+
+@csrf_exempt
+@require_http_methods(["GET", "PUT", "DELETE"])
+def ueps_detail(request, uep_id):
+    
+    """
+    GET: Retorna uma UEP específica
+    PUT: Atualiza uma UEP
+    DELETE: Remove uma UEP
+    """
+    
+    try:
+        uep = contatoUep.objects.get(id=uep_id)
+    except contatoUep.DoesNotExist:
+        print(f"[API ERROR] UEP ID {uep_id} não encontrada")
+        return JsonResponse({
+            'success': False,
+            'error': 'UEP não encontrada'
+        }, status=404)
+    
+    if request.method == 'GET':
+        print(f"[API] GET /ueps/{uep_id}")
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'id': uep.id,
+                'afretUep': uep.afretUep,
+                'criado_em': uep.criado_em,
+                'atualizado_em': uep.atualizado_em
+            }
+        })
+    
+    elif request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            
+            print(f"[API] PUT /ueps/{uep_id} - Atualizando")
+            
+            # Atualizar campo afretUep
+            if 'afretUep' in data:
+                uep.afretUep = data['afretUep']
+            
+            uep.save()
+            
+            print(f"[API] PUT /ueps/{uep_id} - Atualizado com sucesso")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'UEP atualizada com sucesso',
+                'data': {
+                    'id': uep.id,
+                    'afretUep': uep.afretUep,
+                    'criado_em': uep.criado_em,
+                    'atualizado_em': uep.atualizado_em
+                }
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] PUT /ueps/{uep_id} - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    elif request.method == 'DELETE':
+        try:
+            uep_id_deletado = uep.id
+            uep.delete()
+            
+            print(f"[API] DELETE /ueps/{uep_id} - UEP removida")
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'UEP ID {uep_id_deletado} removida com sucesso'
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] DELETE /ueps/{uep_id} - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+        
+@csrf_exempt
+@require_http_methods(["GET", "PUT", "DELETE"])
+def uep_contatos_detail(request, contato_id):
+    """
+    GET: Retorna um contato UEP específico
+    PUT: Atualiza um contato UEP
+    DELETE: Remove um contato UEP
+    """
+    
+    try:
+        contato = subTabcontatosUeps.objects.get(id=contato_id)
+    except subTabcontatosUeps.DoesNotExist:
+        print(f"[API ERROR] Contato UEP ID {contato_id} não encontrado")
+        return JsonResponse({
+            'success': False,
+            'error': 'Contato não encontrado'
+        }, status=404)
+    
+    if request.method == 'GET':
+        print(f"[API] GET /uep-contatos/{contato_id}")
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'id': contato.id,
+                'idxcontatoUep_id': contato.idxcontatoUep.id,
+                'tipoContato': contato.tipoContato,
+                'chaveCompartilhada': contato.chaveCompartilhada,
+                'emailExterno': contato.emailExterno,
+                'ramalBR': contato.ramalBR,
+                'telExterno': contato.telExterno
+            }
+        })
+    
+    elif request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            
+            print(f"[API] PUT /uep-contatos/{contato_id} - Atualizando")
+            
+            # Atualizar campos
+            contato.tipoContato = data.get('tipoContato', contato.tipoContato)
+            contato.chaveCompartilhada = data.get('chaveCompartilhada', contato.chaveCompartilhada)
+            contato.emailExterno = data.get('emailExterno', contato.emailExterno)
+            contato.ramalBR = data.get('ramalBR', contato.ramalBR)
+            contato.telExterno = data.get('telExterno', contato.telExterno)
+            
+            contato.save()
+            
+            print(f"[API] PUT /uep-contatos/{contato_id} - Atualizado com sucesso")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Contato atualizado com sucesso',
+                'data': {
+                    'id': contato.id,
+                    'idxcontatoUep_id': contato.idxcontatoUep.id,
+                    'tipoContato': contato.tipoContato,
+                    'chaveCompartilhada': contato.chaveCompartilhada,
+                    'emailExterno': contato.emailExterno,
+                    'ramalBR': contato.ramalBR,
+                    'telExterno': contato.telExterno
+                }
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] PUT /uep-contatos/{contato_id} - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    elif request.method == 'DELETE':
+        try:
+            contato_id_deletado = contato.id
+            contato.delete()
+            
+            print(f"[API] DELETE /uep-contatos/{contato_id} - Contato removido")
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Contato ID {contato_id_deletado} removido com sucesso'
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] DELETE /uep-contatos/{contato_id} - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+
+# As opções da descrição do contato dependem da escolha da check box
+@csrf_exempt
+@require_http_methods(["GET"])
+def uep_choices(request, uep_id):
+    """
+    GET: Retorna os choices de tipoContato baseado no valor de afretUep
+    """
+    
+    try:
+        uep = contatoUep.objects.get(id=uep_id)
+    except contatoUep.DoesNotExist:
+        print(f"[API ERROR] UEP ID {uep_id} não encontrada")
+        return JsonResponse({
+            'success': False,
+            'error': 'UEP não encontrada'
+        }, status=404)
+    
+    try:
+        # Determinar qual lista de choices usar baseado em afretUep
+        if uep.afretUep:
+            # UEP Afretada - usar contatoUepAfretChoices
+            choices = [
+                {'value': choice[0], 'label': choice[1]} 
+                for choice in subTabcontatosUeps.contatoUepAfretChoices
+            ]
+        else:
+            # UEP Petrobras (Não Afretada) - usar contatoUepBrChoices
+            choices = [
+                {'value': choice[0], 'label': choice[1]} 
+                for choice in subTabcontatosUeps.contatoUepBrChoices
+            ]
+        
+        print(f"[API] GET /ueps/{uep_id}/choices - Retornando {len(choices)} opções (Afretada={uep.afretUep})")
+        
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'afretUep': uep.afretUep,
+                'choices': choices
+            }
+        })
+        
+    except Exception as e:
+        print(f"[API ERROR] GET /ueps/{uep_id}/choices - {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+

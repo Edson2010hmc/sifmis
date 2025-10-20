@@ -8,7 +8,7 @@ const EmbarcacoesModule = (() => {
   let embarcacaoEditandoId = null;
 
   // Referências aos elementos DOM
-  const elementos = {
+    const elementos = {
     tipo: document.getElementById('cad_e_tipo'),
     nome: document.getElementById('cad_e_nome'),
     modal: document.getElementById('cad_e_modal'),
@@ -29,6 +29,14 @@ const EmbarcacoesModule = (() => {
     nomeSto: document.getElementById('cad_e_nomeSto'),
     emailSto: document.getElementById('cad_e_emailSto'),
     contSto: document.getElementById('cad_e_contSto'),
+    ramalOper: document.getElementById('cad_e_ramalOper'),
+    telOper: document.getElementById('cad_e_telOper'),
+    emailOper: document.getElementById('cad_e_emailOper'),
+    ramalPassad: document.getElementById('cad_e_ramalPassad'),
+    telPassad: document.getElementById('cad_e_telPassad'),
+    contPassad: document.getElementById('cad_e_contPassad'),
+    emailPassad: document.getElementById('cad_e_emailPassad'),
+    emailsAssDig: document.getElementById('cad_e_emailsAssDig'),
     lista: document.getElementById('cad_e_list'),
     btnSalvar: document.getElementById('btnSaveEmb'),
     btnEditar: document.getElementById('btnEmbEditar'),
@@ -380,7 +388,15 @@ const EmbarcacoesModule = (() => {
       chaveSto: elementos.chaveSto.value.trim(),
       nomeSto: elementos.nomeSto.value.trim(),
       emailSto: elementos.emailSto.value.trim(),
-      contSto: elementos.contSto.value.trim()
+      contSto: elementos.contSto.value.trim(),
+      RamalBrOper: elementos.ramalOper.value.trim(),
+      TelExtoper: elementos.telOper.value.trim(),
+      emailOper: elementos.emailOper.value.trim(),
+      RamalBrPassad: elementos.ramalPassad.value.trim(),
+      TelExtpassad: elementos.telPassad.value.trim(),
+      contPassad: elementos.contPassad.value.trim(),
+      emailPassad: elementos.emailPassad.value.trim(),
+      listEmailAssDig: elementos.emailsAssDig.value.trim()
     };
   }
 
@@ -420,7 +436,7 @@ const EmbarcacoesModule = (() => {
   }
 
   // ===== PREENCHER FORMULÁRIO =====
-  function preencherFormulario(barco) {
+    function preencherFormulario(barco) {
     elementos.tipo.value = barco.tipoBarco || '';
     elementos.nome.value = barco.nomeBarco || '';
     elementos.modal.value = barco.modalSelec_id || '';
@@ -441,7 +457,14 @@ const EmbarcacoesModule = (() => {
     elementos.nomeSto.value = barco.nomeSto || '';
     elementos.emailSto.value = barco.emailSto || '';
     elementos.contSto.value = barco.contSto || '';
-    
+    elementos.ramalOper.value = barco.RamalBrOper || '';
+    elementos.telOper.value = barco.TelExtoper || '';
+    elementos.emailOper.value = barco.emailOper || '';
+    elementos.ramalPassad.value = barco.RamalBrPassad || '';
+    elementos.telPassad.value = barco.TelExtpassad || '';
+    elementos.contPassad.value = barco.contPassad || '';
+    elementos.emailPassad.value = barco.emailPassad || '';
+    elementos.emailsAssDig.value = barco.listEmailAssDig || '';
     
     habilitarCampos(false);
   }
@@ -468,6 +491,14 @@ const EmbarcacoesModule = (() => {
     elementos.nomeSto.value = '';
     elementos.emailSto.value = '';
     elementos.contSto.value = '';
+    elementos.ramalOper.value = '';
+    elementos.telOper.value = '';
+    elementos.emailOper.value = '';
+    elementos.ramalPassad.value = '';
+    elementos.telPassad.value = '';
+    elementos.contPassad.value = '';
+    elementos.emailPassad.value = '';
+    elementos.emailsAssDig.value = '';
     
     habilitarCampos(true);
   }
@@ -482,7 +513,6 @@ const EmbarcacoesModule = (() => {
     elementos.emailFiscContr.disabled = !habilitar;
     elementos.emprNav.disabled = !habilitar;
     elementos.icjEmprNav.disabled = !habilitar;
-
     elementos.emprServ.disabled = !habilitar;
     elementos.icjEmprServ.disabled = !habilitar;
     elementos.gerOper.disabled = !habilitar;
@@ -495,7 +525,14 @@ const EmbarcacoesModule = (() => {
     elementos.nomeSto.disabled = !habilitar;
     elementos.emailSto.disabled = !habilitar;
     elementos.contSto.disabled = !habilitar;
-
+    elementos.ramalOper.disabled = !habilitar;
+    elementos.telOper.disabled = !habilitar;
+    elementos.emailOper.disabled = !habilitar;
+    elementos.ramalPassad.disabled = !habilitar;
+    elementos.telPassad.disabled = !habilitar;
+    elementos.contPassad.disabled = !habilitar;
+    elementos.emailPassad.disabled = !habilitar;
+    elementos.emailsAssDig.disabled = !habilitar;
   }
 
    // ===== REINICIAR FORMULÁRIO =====

@@ -8,7 +8,7 @@ from django.dispatch import receiver
 
 celular_validator = RegexValidator(
         regex=r'^\(\d{2}\)\d{4,5}-\d{4}$',
-        message='Celular deve estar no formato: (99)99999-9999'
+        message='Telefone ou Celular deve estar no formato: (99)99999-9999'
     )
 
 #=================================TABELAS DE APOIO - MODELO MODAL BARCO==============================================#
@@ -108,20 +108,19 @@ class BarcosCad(models.Model):
         super().save(*args, **kwargs)
     
 
-#================================SUBTABELA DE CADASTRO DE UEPs - EMAILS E RAMAIS=================
+#================================TABELA PAI - CADASTRO DE UEPs=================
 class contatoUep(models.Model):
     """Modelo para cadastro de UEPS, ramais e e-mails """
-
-                       
+    
+    # Campo principal - define se é Petrobras (BR) ou Afretada
     afretUep = models.BooleanField(verbose_name='Unidade Afretada?')
-    if afretUep:
-        uepContatoType = "Afretada"
-    else:
-        uepContatoType = "Não Afretada"
-
+    
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return self.afretUep
+        tipo = "Afretada" if self.afretUep else "Não Afretada"
+        return f"UEP {tipo} - ID {self.id}"
     
     class Meta:
         verbose_name = 'Contato UEP'
@@ -131,35 +130,36 @@ class contatoUep(models.Model):
 class subTabcontatosUeps(models.Model):
     """Modelo para sub tabela cadastro de UEPS, ramais e e-mails """
 
-    contatoUepBrChoices =   [
-                        ('GEPLAT' , 'GEPLAT'),
-                        ('COPROD', 'COPROD'),
-                        ('COEMB' , 'COEMB'),
-                        ('COMAN' , 'COMAN'),
-                        ('TEC.SEGURANÇA', 'TEC.SEGURANÇA'),
-                             ]
+    # Choices para UEPs Petrobras (NÃO Afretadas)
+    contatoUepBrChoices = [
+        ('GEPLAT', 'GEPLAT'),
+        ('COPROD', 'COPROD'),
+        ('COEMB', 'COEMB'),
+        ('COMAN', 'COMAN'),
+        ('TEC.SEGURANÇA', 'TEC.SEGURANÇA'),
+    ]
     
-    contatoUepAfretChoices =[
-                        ('FISCAL' , 'FISCAL'),
-                        ('ENGENHEIRO OU OIM', 'ENGENHEIRO OU OIM'),
-                        ('TEC.SEGURANÇA', 'TEC.SEGURANÇA'),
-                        ('COMANDANTE' , 'COMANDANTE'),
-                               ]
+    # Choices para UEPs Afretadas
+    contatoUepAfretChoices = [
+        ('FISCAL', 'FISCAL'),
+        ('ENGENHEIRO OU OIM', 'ENGENHEIRO OU OIM'),
+        ('TEC.SEGURANÇA', 'TEC.SEGURANÇA'),
+        ('COMANDANTE', 'COMANDANTE'),
+    ]
 
 
     # Campos
     idxcontatoUep = models.ForeignKey(contatoUep, on_delete=models.CASCADE)
-    tipoContato = models.CharField(max_length=10,choices={'''Escolhera o choice conforme a combo box na tabela pai'''},verbose_name='Descrição do Contato')
-    chaveCompartilhada = models.CharField(max_length=4,verbose_name='Chave Compartilhada', unique=True,null=)
-    emailexterno = models.EmailField(max_length=40, verbose_name='E-mail Externo')
-    ramalBR = models.CharField(max_length=9,verbose_name='Ramal BR')
-    TelExt = models.CharField(max_length=15,validators=[celular_validator],blank=True,null=True,verbose_name='Telefone Externo Operações')
+    tipoContato = models.CharField(max_length=20, verbose_name='Descrição do Contato')
+    chaveCompartilhada = models.CharField(max_length=4, verbose_name='Chave Compartilhada', unique=True, null=True, blank=True)
+    emailExterno = models.EmailField(max_length=40, verbose_name='E-mail Externo')
+    ramalBR = models.CharField(max_length=9, verbose_name='Ramal BR', blank=True, null=True)
+    telExterno = models.CharField(max_length=15, validators=[celular_validator], blank=True, null=True, verbose_name='Telefone Externo')
 
-
-    
     def __str__(self):
-        return self.tipoUep
+        return f"{self.tipoContato} - {self.emailExterno}"
     
     class Meta:
         verbose_name = 'Sub Tabela Contato UEP'
         verbose_name_plural = "Sub Tabela Contatos UEPs"
+        ordering = ['idxcontatoUep', 'tipoContato']

@@ -152,7 +152,44 @@
                   <div style="flex:0 0 auto;">
                     <label>Contato STO</label><input id="cad_e_contSto" type="text" maxlength="15" style="width:150px">
                   </div>
-                </div>    
+                </div>
+                
+                <!-- CAMPOS OPERAÇÕES -->
+                <div style="display:flex; gap:15px 18px; align-items:flex-start;">
+                  <div style="flex:0 0 auto;">
+                    <label>Ramal BR Operações</label><input id="cad_e_ramalOper" type="text" maxlength="9" style="width:120px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>Tel. Externo Operações</label><input id="cad_e_telOper" type="text" maxlength="15" style="width:150px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>E-mail Operações</label><input id="cad_e_emailOper" type="text" style="width:300px">
+                  </div>
+                </div>
+
+                <!-- CAMPOS PASSADIÇO -->
+                <div style="display:flex; gap:15px 18px; align-items:flex-start;">
+                  <div style="flex:0 0 auto;">
+                    <label>Ramal BR Passadiço</label><input id="cad_e_ramalPassad" type="text" maxlength="9" style="width:120px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>Tel. Externo Passadiço</label><input id="cad_e_telPassad" type="text" maxlength="15" style="width:150px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>Celular Passadiço</label><input id="cad_e_contPassad" type="text" maxlength="15" style="width:150px">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>E-mail Passadiço</label><input id="cad_e_emailPassad" type="text" style="width:300px">
+                  </div>
+                </div>
+
+                <!-- CAMPO ASSINATURA DIGITAL -->
+                <div style="display:flex; gap:15px 18px; align-items:flex-start;">
+                  <div style="flex:1 1 auto;">
+                    <label>E-mails Assinatura Digital RDO (separados por ponto e vírgula)</label>
+                    <textarea id="cad_e_emailsAssDig" maxlength="500" rows="3" style="width:100%; resize:vertical;"></textarea>
+                  </div>
+                </div>
 
             <div class="col"></div>
 
@@ -175,6 +212,86 @@
         </div>
       </div>
       </div>
+
+      <!-- ========== ACCORDION ITEM: UEPs ========== -->
+      <div class="accordion-item">
+        <div class="accordion-header" data-target="ueps">
+          <h3>🏭 Contatos das UEPs</h3>
+          <span class="toggle">▼</span>
+        </div>
+        <div class="accordion-content" id="acc-ueps">
+          <div class="card fadein">
+            <div class="col">
+              <label style="display:inline-flex; align-items:center; gap:6px">
+                <input id="cad_uep_afretada" type="checkbox"> Unidade Afretada?
+              </label>
+            </div>
+
+            <!-- SUBTABELA DE CONTATOS -->
+            <div id="containerSubtabelaUep" style="display:block; margin-top:16px;">
+              <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
+                <div style="flex:0 0 auto;">
+                  <label>Tipo Contato</label>
+                  <select id="uepTipoContato" style="width:200px;">
+                    <option value="">— selecione —</option>
+                  </select>
+                </div>
+                <div style="flex:0 0 auto;">
+                  <label>Chave Compartilhada</label>
+                  <input id="uepChave" type="text" maxlength="4" style="width:100px;">
+                </div>
+                <div style="flex:0 0 auto;">
+                  <label>E-mail Externo</label>
+                  <input id="uepEmail" type="email" style="width:300px;">
+                </div>
+                <div style="flex:0 0 auto;">
+                  <label>Ramal BR</label>
+                  <input id="uepRamal" type="text" maxlength="9" style="width:120px;">
+                </div>
+                <div style="flex:0 0 auto;">
+                  <label>Tel. Externo</label>
+                  <input id="uepTelExterno" type="text" maxlength="15" style="width:150px;">
+                </div>
+                <div style="flex:0 0 auto; align-self:flex-end;">
+                  <button id="btnAddUepContato" class="btn ghost">Adicionar</button>
+                </div>
+              </div>
+
+              <table id="tblUepContatos" style="width:100%; border-collapse:collapse; margin-bottom:16px;">
+                <thead>
+                  <tr>
+                    <th style="border:1px solid #ddd; padding:8px; text-align:left;">Tipo Contato</th>
+                    <th style="border:1px solid #ddd; padding:8px; text-align:left;">Chave</th>
+                    <th style="border:1px solid #ddd; padding:8px; text-align:left;">E-mail</th>
+                    <th style="border:1px solid #ddd; padding:8px; text-align:left;">Ramal BR</th>
+                    <th style="border:1px solid #ddd; padding:8px; text-align:left;">Tel. Externo</th>
+                    <th style="border:1px solid #ddd; padding:8px; text-align:center; width:100px;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="row" style="align-items:flex-end; gap:8px; margin-top:8px">
+              <div class="col" style="min-width:300px">
+                <label>UEPs cadastradas</label>
+                <select id="cad_uep_list"><option value="">— selecione —</option></select>
+              </div>
+              <div class="col" style="flex:0 0 auto; display:flex; gap:8px">
+                <button id="btnSaveUep" class="btn ghost">Salvar</button>
+                <button id="btnUepEditar" class="btn ghost" disabled>Editar</button>
+                <button id="btnUepExcluir" class="btn ghost" disabled>Excluir</button>
+                <div class="col" id="uepEditActions" style="flex:0 0 auto; display:none; gap:8px">
+                  <button id="btnUepConfirma" class="btn">Confirmar</button>
+                  <button id="btnUepCancela" class="btn ghost">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ========== ACCORDION ITEM: PASSAGENS DE SERVIÇO (ADM) ========== -->
       <div class="accordion-item">
         <div class="accordion-header" data-target="passagens">
@@ -206,7 +323,9 @@
 <script src="/static/js/auth.js"></script>
 <script src="/static/js/fiscais.js"></script>
 <script src="/static/js/embarcacoes.js"></script>
+<script src="/static/js/ueps.js"></script>
 <script src="/static/js/cad-passagens.js"></script>
 <script src="/static/js/cadastros.js"></script>
+
 </body>
 </html>

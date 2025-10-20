@@ -35,6 +35,14 @@ urlpatterns = [
     # API Modais
     path('api/modais/', views_cad.modais_list, name='modais_list'),
 
+    # API Contatos UEPs
+
+    path('api/ueps/', views_cad.ueps_list, name='ueps_list'),
+    path('api/ueps/<int:uep_id>/', views_cad.ueps_detail, name='ueps_detail'),
+    path('api/ueps/<int:uep_id>/contatos/', views_cad.uep_contatos_list, name='uep_contatos_list'),
+    path('api/uep-contatos/<int:contato_id>/', views_cad.uep_contatos_detail, name='uep_contatos_detail'),
+    path('api/ueps/<int:uep_id>/choices/', views_cad.uep_choices, name='uep_choices'),
+
 
     #===========================================MODULO PASSAGEM DE SERVIÇO=================================
     # API Passagem de Serviço
