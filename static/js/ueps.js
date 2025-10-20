@@ -10,6 +10,7 @@ const UepsModule = (() => {
   // Referências aos elementos DOM
   const elementos = {
     checkboxAfretada: document.getElementById('cad_uep_afretada'),
+    inputUnidade: document.getElementById('cad_uep_unidade'),
     selectTipoContato: document.getElementById('uepTipoContato'),
     inputChave: document.getElementById('uepChave'),
     inputEmail: document.getElementById('uepEmail'),
