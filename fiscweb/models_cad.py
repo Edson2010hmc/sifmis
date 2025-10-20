@@ -6,6 +6,11 @@ from datetime import datetime, timedelta
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
+celular_validator = RegexValidator(
+        regex=r'^\(\d{2}\)\d{4,5}-\d{4}$',
+        message='Celular deve estar no formato: (99)99999-9999'
+    )
+
 #=================================TABELAS DE APOIO - MODELO MODAL BARCO==============================================#
 class ModalBarco(models.Model):
     """Modelo para cadastro de Modais de barcos """
@@ -23,11 +28,7 @@ class ModalBarco(models.Model):
 class FiscaisCad(models.Model):
     """Modelo para cadastro de fiscaiss"""
       
-    celular_validator = RegexValidator(
-        regex=r'^\(\d{2}\)\d{4,5}-\d{4}$',
-        message='Celular deve estar no formato: (99)99999-9999'
-    )
-    
+   
     # Campos
     chave = models.CharField(max_length=4,verbose_name='Chave', unique=True)
     nome = models.CharField(max_length=80, verbose_name='Nome')
@@ -57,10 +58,6 @@ class BarcosCad(models.Model):
                         ('TUP' , 'TUP'),
                                           ]
     
-    celular_validator = RegexValidator(
-        regex=r'^\(\d{2}\)\d{4,5}-\d{4}$',
-        message='Celular deve estar no formato: (99)99999-9999'
-    )
                    
     tipoBarco = models.CharField(max_length=6,choices=barcoTipoChoice, verbose_name='Tipo')
     nomeBarco = models.CharField(max_length=50, verbose_name='Nome',unique=True)
@@ -83,7 +80,15 @@ class BarcosCad(models.Model):
     nomeSto = models.CharField(max_length=25,verbose_name='Nome STO do barco')
     emailSto = models.EmailField(max_length=40, verbose_name='E-mail STO',unique=True)
     contSto = models.CharField(max_length=15,validators=[celular_validator],blank=True,null=True,verbose_name='Celular STO' )
-    
+    RamalBrOper = models.CharField(max_length=9,blank=True,null=True,verbose_name='Ramal BR Operações' )
+    TelExtoper = models.CharField(max_length=15,validators=[celular_validator],blank=True,null=True,verbose_name='Telefone Externo Operações')
+    emailOper = models.EmailField(max_length=40, verbose_name='E-mail OPerações',unique=True)
+    RamalBrPassad = models.CharField(max_length=9,blank=True,null=True,verbose_name='Ramal BR Passadiço' )
+    TelExtpassad = models.CharField(max_length=15,validators=[celular_validator],blank=True,null=True,verbose_name='Telefone Externo Passadiço')  
+    contPassad = models.CharField(max_length=15,validators=[celular_validator],blank=True,null=True,verbose_name='Celular Passadiço' )
+    emailPassad = models.EmailField(max_length=40, verbose_name='E-mail Passadiço',unique=True)
+    listEmailAssDig = models.TextField(max_length=500,verbose_name='e-mails assinatura digital RDO',blank=True,null=True) 
+          
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
     
@@ -102,17 +107,59 @@ class BarcosCad(models.Model):
 
         super().save(*args, **kwargs)
     
-#==================================SUBTABELA CADASTRO BARCOS TELEFONES============================#
-
-
-
-
-
-
-
-
-
-
 
 #================================SUBTABELA DE CADASTRO DE UEPs - EMAILS E RAMAIS=================
+class contatoUep(models.Model):
+    """Modelo para cadastro de UEPS, ramais e e-mails """
 
+                       
+    afretUep = models.BooleanField(verbose_name='Unidade Afretada?')
+    if afretUep:
+        uepContatoType = "Afretada"
+    else:
+        uepContatoType = "Não Afretada"
+
+    
+    def __str__(self):
+        return self.afretUep
+    
+    class Meta:
+        verbose_name = 'Contato UEP'
+        verbose_name_plural = "Contatos UEPs"
+
+#==================SUB TABELA CONTATOS UEP=================================================
+class subTabcontatosUeps(models.Model):
+    """Modelo para sub tabela cadastro de UEPS, ramais e e-mails """
+
+    contatoUepBrChoices =   [
+                        ('GEPLAT' , 'GEPLAT'),
+                        ('COPROD', 'COPROD'),
+                        ('COEMB' , 'COEMB'),
+                        ('COMAN' , 'COMAN'),
+                        ('TEC.SEGURANÇA', 'TEC.SEGURANÇA'),
+                             ]
+    
+    contatoUepAfretChoices =[
+                        ('FISCAL' , 'FISCAL'),
+                        ('ENGENHEIRO OU OIM', 'ENGENHEIRO OU OIM'),
+                        ('TEC.SEGURANÇA', 'TEC.SEGURANÇA'),
+                        ('COMANDANTE' , 'COMANDANTE'),
+                               ]
+
+
+    # Campos
+    idxcontatoUep = models.ForeignKey(contatoUep, on_delete=models.CASCADE)
+    tipoContato = models.CharField(max_length=10,choices={'''Escolhera o choice conforme a combo box na tabela pai'''},verbose_name='Descrição do Contato')
+    chaveCompartilhada = models.CharField(max_length=4,verbose_name='Chave Compartilhada', unique=True,null=)
+    emailexterno = models.EmailField(max_length=40, verbose_name='E-mail Externo')
+    ramalBR = models.CharField(max_length=9,verbose_name='Ramal BR')
+    TelExt = models.CharField(max_length=15,validators=[celular_validator],blank=True,null=True,verbose_name='Telefone Externo Operações')
+
+
+    
+    def __str__(self):
+        return self.tipoUep
+    
+    class Meta:
+        verbose_name = 'Sub Tabela Contato UEP'
+        verbose_name_plural = "Sub Tabela Contatos UEPs"
