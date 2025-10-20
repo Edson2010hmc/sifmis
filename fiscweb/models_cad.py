@@ -114,6 +114,7 @@ class contatoUep(models.Model):
     
     # Campo principal - define se é Petrobras (BR) ou Afretada
     afretUep = models.BooleanField(verbose_name='Unidade Afretada?')
+    unidade = models.CharField(max_length=80, verbose_name='Unidade')
     
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)

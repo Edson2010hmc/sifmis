@@ -723,7 +723,69 @@ def ueps_detail(request, uep_id):
                 'success': False,
                 'error': str(e)
             }, status=400)
-        
+
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def ueps_list(request):
+    """
+    GET: Lista todas as UEPs
+    POST: Cria uma nova UEP
+    """
+    
+    if request.method == 'GET':
+        try:
+            ueps = contatoUep.objects.all().values(
+                'id', 'afretUep', 'criado_em', 'atualizado_em'
+            )
+            ueps_list = list(ueps)
+            
+            print(f"[API] GET /ueps - Retornando {len(ueps_list)} UEPs")
+            
+            return JsonResponse({
+                'success': True,
+                'data': ueps_list,
+                'count': len(ueps_list)
+            }, safe=False)
+            
+        except Exception as e:
+            print(f"[API ERROR] GET /ueps - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+    
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            afret_uep = data.get('afretUep', False)
+            
+            print(f"[API] POST /ueps - Criando UEP: Afretada={afret_uep}")
+            
+            uep = contatoUep.objects.create(
+                afretUep=afret_uep
+            )
+            
+            print(f"[API] POST /ueps - UEP criada com ID: {uep.id}")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'UEP criada com sucesso',
+                'data': {
+                    'id': uep.id,
+                    'afretUep': uep.afretUep,
+                    'criado_em': uep.criado_em,
+                    'atualizado_em': uep.atualizado_em
+                }
+            }, status=201)
+            
+        except Exception as e:
+            print(f"[API ERROR] POST /ueps - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+
 @csrf_exempt
 @require_http_methods(["GET", "PUT", "DELETE"])
 def uep_contatos_detail(request, contato_id):
