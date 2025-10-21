@@ -402,7 +402,7 @@ class anomSMS(models.Model):
     dataAnomSMS = models.DateField(verbose_name='Data da Anomalia')
     horaAnomSMS = models.TimeField(verbose_name='Hora da Anomalia')
     relacAnomSMS = models.CharField(max_length=15, verbose_name='Referente a')
-    linkAnomSMS = models.CharField(max_length=15, verbose_name='Visualizar Informe')
+    linkAnomSMS = models.IntegerField(verbose_name='ID do informe')
     class Meta:
         verbose_name = 'Anomalia de SMS'
         verbose_name_plural = 'Anomalias de SMS'

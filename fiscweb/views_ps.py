@@ -2373,25 +2373,32 @@ def anom_sms_list(request, ps_id):
     """
     try:
         # Buscar PassServ
+# Substituir o bloco em anom_sms_list após buscar PassServ:
+
         ps = PassServ.objects.get(id=ps_id)
-        
+
         print(f"[API] GET /api/ps/{ps_id}/anom-sms/ - Buscando anomalias SMS")
         print(f"[DEBUG] Embarcação: {ps.BarcoPS}, Quinzena: {ps.dataInicio} a {ps.dataFim}")
-        
-        # Buscar informes que correspondem à embarcação e quinzena
+
+        # BarcoPS formato: "TIPO - NOME", siteInstalacao formato: "TIPO NOME"
+        barco_busca = ps.BarcoPS.replace(' - ', ' ')
+
+        print(f"[DEBUG] String de busca: '{barco_busca}'")
+
+        # Buscar informes
         informes = InformeAnomalia.objects.filter(
-            siteInstalacao__icontains=ps.BarcoPS,
+            siteInstalacao__icontains=barco_busca,
             dataEvento__gte=ps.dataInicio,
             dataEvento__lte=ps.dataFim
         ).order_by('-dataEvento', '-horarioEvento')
-        
+
         print(f"[DEBUG] Encontrados {informes.count()} informes")
         
         # Para cada informe, criar ou atualizar anomSMS
         for informe in informes:
             anomSMS.objects.update_or_create(
                 idxAnomSMS=ps,
-                linkAnomSMS=str(informe.id),
+                linkAnomSMS=informe.id,  
                 defaults={
                     'dataAnomSMS': informe.dataEvento,
                     'horaAnomSMS': informe.horarioEvento,
