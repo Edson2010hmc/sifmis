@@ -2080,10 +2080,6 @@ def subtab_emb_equip_detail(request, item_id):
                 'error': str(e)
             }, status=400)
 
-
-
-
-
 #================================================MOBILIZAÇÃO/DESMOBILIZAÇÃO - API REST=================================================
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
