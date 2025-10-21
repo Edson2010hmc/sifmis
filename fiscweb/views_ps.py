@@ -2367,9 +2367,6 @@ def subtab_mob_desm_detail(request, item_id):
                 'error': str(e)
             }, status=400)
 
-
-
-
 #===========================================BUSCAR INFORMES DE ANOMALIAS EMITIDOS NA QUINZENA=====================
 #================================================ANOMALIAS SMS - API REST=================================================
 @csrf_exempt

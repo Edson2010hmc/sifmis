@@ -97,6 +97,20 @@ path('api/passagens/<int:ps_id>/finalizar/', views_ps.finalizar_passagem, name='
 # API Gerar PDF da Passagem de Serviço
 path('api/passagens/<int:ps_id>/gerar-pdf/', views_ps.gerar_pdf_passagem, name='gerar_pdf_passagem'),
 
+#API Informes de anomalias da Quinzena
+path('api/ps/<int:ps_id>/anom-sms/', views_ps.anom_sms_list, name='anom_sms_list'),
+
+
+
+
+
+
+
+
+
+
+
+
 
 #=================================MODULO INFORME DE ANOMALIA==============================
 path('api/informes/', views_anom.informe_anomalia_list, name='informe_anomalia_list'),
