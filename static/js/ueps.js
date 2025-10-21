@@ -32,7 +32,7 @@ const UepsModule = (() => {
     carregarLista();
     configurarEventos();
     aplicarEstadoInicial();
-    carregarChoicesPadrao();
+    recarregarChoicesPorCheckbox;
   }
 
   // ===== ESTADO INICIAL =====
@@ -56,9 +56,10 @@ const UepsModule = (() => {
     // Quando mudar checkbox, recarregar choices e habilitar botão Salvar
     elementos.checkboxAfretada.addEventListener('change', function() {
       if (!modoEdicao) {
+        recarregarChoicesPorCheckbox();
         validarCamposParaSalvar();
       }
-    });
+});
   }
 
   // ===== VALIDAR CAMPOS PARA HABILITAR SALVAR =====
@@ -70,35 +71,6 @@ const UepsModule = (() => {
     elementos.btnSalvar.disabled = !podeHabilitar;
   }
 
-  // ===== CARREGAR CHOICES PADRÃO (NÃO AFRETADA) =====
-  function carregarChoicesPadrao() {
-    const choicesBR = [
-      { value: 'GEPLAT', label: 'GEPLAT' },
-      { value: 'COPROD', label: 'COPROD' },
-      { value: 'COEMB', label: 'COEMB' },
-      { value: 'COMAN', label: 'COMAN' },
-      { value: 'TEC.SEGURANÇA', label: 'TEC.SEGURANÇA' }
-    ];
-    
-    preencherSelectTipoContato(choicesBR);
-  }
-
-  // ===== CARREGAR CHOICES DINÂMICOS =====
-  async function carregarChoicesDinamicos(uepId) {
-    try {
-      const response = await fetch(`/api/ueps/${uepId}/choices/`);
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      preencherSelectTipoContato(result.data.choices);
-
-    } catch (error) {
-      alert('Erro ao carregar tipos de contato: ' + error.message);
-    }
-  }
 
   // ===== PREENCHER SELECT TIPO CONTATO =====
   function preencherSelectTipoContato(choices) {
@@ -128,7 +100,7 @@ const UepsModule = (() => {
         const option = document.createElement('option');
         option.value = uep.id;
         const tipo = uep.afretUep ? 'Afretada' : 'Não Afretada';
-        option.textContent = `UEP ${tipo} - ID ${uep.id}`;
+        option.textContent = `${uep.unidade} - ${tipo}`;
         option.dataset.uep = JSON.stringify(uep);
         elementos.lista.appendChild(option);
       });
@@ -218,59 +190,69 @@ const UepsModule = (() => {
     elementos.selectTipoContato.focus();
   }
 
-  // ===== SALVAR NOVA UEP =====
+ // ===== SALVAR NOVA UEP =====
   async function salvarNovaUep() {
-    if (itensSubtabela.length === 0) {
-      alert('Adicione pelo menos um contato');
-      return;
+  // Validar campo unidade
+  const unidade = elementos.inputUnidade.value.trim();
+  
+  if (!unidade) {
+    alert('Informe a Unidade');
+    elementos.inputUnidade.focus();
+    return;
+  }
+  
+  if (itensSubtabela.length === 0) {
+    alert('Adicione pelo menos um contato');
+    return;
+  }
+
+  try {
+    // 1. Criar UEP
+    const responseUep = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        afretUep: elementos.checkboxAfretada.checked,
+        unidade: unidade
+      })
+    });
+
+    const resultUep = await responseUep.json();
+
+    if (!resultUep.success) {
+      throw new Error(resultUep.error);
     }
 
-    try {
-      // 1. Criar UEP
-      const responseUep = await fetch(API_URL, {
+    const uepId = resultUep.data.id;
+
+    // 2. Salvar contatos
+    for (const item of itensSubtabela) {
+      const responseContato = await fetch(`/api/ueps/${uepId}/contatos/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          afretUep: elementos.checkboxAfretada.checked
-        })
+        body: JSON.stringify(item)
       });
 
-      const resultUep = await responseUep.json();
+      const resultContato = await responseContato.json();
 
-      if (!resultUep.success) {
-        throw new Error(resultUep.error);
+      if (!resultContato.success) {
+        throw new Error(resultContato.error);
       }
-
-      const uepId = resultUep.data.id;
-
-      // 2. Salvar contatos
-      for (const item of itensSubtabela) {
-        const responseContato = await fetch(`/api/ueps/${uepId}/contatos/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(item)
-        });
-
-        const resultContato = await responseContato.json();
-
-        if (!resultContato.success) {
-          throw new Error(resultContato.error);
-        }
-      }
-
-      alert('UEP cadastrada com sucesso!');
-      
-      limparFormulario();
-      carregarLista();
-      
-      elementos.btnSalvar.disabled = true;
-      elementos.btnEditar.disabled = true;
-      elementos.btnExcluir.disabled = true;
-
-    } catch (error) {
-      alert('Erro ao salvar UEP: ' + error.message);
     }
+
+    alert('UEP cadastrada com sucesso!');
+    
+    limparFormulario();
+    carregarLista();
+    
+    elementos.btnSalvar.disabled = true;
+    elementos.btnEditar.disabled = true;
+    elementos.btnExcluir.disabled = true;
+
+  } catch (error) {
+    alert('Erro ao salvar UEP: ' + error.message);
   }
+}
 
   // ===== SELECIONAR UEP DA LISTA =====
   async function selecionarUep() {
@@ -293,18 +275,19 @@ const UepsModule = (() => {
     elementos.btnExcluir.disabled = false;
   }
 
-  // ===== PREENCHER FORMULÁRIO =====
+ // ===== PREENCHER FORMULÁRIO ====================
   async function preencherFormulario(uep) {
-    elementos.checkboxAfretada.checked = uep.afretUep;
-    
-    // Carregar choices dinâmicos
-    await carregarChoicesDinamicos(uep.id);
-    
-    // Carregar contatos
-    await carregarContatos(uep.id);
-    
-    habilitarCampos(false);
-  }
+  elementos.checkboxAfretada.checked = uep.afretUep;
+  elementos.inputUnidade.value = uep.unidade || '';
+  
+  // Choices Dinamicos
+  recarregarChoicesPorCheckbox();
+  
+  // Carregar contatos
+  await carregarContatos(uep.id);
+  
+  habilitarCampos(false);
+}
 
   // ===== CARREGAR CONTATOS =====
   async function carregarContatos(uepId) {
@@ -346,82 +329,92 @@ const UepsModule = (() => {
     elementos.editActions.style.display = 'flex';
   }
 
-  // ===== CONFIRMAR EDIÇÃO =====
+ // ===== CONFIRMAR EDIÇÃO =====
   async function confirmarEdicao() {
-    if (itensSubtabela.length === 0) {
-      alert('Deve haver pelo menos um contato');
-      return;
+  // Validar campo unidade
+  const unidade = elementos.inputUnidade.value.trim();
+  
+  if (!unidade) {
+    alert('Informe a Unidade');
+    elementos.inputUnidade.focus();
+    return;
+  }
+  
+  if (itensSubtabela.length === 0) {
+    alert('Deve haver pelo menos um contato');
+    return;
+  }
+
+  try {
+    // 1. Atualizar UEP
+    const responseUep = await fetch(`${API_URL}${uepEditandoId}/`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        afretUep: elementos.checkboxAfretada.checked,
+        unidade: unidade
+      })
+    });
+
+    const resultUep = await responseUep.json();
+
+    if (!resultUep.success) {
+      throw new Error(resultUep.error);
     }
 
-    try {
-      // 1. Atualizar UEP
-      const responseUep = await fetch(`${API_URL}${uepEditandoId}/`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          afretUep: elementos.checkboxAfretada.checked
-        })
+    // 2. Deletar contatos removidos
+    for (const itemId of itensParaDeletar) {
+      const responseDelete = await fetch(`/api/uep-contatos/${itemId}/`, {
+        method: 'DELETE'
       });
 
-      const resultUep = await responseUep.json();
+      const resultDelete = await responseDelete.json();
 
-      if (!resultUep.success) {
-        throw new Error(resultUep.error);
+      if (!resultDelete.success) {
+        throw new Error(resultDelete.error);
       }
+    }
+    itensParaDeletar = [];
 
-      // 2. Deletar contatos removidos
-      for (const itemId of itensParaDeletar) {
-        const responseDelete = await fetch(`/api/uep-contatos/${itemId}/`, {
-          method: 'DELETE'
+    // 3. Salvar/atualizar contatos
+    for (const item of itensSubtabela) {
+      if (item.id) {
+        // Atualizar existente
+        const responsePut = await fetch(`/api/uep-contatos/${item.id}/`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item)
         });
 
-        const resultDelete = await responseDelete.json();
+        const resultPut = await responsePut.json();
 
-        if (!resultDelete.success) {
-          throw new Error(resultDelete.error);
+        if (!resultPut.success) {
+          throw new Error(resultPut.error);
+        }
+      } else {
+        // Criar novo
+        const responsePost = await fetch(`/api/ueps/${uepEditandoId}/contatos/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item)
+        });
+
+        const resultPost = await responsePost.json();
+
+        if (!resultPost.success) {
+          throw new Error(resultPost.error);
         }
       }
-      itensParaDeletar = [];
-
-      // 3. Salvar/atualizar contatos
-      for (const item of itensSubtabela) {
-        if (item.id) {
-          // Atualizar existente
-          const responsePut = await fetch(`/api/uep-contatos/${item.id}/`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(item)
-          });
-
-          const resultPut = await responsePut.json();
-
-          if (!resultPut.success) {
-            throw new Error(resultPut.error);
-          }
-        } else {
-          // Criar novo
-          const responsePost = await fetch(`/api/ueps/${uepEditandoId}/contatos/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(item)
-          });
-
-          const resultPost = await responsePost.json();
-
-          if (!resultPost.success) {
-            throw new Error(resultPost.error);
-          }
-        }
-      }
-
-      alert('UEP atualizada com sucesso!');
-      
-      cancelarEdicao();
-      carregarLista();
-
-    } catch (error) {
-      alert('Erro ao atualizar UEP: ' + error.message);
     }
+
+    alert('UEP atualizada com sucesso!');
+    
+    cancelarEdicao();
+    carregarLista();
+
+  } catch (error) {
+    alert('Erro ao atualizar UEP: ' + error.message);
+  }
   }
 
   // ===== CANCELAR EDIÇÃO =====
@@ -442,48 +435,15 @@ const UepsModule = (() => {
     elementos.editActions.style.display = 'none';
   }
 
-  // ===== EXCLUIR UEP =====
-  async function excluirUep() {
-    const selectedOption = elementos.lista.selectedOptions[0];
-    
-    if (!selectedOption || !selectedOption.value) {
-      alert('Selecione uma UEP para excluir');
-      return;
-    }
-
-    if (!confirm('Deseja realmente excluir esta UEP e todos os seus contatos?')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_URL}${selectedOption.value}/`, {
-        method: 'DELETE'
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      alert('UEP excluída com sucesso!');
-      
-      limparFormulario();
-      carregarLista();
-      
-      elementos.btnSalvar.disabled = false;
-      elementos.btnEditar.disabled = true;
-      elementos.btnExcluir.disabled = true;
-
-    } catch (error) {
-      alert('Erro ao excluir UEP: ' + error.message);
-      
-      limparFormulario();
-      elementos.lista.value = '';
-      elementos.btnSalvar.disabled = false;
-      elementos.btnEditar.disabled = true;
-      elementos.btnExcluir.disabled = true;
-    }
+  // ===== LIMPAR FORMULÁRIO =====
+  function limparFormulario() {
+  elementos.checkboxAfretada.checked = false;
+  elementos.inputUnidade.value = '';
+  itensSubtabela = [];
+  renderizarTabela();
+  limparCamposSubtabela();
+  recarregarChoicesPorCheckbox();
+  habilitarCampos(true);
   }
 
   // ===== LIMPAR FORMULÁRIO =====
@@ -499,12 +459,39 @@ const UepsModule = (() => {
   // ===== HABILITAR/DESABILITAR CAMPOS =====
   function habilitarCampos(habilitar) {
     elementos.checkboxAfretada.disabled = !habilitar;
+    elementos.inputUnidade.disabled = !habilitar;
     elementos.selectTipoContato.disabled = !habilitar;
     elementos.inputChave.disabled = !habilitar;
     elementos.inputEmail.disabled = !habilitar;
     elementos.inputRamal.disabled = !habilitar;
     elementos.inputTelExterno.disabled = !habilitar;
     elementos.btnAdicionar.disabled = !habilitar;
+  }
+
+  // ===== RECARREGAR CHOICES BASEADO NO CHECKBOX =====
+  function recarregarChoicesPorCheckbox() {
+    const isAfretada = elementos.checkboxAfretada.checked;
+  
+    if (isAfretada) {
+      // Choices para Afretada
+      const choicesAfret = [
+        { value: 'FISCAL', label: 'FISCAL' },
+        { value: 'ENGENHEIRO OU OIM', label: 'ENGENHEIRO OU OIM' },
+        { value: 'TEC.SEGURANÇA', label: 'TEC.SEGURANÇA' },
+        { value: 'COMANDANTE', label: 'COMANDANTE' }
+      ];
+      preencherSelectTipoContato(choicesAfret);
+    } else {
+      // Choices para Não Afretada (BR)
+      const choicesBR = [
+        { value: 'GEPLAT', label: 'GEPLAT' },
+        { value: 'COPROD', label: 'COPROD' },
+        { value: 'COEMB', label: 'COEMB' },
+        { value: 'COMAN', label: 'COMAN' },
+        { value: 'TEC.SEGURANÇA', label: 'TEC.SEGURANÇA' }
+      ];
+      preencherSelectTipoContato(choicesBR);
+    }
   }
 
   // ===== INICIALIZAR QUANDO DOM CARREGAR =====
