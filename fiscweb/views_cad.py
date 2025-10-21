@@ -668,6 +668,7 @@ def ueps_detail(request, uep_id):
             'data': {
                 'id': uep.id,
                 'afretUep': uep.afretUep,
+                'unidade': uep.unidade,
                 'criado_em': uep.criado_em,
                 'atualizado_em': uep.atualizado_em
             }
@@ -682,7 +683,14 @@ def ueps_detail(request, uep_id):
             # Atualizar campo afretUep
             if 'afretUep' in data:
                 uep.afretUep = data['afretUep']
-            
+            if 'unidade' in data:
+                unidade = (data.get('unidade') or '').strip()
+                if not unidade:
+                    return JsonResponse({
+                        'success': False,
+                        'error': "Campo 'unidade' não pode ser vazio"
+                    }, status=400)
+                uep.unidade = unidade
             uep.save()
             
             print(f"[API] PUT /ueps/{uep_id} - Atualizado com sucesso")
@@ -693,6 +701,7 @@ def ueps_detail(request, uep_id):
                 'data': {
                     'id': uep.id,
                     'afretUep': uep.afretUep,
+                    'unidade': uep.unidade,
                     'criado_em': uep.criado_em,
                     'atualizado_em': uep.atualizado_em
                 }
@@ -735,7 +744,7 @@ def ueps_list(request):
     if request.method == 'GET':
         try:
             ueps = contatoUep.objects.all().values(
-                'id', 'afretUep', 'criado_em', 'atualizado_em'
+                'id', 'afretUep', 'unidade', 'criado_em', 'atualizado_em'
             )
             ueps_list = list(ueps)
             
@@ -759,11 +768,19 @@ def ueps_list(request):
             data = json.loads(request.body)
             
             afret_uep = data.get('afretUep', False)
+            unidade = (data.get('unidade') or '').strip()
+
+            if not unidade:
+                return JsonResponse({
+                    'success': False,
+                    'error': "Informe a Unidade"
+                }, status=400)
             
             print(f"[API] POST /ueps - Criando UEP: Afretada={afret_uep}")
             
             uep = contatoUep.objects.create(
-                afretUep=afret_uep
+                afretUep=afret_uep,
+                unidade=unidade,
             )
             
             print(f"[API] POST /ueps - UEP criada com ID: {uep.id}")
@@ -774,6 +791,7 @@ def ueps_list(request):
                 'data': {
                     'id': uep.id,
                     'afretUep': uep.afretUep,
+                    'unidade': uep.unidade,
                     'criado_em': uep.criado_em,
                     'atualizado_em': uep.atualizado_em
                 }
@@ -914,6 +932,7 @@ def uep_choices(request, uep_id):
             'success': True,
             'data': {
                 'afretUep': uep.afretUep,
+                'unidade': uep.unidade,
                 'choices': choices
             }
         })
