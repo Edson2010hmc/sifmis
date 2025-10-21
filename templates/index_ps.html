@@ -444,10 +444,79 @@
           </div>
         </div>
 
-      </div>
+      </div><!--Fim da subtab PORTO-->
 
-      <div class="subtab" id="sub-sms"><div class="card"><h3>2. SMS – campos prontos</h3></div></div>
-      <div class="subtab" id="sub-rotinas"><div class="card"><h3>3. ROTINAS – campos prontos</h3></div></div>
+
+      <div class="subtab" id="sub-rotinas"><div class="card"><h3>2. ROTINAS – campos prontos</h3></div></div>
+
+
+
+
+
+      <div class="subtab" id="sub-sms"><div class="card"><h2>3. SMS</h2></div>
+        <!-- 2.1 Anomalias de SMS -->
+        <div class="accordion-item">
+          <div class="accordion-header" data-target="anomsms">
+            <span>3.1 Anomalias de SMS da Quinzena</span>
+            <span class="toggle">▼</span>
+          </div>
+          <div class="accordion-content" id="acc-anomsms">
+            <div class="col">
+              <p style="margin-bottom:12px; color:#666;">Informes de anomalia emitidos na quinzena.</p>
+              
+              <table id="tblAnomSMS" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+                <thead>
+                  <tr style="background:#f0f0f0;">
+                    <th style="border:1px solid #ddd; padding:8px; text-align:center;">Data</th>
+                    <th style="border:1px solid #ddd; padding:8px; text-align:center;">Hora</th>
+                    <th style="border:1px solid #ddd; padding:8px; text-align:left;">Referente a</th>
+                    <th style="border:1px solid #ddd; padding:8px; text-align:center; width:120px;">Visualizar</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+              
+              <div id="msgSemAnomalias" style="display:none; padding:20px; text-align:center; color:#666;">
+                Nenhuma anomalia registrada nesta quinzena.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+          
+    </div><!--Fim da subtab SMS-->
+          <!-- MODAL DE VISUALIZAÇÃO DE INFORME -->
+      <div id="modalVisualizarInforme" class="modal-overlay">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 style="margin:0;">Visualizar Informe de Anomalia</h2>
+            <button class="modal-close" onclick="AnomSMSModule.fecharModal()">&times;</button>
+          </div>
+          <div class="modal-body" id="modalInformeConteudo">
+            <!-- Conteúdo será inserido via JavaScript -->
+          </div>
+        </div>
+      </div>  
+            
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
       <div class="subtab" id="sub-os"><div class="card"><h3>4. ORDENS DE SERVIÇO – campos prontos</h3></div></div>
       <div class="subtab" id="sub-gerais"><div class="card"><h3>5. INFORMAÇÕES GERAIS – campos prontos</h3></div></div>
       
@@ -481,6 +550,7 @@
 <script src="/static/js/insp-petr.js"></script>
 <script src="/static/js/emb-equip.js"></script>
 <script src="/static/js/mob-desm.js"></script>
+<script src="/static/js/anom-sms.js"></script>
 <script src="/static/js/app.js"></script>
 </body>
 </html>

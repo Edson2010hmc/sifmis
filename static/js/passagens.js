@@ -259,6 +259,10 @@ if (typeof MobDesmModule !== 'undefined' && MobDesmModule.carregarDados) {
   MobDesmModule.carregarDados(psData.id);
 }
 
+if (typeof AnomSMSModule !== 'undefined' && AnomSMSModule.carregarDados) {
+  AnomSMSModule.carregarDados(psData.id);
+}
+
 
 // Verificar se PS está finalizada
 verificarPSFinalizada(psData);
