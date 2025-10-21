@@ -391,127 +391,46 @@ class PortoDesMat(models.Model):
 
 
 
+#=============================== 2  ROTINAS - SMS =========================================
 
+#================================2.1 MODELO ANOMALIAS DE SMS===========================================
 
+class anomSMS(models.Model):
+    """Modelo para  Passagem de Serviço - Anomalias de SMS"""
 
-#================================2.0 MODELO ANOMALIAS E CORRENCIAS DE SMS===========================================
-
-
-
-class anocSMS(models.Model):
-    """Modelo para cadastro de Passagem de Serviço - Anomalias e Ocorrencias de SMS"""
-
-    classanocSMSChoices=[   
-                            ('critica','CRÍTICA'),
-                            ('nao_critica','NÃO CRITICA'),
-                            ]
-    
-    informContrChoices=[
-                            ('sim','SIM'),
-                            ('nao','NÃO'),
-                            ]
-
-    idxanocSMS = models.ForeignKey(PassServ, on_delete=models.CASCADE)
-
-    prevanocSMS = models.BooleanField(default=False, verbose_name='Anomalias?')
-
-    DataanocSMS = models.DateField(verbose_name='Data da Anomalia')
-    classnocSMS = models.CharField(max_length=12,choices=classanocSMSChoices, verbose_name='Classificação da Anomalia')
-    DescanocSMS = models.TextField(max_length=500, verbose_name='Descrição da Anomalia', blank=True)
-    informContr = models.CharField(max_length=4, choices=informContrChoices, verbose_name='Houve Informe ao Controle?')
-    
+    idxAnomSMS = models.ForeignKey(PassServ, on_delete=models.CASCADE)
+    dataAnomSMS = models.DateField(verbose_name='Data da Anomalia')
+    horaAnomSMS = models.TimeField(verbose_name='Hora da Anomalia')
+    relacAnomSMS = models.CharField(max_length=15, verbose_name='Referente a')
+    linkAnomSMS = models.CharField(max_length=15, verbose_name='Visualizar Informe')
     class Meta:
-        verbose_name = 'Anomalia e Ocorrência de SMS'
-        verbose_name_plural = 'Anomalias e Ocorrêcias de SMS'
-        ordering = ['idxanocSMS__BarcoPS','-idxanocSMS__numPS']  
+        verbose_name = 'Anomalia de SMS'
+        verbose_name_plural = 'Anomalias de SMS'
+        ordering = ['-dataAnomSMS','-horaAnomSMS']  
 
     def __str__(self):
-        return f"{self.idxanocSMS} - {self.classnocSMS}" 
+        return f"{self.dataAnomSMS} - {self.horaAnomSMS} - {self.relacAnomSMS}" 
 
-#================================3 MODELO INOPERANCIAS PENDENCIAS E ASSUNTOS CONTRATUAIS===========================================
-class inoPendContr(models.Model):
-    """Modelo para cadastro de Passagem de Serviço - Inoperâncias Pendências e assuntos Contratuais"""
+#================================2.2 DESVIOS DE SMS A BORDO===========================================
+class desvSMS(models.Model):
+    """Modelo para  Passagem de Serviço - Desvios de SMS A BORDO"""
 
+    idxDesvSMS = models.ForeignKey(PassServ, on_delete=models.CASCADE)
+    ocorDesvSMS = models.BooleanField(default=False, verbose_name='Ocorreram Desvios?')
+    dataDesvSMS = models.DateField(verbose_name='Data do desvio')
+    localDesvSMS = models.CharField(max_length=80, verbose_name='Local do desvio')
+    obsDesvSMS = models.TextField(max_length=500, verbose_name='Informações Gerais')
     
-    inoPendContrConfChoices=[
-                            ('sim' ,'SIM'),
-                            ('nao' ,'NÃO'),
-                            ('n_ap','N/A'),
-                            ]
-
-    idxinoPendContr = models.ForeignKey(PassServ, on_delete=models.CASCADE)
-
-    previnoPendContr = models.BooleanField(default=False, verbose_name='Anomalias?')
-
-    DatainoPendContr = models.DateField(verbose_name='Data da Anomalia')
-    DescinoPendContr = models.TextField(max_length=500, verbose_name='Descrição', blank=True)
-    BroainoPendContr = models.CharField(max_length=4, choices=inoPendContrConfChoices, verbose_name='Abertura de BROA?')
-    NumBroainoPendContr = models.CharField(max_length=12, verbose_name='Num BROA', blank=True)
-    infGerContinoPendContr = models.CharField(max_length=4, choices=inoPendContrConfChoices, verbose_name='Houve Informe a Gerência de Contrato?')
     class Meta:
-        verbose_name = 'Inoperância,Pendencia e Assunto Contratual'
-        verbose_name_plural = 'Inoperâncias,Pendencias e Assuntos Contratuais'
-        ordering = ['idxinoPendContr__BarcoPS','-idxinoPendContr__numPS']  
+        verbose_name = 'Desvio de SMS'
+        verbose_name_plural = 'Desvios de SMS'
+        ordering = ['-dataDesvSMS','-localDesvSMS']  
 
     def __str__(self):
-        return f"{self.idxinoPendContr}" 
-    
-
- #===========================================================4 MODELO ROTINAS===========================================
-
- #-==========================================================4.1 IAPO===================================================
-class iapo(models.Model):
-    """Modelo para cadastro de Passagem de Serviço - IAPO - Rotinas"""
-
-    iapoConfChoices=[
-                        ('sim' ,'SIM'),
-                        ('nao' ,'NÃO'),
-                        ('n_ap','N/A'),
-                        ]
-
-    idxIapo = models.ForeignKey(PassServ, on_delete=models.CASCADE)
-
-    priDomIapo = models.DateField(verbose_name='IAPO Primeira Semana')
-    priDomIapoOs = models.CharField(max_length=4, choices=iapoConfChoices, verbose_name='OSs para IAPO?')
-    segDomIapo = models.DateField(verbose_name='IAPO Segunda Semana')
-    segDomIapoOs = models.CharField(max_length=4, choices=iapoConfChoices, verbose_name='OSs para IAPO?')
-    terDomIapo = models.DateField(verbose_name='IAPO Terceira Semana')  # Corrigido
-    terDomIapoOsConc = models.CharField(max_length=4, choices=iapoConfChoices, verbose_name='OSs concluidas para esse envio?')
-    ObservIapo = models.TextField(max_length=500, verbose_name='Observações', blank=True)
-
-    class Meta:
-        verbose_name = 'IAPO'
-        ordering = ['idxIapo__BarcoPS','-idxIapo__numPS']  
-
-    def __str__(self):
-        return f"{self.idxIapo}"
-
-    def save(self, *args, **kwargs):
-        """Calcula os três domingos automaticamente"""
-        if self.idxIapo and self.idxIapo.dataEmissaoPS:
-            data_base = self.idxIapo.dataEmissaoPS
-            
-            # Achar próximo domingo
-            dias_ate_domingo = (6 - data_base.weekday()) % 7
-            if dias_ate_domingo == 0:  
-                dias_ate_domingo = 7
-            
-            primeiro_domingo = data_base + timedelta(days=dias_ate_domingo)
-            
-            # Calcular os três domingos
-            self.priDomIapo = primeiro_domingo
-            self.segDomIapo = primeiro_domingo + timedelta(weeks=1)
-            self.terDomIapo = primeiro_domingo + timedelta(weeks=2)
-
-            print(f"priDomIapo: {self.priDomIapo}")
-            print(f"segDomIapo: {self.segDomIapo}")
-            print(f"terDomIapo: {self.terDomIapo}")
-        
-        super().save(*args, **kwargs)
+        return f"{self.dataDesvSMS} - {self.localDesvSMS}" 
 
 
-#-===============================4.2 SMS===================================================
-#================================4.2.1 LV de Mangueiras====================================
+#================================2.3  LV de Mangueiras====================================
 
 class smsLvMang(models.Model):
     """Modelo para cadastro de Passagem de Serviço - LV de Mangueiras - SMS"""
@@ -540,8 +459,7 @@ class smsLvMang(models.Model):
         
 
 
-#================================4.2.2 LV de Segurança====================================
-
+#================================2.4 LV de Segurança====================================
 class smsLvSeg(models.Model):
     """Modelo para cadastro de Passagem de Serviço - LV de Segurança - SMS"""
 
@@ -614,6 +532,102 @@ class smsLvSeg(models.Model):
         pass
         super().save(*args, **kwargs)
         
+
+
+
+
+
+
+
+
+
+
+
+#================================3 ROTINAS ADMINISTRATIVAS===========================================
+
+#==================================3.1 INOPERANCIAS,PENDENCIAS E ASSUNTOS CONTRATUAIS======================
+
+class inoPendContr(models.Model):
+    """Modelo para cadastro de Passagem de Serviço - Inoperâncias Pendências e assuntos Contratuais"""
+
+    
+    inoPendContrConfChoices=[
+                            ('sim' ,'SIM'),
+                            ('nao' ,'NÃO'),
+                            ('N/A','N/A'),
+                            ]
+    
+     
+    idxInoPendContr = models.ForeignKey(PassServ, on_delete=models.CASCADE)
+
+    prevInoPendContr = models.BooleanField(default=False, verbose_name='Anomalias?')
+    dataInoPendContr = models.DateField(verbose_name='Data da Anomalia')
+    descInoPendContr = models.TextField(max_length=500, verbose_name='Descrição', blank=True)
+    broaInoPendContr = models.CharField(max_length=4, choices=inoPendContrConfChoices, verbose_name='Abertura de BROA?')
+    numBroainoPendContr = models.CharField(max_length=12, verbose_name='Num BROA', blank=True)
+    infGerContinoPendContr = models.CharField(max_length=4, choices=inoPendContrConfChoices, verbose_name='Houve Informe a Gerência de Contrato?')
+    
+    class Meta:
+        verbose_name = 'Inoperância,Pendencia e Assunto Contratual'
+        verbose_name_plural = 'Inoperâncias,Pendencias e Assuntos Contratuais'
+        ordering = ['idxInoPendContr__BarcoPS','-idxInoPendContr__numPS']  
+
+    def __str__(self):
+        return f"{self.idxInoPendContr}" 
+    
+  #-==========================================================4.1 IAPO===================================================
+class iapo(models.Model):
+    """Modelo para cadastro de Passagem de Serviço - IAPO - Rotinas"""
+
+    iapoConfChoices=[
+                        ('sim' ,'SIM'),
+                        ('nao' ,'NÃO'),
+                        ('n_ap','N/A'),
+                        ]
+
+    idxIapo = models.ForeignKey(PassServ, on_delete=models.CASCADE)
+
+    priDomIapo = models.DateField(verbose_name='IAPO Primeira Semana')
+    priDomIapoOs = models.CharField(max_length=4, choices=iapoConfChoices, verbose_name='OSs para IAPO?')
+    segDomIapo = models.DateField(verbose_name='IAPO Segunda Semana')
+    segDomIapoOs = models.CharField(max_length=4, choices=iapoConfChoices, verbose_name='OSs para IAPO?')
+    terDomIapo = models.DateField(verbose_name='IAPO Terceira Semana')  # Corrigido
+    terDomIapoOsConc = models.CharField(max_length=4, choices=iapoConfChoices, verbose_name='OSs concluidas para esse envio?')
+    ObservIapo = models.TextField(max_length=500, verbose_name='Observações', blank=True)
+
+    class Meta:
+        verbose_name = 'IAPO'
+        ordering = ['idxIapo__BarcoPS','-idxIapo__numPS']  
+
+    def __str__(self):
+        return f"{self.idxIapo}"
+
+    def save(self, *args, **kwargs):
+        """Calcula os três domingos automaticamente"""
+        if self.idxIapo and self.idxIapo.dataEmissaoPS:
+            data_base = self.idxIapo.dataEmissaoPS
+            
+            # Achar próximo domingo
+            dias_ate_domingo = (6 - data_base.weekday()) % 7
+            if dias_ate_domingo == 0:  
+                dias_ate_domingo = 7
+            
+            primeiro_domingo = data_base + timedelta(days=dias_ate_domingo)
+            
+            # Calcular os três domingos
+            self.priDomIapo = primeiro_domingo
+            self.segDomIapo = primeiro_domingo + timedelta(weeks=1)
+            self.terDomIapo = primeiro_domingo + timedelta(weeks=2)
+
+            print(f"priDomIapo: {self.priDomIapo}")
+            print(f"segDomIapo: {self.segDomIapo}")
+            print(f"terDomIapo: {self.terDomIapo}")
+        
+        super().save(*args, **kwargs)
+
+
+#-===============================4.2 SMS===================================================
+
 
 
 

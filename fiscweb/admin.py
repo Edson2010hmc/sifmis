@@ -3,8 +3,8 @@ from django.contrib import admin
 from .models_cad import FiscaisCad,BarcosCad,ModalBarco,contatoUep,subTabcontatosUeps # Seção cadastro
 
 from .models_ps import PassServ, PortoTrocaTurma,PortoManutPrev,PortoAbast,PortoInspNorm,subTabPortoInspNorm,PortoInspPetr,subTabPortoInspPetr,PortoEmbEquip,subTabPortoEmbEquip,PortoEmbMat,subTabPortoEmbMat,PortoDesMat,PortoMobD # Seção 1
-from .models_ps import anocSMS #Seção 2
-from .models_ps import inoPendContr #Seção 3
+from .models_ps import anomSMS,desvSMS 
+from .models_ps import inoPendContr 
 from .models_ps import iapo, smsLvMang,smsLvSeg
 
 from .models_anom import InformeAnomalia, SubTabPessoasAnomalia
@@ -33,7 +33,8 @@ admin.site.register(subTabPortoInspPetr)
 admin.site.register(subTabPortoEmbEquip)
 admin.site.register(subTabPortoEmbMat)
 
-admin.site.register(anocSMS)
+admin.site.register(anomSMS)
+admin.site.register(desvSMS)
 admin.site.register(inoPendContr)
 admin.site.register(iapo)
 admin.site.register(smsLvMang)

@@ -25,7 +25,7 @@ from .models_ps import PortoInspNorm,subTabPortoInspNorm
 from .models_ps import PortoInspPetr,subTabPortoInspPetr
 from .models_ps import PortoEmbEquip,subTabPortoEmbEquip
 from .models_ps import PortoMobD,SubTabPortoMobD
-
+from .models_ps import anomSMS,desvSMS
 
 
 #================================================PASSAGEM DE SERVIÇO - API REST - VERIFICA RASCUNHO USUARIO=================================================
