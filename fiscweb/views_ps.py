@@ -2373,42 +2373,57 @@ def anom_sms_list(request, ps_id):
     """
     try:
         # Buscar PassServ
-# Substituir o bloco em anom_sms_list após buscar PassServ:
-
         ps = PassServ.objects.get(id=ps_id)
+        
+        print(f"[API] GET /api/ps/{ps_id}/anom-sms/")
+        print(f"[DEBUG] BarcoPS: '{ps.BarcoPS}'")
+        print(f"[DEBUG] Quinzena: {ps.dataInicio} até {ps.dataFim}")
 
-        print(f"[API] GET /api/ps/{ps_id}/anom-sms/ - Buscando anomalias SMS")
-        print(f"[DEBUG] Embarcação: {ps.BarcoPS}, Quinzena: {ps.dataInicio} a {ps.dataFim}")
+        # Verificar se existem informes no banco
+        total_informes = InformeAnomalia.objects.count()
+        print(f"[DEBUG] Total de informes no banco: {total_informes}")
 
-        # BarcoPS formato: "TIPO - NOME", siteInstalacao formato: "TIPO NOME"
+        # Verificar se existem informes no período (SEM filtro de embarcação)
+        informes_periodo = InformeAnomalia.objects.filter(
+            dataEvento__gte=ps.dataInicio,
+            dataEvento__lte=ps.dataFim
+        )
+        print(f"[DEBUG] Informes no período: {informes_periodo.count()}")
+
+        # Mostrar os primeiros 3 informes do período
+        for inf in informes_periodo[:3]:
+            print(f"[DEBUG]   - ID={inf.id}, site='{inf.siteInstalacao}', data={inf.dataEvento}")
+
+        # Agora buscar com filtro de embarcação
         barco_busca = ps.BarcoPS.replace(' - ', ' ')
+        print(f"[DEBUG] Buscando por: '{barco_busca}'")
 
-        print(f"[DEBUG] String de busca: '{barco_busca}'")
-
-        # Buscar informes
         informes = InformeAnomalia.objects.filter(
             siteInstalacao__icontains=barco_busca,
             dataEvento__gte=ps.dataInicio,
             dataEvento__lte=ps.dataFim
         ).order_by('-dataEvento', '-horarioEvento')
 
-        print(f"[DEBUG] Encontrados {informes.count()} informes")
-        
+        print(f"[DEBUG] Informes encontrados COM filtro embarcação: {informes.count()}")
+
         # Para cada informe, criar ou atualizar anomSMS
         for informe in informes:
-            anomSMS.objects.update_or_create(
+            obj, created = anomSMS.objects.update_or_create(
                 idxAnomSMS=ps,
-                linkAnomSMS=informe.id,  
+                linkAnomSMS=informe.id,
                 defaults={
                     'dataAnomSMS': informe.dataEvento,
                     'horaAnomSMS': informe.horarioEvento,
                     'relacAnomSMS': informe.relacaoEvento
                 }
             )
-        
+            print(f"[DEBUG] anomSMS ID={obj.id}, created={created}")
+
         # Buscar todos os anomSMS desta PS
         anomalias = anomSMS.objects.filter(idxAnomSMS=ps).order_by('-dataAnomSMS', '-horaAnomSMS')
-        
+
+        print(f"[DEBUG] Total anomSMS retornando: {anomalias.count()}")
+
         data = []
         for anom in anomalias:
             data.append({
@@ -2418,9 +2433,9 @@ def anom_sms_list(request, ps_id):
                 'relacAnomSMS': anom.relacAnomSMS,
                 'linkAnomSMS': anom.linkAnomSMS
             })
-        
+
         print(f"[API] Retornando {len(data)} anomalias SMS")
-        
+
         return JsonResponse({
             'success': True,
             'data': data
@@ -2434,6 +2449,8 @@ def anom_sms_list(request, ps_id):
         }, status=404)
     except Exception as e:
         print(f"[API ERROR] GET /api/ps/{ps_id}/anom-sms/ - {str(e)}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({
             'success': False,
             'error': str(e)

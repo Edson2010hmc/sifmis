@@ -168,7 +168,7 @@ async function criarNovaPS(barcoId, barcoData) {
       MobDesmModule.limpar();
     }
 
-
+   
     // 5. Fechar modal e guardar ID
     psAtualId = createResult.data.id;
     document.getElementById('modalNovaPS').classList.add('hidden');
@@ -259,8 +259,12 @@ if (typeof MobDesmModule !== 'undefined' && MobDesmModule.carregarDados) {
   MobDesmModule.carregarDados(psData.id);
 }
 
+console.log('[DEBUG] Verificando AnomSMSModule:', typeof AnomSMSModule);
 if (typeof AnomSMSModule !== 'undefined' && AnomSMSModule.carregarDados) {
+  console.log('[DEBUG] Chamando AnomSMSModule.carregarDados com psId:', psData.id);
   AnomSMSModule.carregarDados(psData.id);
+} else {
+  console.log('[DEBUG] AnomSMSModule não disponível');
 }
 
 
@@ -362,6 +366,12 @@ async function abrirPS(psId) {
     if (typeof EmbEquipModule !== 'undefined' && EmbEquipModule.carregarDados) {
       EmbEquipModule.carregarDados(psId);
     }
+
+    
+    if (typeof AnomSMSModule !== 'undefined' && AnomSMSModule.carregarDados) {
+          AnomSMSModule.carregarDados(psId.id);
+    } 
+
 
     // Ir para tela da PS
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
