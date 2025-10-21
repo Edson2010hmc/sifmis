@@ -32,7 +32,7 @@ const UepsModule = (() => {
     carregarLista();
     configurarEventos();
     aplicarEstadoInicial();
-    recarregarChoicesPorCheckbox;
+    recarregarChoicesPorCheckbox();
   }
 
   // ===== ESTADO INICIAL =====
@@ -54,12 +54,15 @@ const UepsModule = (() => {
     elementos.btnAdicionar.addEventListener('click', adicionarContato);
     
     // Quando mudar checkbox, recarregar choices e habilitar botão Salvar
+// Quando mudar checkbox, recarregar choices SEMPRE
     elementos.checkboxAfretada.addEventListener('change', function() {
+      recarregarChoicesPorCheckbox();
+      
+      // Validar apenas se não estiver em edição
       if (!modoEdicao) {
-        recarregarChoicesPorCheckbox();
         validarCamposParaSalvar();
       }
-});
+    });
   }
 
   // ===== VALIDAR CAMPOS PARA HABILITAR SALVAR =====
@@ -444,16 +447,6 @@ const UepsModule = (() => {
   limparCamposSubtabela();
   recarregarChoicesPorCheckbox();
   habilitarCampos(true);
-  }
-
-  // ===== LIMPAR FORMULÁRIO =====
-  function limparFormulario() {
-    elementos.checkboxAfretada.checked = false;
-    itensSubtabela = [];
-    renderizarTabela();
-    limparCamposSubtabela();
-    carregarChoicesPadrao();
-    habilitarCampos(true);
   }
 
   // ===== HABILITAR/DESABILITAR CAMPOS =====
