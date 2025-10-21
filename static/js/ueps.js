@@ -77,6 +77,7 @@ const UepsModule = (() => {
 
   // ===== PREENCHER SELECT TIPO CONTATO =====
   function preencherSelectTipoContato(choices) {
+    
     elementos.selectTipoContato.innerHTML = '<option value="">— selecione —</option>';
     
     choices.forEach(choice => {
@@ -85,6 +86,7 @@ const UepsModule = (() => {
       option.textContent = choice.label;
       elementos.selectTipoContato.appendChild(option);
     });
+    
   }
 
   // ===== CARREGAR LISTA DE UEPs =====
@@ -438,6 +440,60 @@ const UepsModule = (() => {
     elementos.editActions.style.display = 'none';
   }
 
+  // ===== EXCLUIR UEP =====
+async function excluirUep() {
+  const selectedOption = elementos.lista.selectedOptions[0];
+  
+  if (!selectedOption || !selectedOption.value) {
+    alert('Selecione uma UEP para excluir');
+    return;
+  }
+
+  elementos.btnSalvar.disabled = true;
+  elementos.btnEditar.disabled = true;
+
+  const uep = JSON.parse(selectedOption.dataset.uep);
+  
+  if (!confirm(`Confirma exclusão da UEP "${uep.unidade}"?`)) {
+    limparFormulario();
+    elementos.lista.value = '';
+    elementos.btnSalvar.disabled = false;
+    elementos.btnEditar.disabled = true;
+    elementos.btnExcluir.disabled = true;
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}${selectedOption.value}/`, {
+      method: 'DELETE'
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+
+    alert('UEP excluída com sucesso!');
+    
+    limparFormulario();
+    carregarLista();
+    
+    elementos.btnSalvar.disabled = false;
+    elementos.btnEditar.disabled = true;
+    elementos.btnExcluir.disabled = true;
+
+  } catch (error) {
+    alert('Erro ao excluir UEP: ' + error.message);
+    
+    limparFormulario();
+    elementos.lista.value = '';
+    elementos.btnSalvar.disabled = false;
+    elementos.btnEditar.disabled = true;
+    elementos.btnExcluir.disabled = true;
+  }
+}
+
   // ===== LIMPAR FORMULÁRIO =====
   function limparFormulario() {
   elementos.checkboxAfretada.checked = false;
@@ -464,7 +520,8 @@ const UepsModule = (() => {
   // ===== RECARREGAR CHOICES BASEADO NO CHECKBOX =====
   function recarregarChoicesPorCheckbox() {
     const isAfretada = elementos.checkboxAfretada.checked;
-  
+
+      
     if (isAfretada) {
       // Choices para Afretada
       const choicesAfret = [
@@ -473,6 +530,7 @@ const UepsModule = (() => {
         { value: 'TEC.SEGURANÇA', label: 'TEC.SEGURANÇA' },
         { value: 'COMANDANTE', label: 'COMANDANTE' }
       ];
+      console.log('[UEPS] Carregando choices AFRETADA:', choicesAfret);
       preencherSelectTipoContato(choicesAfret);
     } else {
       // Choices para Não Afretada (BR)
@@ -483,6 +541,7 @@ const UepsModule = (() => {
         { value: 'COMAN', label: 'COMAN' },
         { value: 'TEC.SEGURANÇA', label: 'TEC.SEGURANÇA' }
       ];
+      
       preencherSelectTipoContato(choicesBR);
     }
   }
