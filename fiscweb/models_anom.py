@@ -1,5 +1,4 @@
-# fiscweb/models_anom.py
-# Modelos para Informe de Anomalia
+
 
 from django.core.validators import MinLengthValidator
 import os
@@ -9,6 +8,8 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+
+
 
 class InformeAnomalia(models.Model):
     """Modelo para Informe de Anomalia"""
@@ -116,3 +117,5 @@ class SubTabPessoasAnomalia(models.Model):
     
     def __str__(self):
         return f"{self.nome} - {self.funcao}"
+    
+
