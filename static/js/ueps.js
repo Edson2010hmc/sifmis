@@ -6,6 +6,7 @@ const UepsModule = (() => {
   let uepEditandoId = null;
   let itensSubtabela = [];
   let itensParaDeletar = [];
+  let checkboxEstadoAnterior = false;
 
   // Referências aos elementos DOM
   const elementos = {
@@ -53,12 +54,39 @@ const UepsModule = (() => {
     elementos.lista.addEventListener('change', selecionarUep);
     elementos.btnAdicionar.addEventListener('click', adicionarContato);
     
-    // Quando mudar checkbox, recarregar choices e habilitar botão Salvar
-// Quando mudar checkbox, recarregar choices SEMPRE
+    //Ao mudar checkbox com dados cadastrados na subtabela
     elementos.checkboxAfretada.addEventListener('change', function() {
+      const compativel = verificarCompatibilidade();
+      
+      if (!compativel) {
+        const confirma = confirm(
+          'Contatos cadastrados incompatíveis com a alteração do tipo de UEP.\n\n' +
+          'Confirma remoção dos contatos para efetivar a alteração?'
+         
+        );
+        
+        if (confirma) {
+          // Marcar contatos com ID para deletar
+          itensSubtabela.forEach(item => {
+            if (item.id) {
+              itensParaDeletar.push(item.id);
+            }
+          });
+          // Limpar subtabela
+          itensSubtabela = [];
+          renderizarTabela();
+        } else {
+          // Reverter checkbox
+          elementos.checkboxAfretada.checked = checkboxEstadoAnterior;
+          return;
+        }
+      }
+      
+      // Atualizar estado anterior
+      checkboxEstadoAnterior = elementos.checkboxAfretada.checked;
+      
       recarregarChoicesPorCheckbox();
       
-      // Validar apenas se não estiver em edição
       if (!modoEdicao) {
         validarCamposParaSalvar();
       }
@@ -73,6 +101,19 @@ const UepsModule = (() => {
     const podeHabilitar = itensSubtabela.length > 0;
     elementos.btnSalvar.disabled = !podeHabilitar;
   }
+
+// ===== VERIFICAR COMPATIBILIDADE DOS CONTATOS =====
+function verificarCompatibilidade() {
+  if (itensSubtabela.length === 0) return true;
+  
+  const isAfretada = elementos.checkboxAfretada.checked;
+  const choicesValidos = isAfretada 
+    ? ['FISCAL', 'ENGENHEIRO OU OIM', 'TEC.SEGURANÇA', 'COMANDANTE']
+    : ['GEPLAT', 'COPROD', 'COEMB', 'COMAN', 'TEC.SEGURANÇA'];
+  
+ 
+  return itensSubtabela.every(item => choicesValidos.includes(item.tipoContato));
+}
 
 
   // ===== PREENCHER SELECT TIPO CONTATO =====
@@ -277,6 +318,7 @@ const UepsModule = (() => {
     await preencherFormulario(uep);
     
     habilitarCampos(false);
+    renderizarTabela();
     elementos.btnSalvar.disabled = true;
     elementos.btnEditar.disabled = false;
     elementos.btnExcluir.disabled = false;
@@ -285,6 +327,7 @@ const UepsModule = (() => {
  // ===== PREENCHER FORMULÁRIO ====================
   async function preencherFormulario(uep) {
   elementos.checkboxAfretada.checked = uep.afretUep;
+  checkboxEstadoAnterior = uep.afretUep;
   elementos.inputUnidade.value = uep.unidade || '';
   
   // Choices Dinamicos
@@ -314,27 +357,29 @@ const UepsModule = (() => {
     }
   }
 
-  // ===== ATIVAR MODO EDIÇÃO =====
-  function ativarModoEdicao() {
-    const selectedOption = elementos.lista.selectedOptions[0];
-    
-    if (!selectedOption || !selectedOption.value) {
-      alert('Selecione uma UEP para editar');
-      return;
-    }
-
-    modoEdicao = true;
-    uepEditandoId = selectedOption.value;
-    
-    habilitarCampos(true);
-    elementos.btnSalvar.style.display = 'none';
-    elementos.btnSalvar.disabled = true;
-    elementos.btnEditar.disabled = true;
-    elementos.btnExcluir.style.display = 'none';
-    elementos.btnExcluir.disabled = true;
-    elementos.lista.disabled = true;
-    elementos.editActions.style.display = 'flex';
+// ===== ATIVAR MODO EDIÇÃO =====
+function ativarModoEdicao() {
+  const selectedOption = elementos.lista.selectedOptions[0];
+  
+  if (!selectedOption || !selectedOption.value) {
+    alert('Selecione uma UEP para editar');
+    return;
   }
+
+  modoEdicao = true;
+  uepEditandoId = selectedOption.value;
+  
+  habilitarCampos(true);
+  renderizarTabela(); 
+  
+  elementos.btnSalvar.style.display = 'none';
+  elementos.btnSalvar.disabled = true;
+  elementos.btnEditar.disabled = true;
+  elementos.btnExcluir.style.display = 'none';
+  elementos.btnExcluir.disabled = true;
+  elementos.lista.disabled = true;
+  elementos.editActions.style.display = 'flex';
+}
 
  // ===== CONFIRMAR EDIÇÃO =====
   async function confirmarEdicao() {
@@ -498,13 +543,14 @@ async function excluirUep() {
 
   // ===== LIMPAR FORMULÁRIO =====
   function limparFormulario() {
-  elementos.checkboxAfretada.checked = false;
-  elementos.inputUnidade.value = '';
-  itensSubtabela = [];
-  renderizarTabela();
-  limparCamposSubtabela();
-  recarregarChoicesPorCheckbox();
-  habilitarCampos(true);
+    elementos.checkboxAfretada.checked = false;
+    checkboxEstadoAnterior = false;
+    elementos.inputUnidade.value = '';
+    itensSubtabela = [];
+    renderizarTabela();
+    limparCamposSubtabela();
+    recarregarChoicesPorCheckbox();
+    habilitarCampos(true);
   }
 
   // ===== HABILITAR/DESABILITAR CAMPOS =====
@@ -532,7 +578,7 @@ async function excluirUep() {
         { value: 'TEC.SEGURANÇA', label: 'TEC.SEGURANÇA' },
         { value: 'COMANDANTE', label: 'COMANDANTE' }
       ];
-      console.log('[UEPS] Carregando choices AFRETADA:', choicesAfret);
+      
       preencherSelectTipoContato(choicesAfret);
     } else {
       // Choices para Não Afretada (BR)

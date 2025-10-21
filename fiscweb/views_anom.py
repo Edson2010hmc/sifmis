@@ -12,6 +12,7 @@ import smtplib
 
 from .models_anom import InformeAnomalia, SubTabPessoasAnomalia
 from .models_cad import BarcosCad
+from .views import validar_usuario
 
 
 #========================================== LISTAR INFORMES DE ANOMALIA ==========================================
@@ -735,7 +736,7 @@ def enviar_informe(request, informe_id):
 
         # 4) Montar assunto
         tipo_legivel = informe.get_tipo_display() if hasattr(informe, 'get_tipo_display') else (informe.tipo or '')
-        assunto = f"#### IMPORTANTE #### - INFORME DE ANOMALIA {tipo_legivel} {barco.nomeBarco}"
+        assunto = f"#### IMPORTANTE #### - INFORME DE ANOMALIA - {barco.tipoBarco} {barco.nomeBarco}"
 
         # 5) Gerar HTML usando função auxiliar (SEM dados de envio, pois ainda não foi enviado)
         corpo_html = _gerar_html_informe(informe, incluir_dados_envio=False)
@@ -753,7 +754,7 @@ def enviar_informe(request, informe_id):
     <!-- Cabeçalho -->
     <div style="background-color:#0b7a66; color:white; padding:20px; text-align:center; border-radius:8px 8px 0 0;">
         <h1 style="margin:0; font-size:24px;">INFORME DE ANOMALIA</h1>
-        <p style="margin:5px 0 0 0; font-size:16px; font-weight:bold;">{tipo_legivel}</p>
+        <p style="margin:5px 0 0 0; font-size:16px; font-weight:bold;">{barco.tipoBarco} {barco.nomeBarco}</p>
     </div>
 
     <!-- Corpo -->
