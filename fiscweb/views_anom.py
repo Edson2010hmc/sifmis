@@ -131,6 +131,7 @@ def informe_anomalia_detail(request, informe_id):
             data = {
                 'id': informe.id,
                 'tipo': informe.tipo,
+                'status': informe.status,
                 'siteInstalacao': informe.siteInstalacao,
                 'empresa': informe.empresa,
                 'subcontratada': informe.subcontratada or '',
@@ -176,6 +177,8 @@ def informe_anomalia_detail(request, informe_id):
             # Atualizar campos
             if 'tipo' in data:
                 informe.tipo = data['tipo']
+            if 'status' in data:
+                informe.status = data['status']
             if 'siteInstalacao' in data:
                 informe.siteInstalacao = data['siteInstalacao']
             if 'empresa' in data:
@@ -805,10 +808,8 @@ def enviar_informe(request, informe_id):
         import traceback
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-    """
-    Retorna o HTML formatado do informe (mesmo formato do e-mail)
-    para exibição no modal do frontend
-    """
+    """Retorna o HTML formatado do informe (mesmo formato do e-mail)
+    para exibição no modal do frontend"""
     try:
         # 1) Carregar Informe
         try:
