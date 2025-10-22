@@ -3,11 +3,13 @@ from . import views
 from . import views_cad
 from . import views_ps
 from . import views_anom
+from . import views_invmater
+
 
 
 
 urlpatterns = [
-    #======================================PAGINAS HTML
+    #======================================PAGINAS HTML===================================
     path('', views.index_main, name='index_main'),
     path('passagens/', views.passagens, name='passagens'),
     path('anomalias/', views.anomalias, name='anomalias'),
@@ -36,13 +38,15 @@ urlpatterns = [
     path('api/modais/', views_cad.modais_list, name='modais_list'),
 
     # API Contatos UEPs
-
     path('api/ueps/', views_cad.ueps_list, name='ueps_list'),
     path('api/ueps/<int:uep_id>/', views_cad.ueps_detail, name='ueps_detail'),
     path('api/ueps/<int:uep_id>/contatos/', views_cad.uep_contatos_list, name='uep_contatos_list'),
     path('api/uep-contatos/<int:contato_id>/', views_cad.uep_contatos_detail, name='uep_contatos_detail'),
     path('api/ueps/<int:uep_id>/choices/', views_cad.uep_choices, name='uep_choices'),
 
+    # API Materiais Operação
+    path('api/materiais-operacao/', views_cad.materiais_operacao_list, name='materiais_operacao_list'),
+    path('api/materiais-operacao/<int:material_id>/', views_cad.materiais_operacao_detail, name='materiais_operacao_detail'),
 
     #===========================================MODULO PASSAGEM DE SERVIÇO=================================
     # API Passagem de Serviço
@@ -68,41 +72,57 @@ urlpatterns = [
     path('api/ps/<int:ps_id>/ultimo-abastecimento/', views_ps.buscar_ultimo_abastecimento, name='buscar_ultimo_abastecimento'),
   
     # API Inspeção Normativa (Principal e subtabelas)
-path('api/ps/<int:ps_id>/insp-norm/', views_ps.porto_insp_norm_list, name='porto_insp_norm_list'),
+    path('api/ps/<int:ps_id>/insp-norm/', views_ps.porto_insp_norm_list, name='porto_insp_norm_list'),
     path('api/insp-norm/<int:insp_norm_id>/', views_ps.porto_insp_norm_detail, name='porto_insp_norm_detail'),
     path('api/insp-norm/<int:insp_norm_id>/subtab/', views_ps.subtab_insp_norm_list, name='subtab_insp_norm_list'),
     path('api/insp-norm-item/<int:item_id>/', views_ps.subtab_insp_norm_detail, name='subtab_insp_norm_detail'),
 
-# API Inspeção Petrobras (Principal e subtabelas)
-path('api/ps/<int:ps_id>/insp-petr/', views_ps.porto_insp_petr_list, name='porto_insp_petr_list'),
-path('api/insp-petr/<int:insp_petr_id>/', views_ps.porto_insp_petr_detail, name='porto_insp_petr_detail'),
-path('api/insp-petr/<int:insp_petr_id>/subtab/', views_ps.subtab_insp_petr_list, name='subtab_insp_petr_list'),
-path('api/insp-petr-item/<int:item_id>/', views_ps.subtab_insp_petr_detail, name='subtab_insp_petr_detail'),
+    # API Inspeção Petrobras (Principal e subtabelas)
+    path('api/ps/<int:ps_id>/insp-petr/', views_ps.porto_insp_petr_list, name='porto_insp_petr_list'),
+    path('api/insp-petr/<int:insp_petr_id>/', views_ps.porto_insp_petr_detail, name='porto_insp_petr_detail'),
+    path('api/insp-petr/<int:insp_petr_id>/subtab/', views_ps.subtab_insp_petr_list, name='subtab_insp_petr_list'),
+    path('api/insp-petr-item/<int:item_id>/', views_ps.subtab_insp_petr_detail, name='subtab_insp_petr_detail'),
 
-# API Embarque de Equipes (Principal e subtabelas)
-path('api/ps/<int:ps_id>/emb-equip/', views_ps.porto_emb_equip_list, name='porto_emb_equip_list'),
-path('api/emb-equip/<int:emb_equip_id>/', views_ps.porto_emb_equip_detail, name='porto_emb_equip_detail'),
-path('api/emb-equip/<int:emb_equip_id>/subtab/', views_ps.subtab_emb_equip_list, name='subtab_emb_equip_list'),
-path('api/emb-equip-item/<int:item_id>/', views_ps.subtab_emb_equip_detail, name='subtab_emb_equip_detail'),
+    # API Embarque de Equipes (Principal e subtabelas)
+    path('api/ps/<int:ps_id>/emb-equip/', views_ps.porto_emb_equip_list, name='porto_emb_equip_list'),
+    path('api/emb-equip/<int:emb_equip_id>/', views_ps.porto_emb_equip_detail, name='porto_emb_equip_detail'),
+    path('api/emb-equip/<int:emb_equip_id>/subtab/', views_ps.subtab_emb_equip_list, name='subtab_emb_equip_list'),
+    path('api/emb-equip-item/<int:item_id>/', views_ps.subtab_emb_equip_detail, name='subtab_emb_equip_detail'),
 
-# API Mobilização/Desmobilização (Principal e subtabelas)
-path('api/ps/<int:ps_id>/mob-desm/', views_ps.porto_mob_desm_list, name='porto_mob_desm_list'),
-path('api/mob-desm/<int:mob_desm_id>/', views_ps.porto_mob_desm_detail, name='porto_mob_desm_detail'),
-path('api/mob-desm/<int:mob_desm_id>/subtab/', views_ps.subtab_mob_desm_list, name='subtab_mob_desm_list'),
-path('api/mob-desm-item/<int:item_id>/', views_ps.subtab_mob_desm_detail, name='subtab_mob_desm_detail'),
+    # API Mobilização/Desmobilização (Principal e subtabelas)
+    path('api/ps/<int:ps_id>/mob-desm/', views_ps.porto_mob_desm_list, name='porto_mob_desm_list'),
+    path('api/mob-desm/<int:mob_desm_id>/', views_ps.porto_mob_desm_detail, name='porto_mob_desm_detail'),
+    path('api/mob-desm/<int:mob_desm_id>/subtab/', views_ps.subtab_mob_desm_list, name='subtab_mob_desm_list'),
+    path('api/mob-desm-item/<int:item_id>/', views_ps.subtab_mob_desm_detail, name='subtab_mob_desm_detail'),
 
-# API Finalizar Passagem de Serviço
-path('api/passagens/<int:ps_id>/finalizar/', views_ps.finalizar_passagem, name='finalizar_passagem'),   
+    # API Finalizar Passagem de Serviço
+    path('api/passagens/<int:ps_id>/finalizar/', views_ps.finalizar_passagem, name='finalizar_passagem'),   
 
-# API Gerar PDF da Passagem de Serviço
-path('api/passagens/<int:ps_id>/gerar-pdf/', views_ps.gerar_pdf_passagem, name='gerar_pdf_passagem'),
+    # API Gerar PDF da Passagem de Serviço
+    path('api/passagens/<int:ps_id>/gerar-pdf/', views_ps.gerar_pdf_passagem, name='gerar_pdf_passagem'),
 
-#API Informes de anomalias da Quinzena
-path('api/ps/<int:ps_id>/anom-sms/', views_ps.anom_sms_list, name='anom_sms_list'),
-
-
+    #API Informes de anomalias da Quinzena
+    path('api/ps/<int:ps_id>/anom-sms/', views_ps.anom_sms_list, name='anom_sms_list'),
 
 
+    #=================================MODULO INFORME DE ANOMALIA==============================
+    path('api/informes/', views_anom.informe_anomalia_list, name='informe_anomalia_list'),
+    path('api/informes/<int:informe_id>/', views_anom.informe_anomalia_detail, name='informe_anomalia_detail'),
+    path('api/informes/<int:informe_id>/pessoas/', views_anom.subtab_pessoas_list, name='subtab_pessoas_list'),
+    path('api/pessoas/<int:pessoa_id>/', views_anom.subtab_pessoas_detail, name='subtab_pessoas_detail'),
+    path('api/embarcacoes/<int:embarcacao_id>/empresas/', views_anom.buscar_empresas_embarcacao, name='buscar_empresas_embarcacao'),
+    path('api/informes/<int:informe_id>/enviar/', views_anom.enviar_informe, name='enviar_informe'),
+    path('api/informes/<int:informe_id>/html/', views_anom.obter_html_informe, name='obter_html_informe'),
+
+
+    #===========================================MODULO INVENTÁRIO DE MATERIAIS========================================
+    # API Contentores/Cestas
+    path('api/contentores/', views_invmater.contentores_list, name='contentores_list'),
+    path('api/contentores/<int:contentor_id>/', views_invmater.contentores_detail, name='contentores_detail'),
+
+    # API Materiais a Bordo
+    path('api/materiais-bordo/', views_invmater.materiais_bordo_list, name='materiais_bordo_list'),
+    path('api/materiais-bordo/<int:material_id>/', views_invmater.materiais_bordo_detail, name='materiais_bordo_detail'),
 
 
 
@@ -112,12 +132,7 @@ path('api/ps/<int:ps_id>/anom-sms/', views_ps.anom_sms_list, name='anom_sms_list
 
 
 
-#=================================MODULO INFORME DE ANOMALIA==============================
-path('api/informes/', views_anom.informe_anomalia_list, name='informe_anomalia_list'),
-path('api/informes/<int:informe_id>/', views_anom.informe_anomalia_detail, name='informe_anomalia_detail'),
-path('api/informes/<int:informe_id>/pessoas/', views_anom.subtab_pessoas_list, name='subtab_pessoas_list'),
-path('api/pessoas/<int:pessoa_id>/', views_anom.subtab_pessoas_detail, name='subtab_pessoas_detail'),
-path('api/embarcacoes/<int:embarcacao_id>/empresas/', views_anom.buscar_empresas_embarcacao, name='buscar_empresas_embarcacao'),
-path('api/informes/<int:informe_id>/enviar/', views_anom.enviar_informe, name='enviar_informe'),
-path('api/informes/<int:informe_id>/html/', views_anom.obter_html_informe, name='obter_html_informe'),
+
+
+
 ]

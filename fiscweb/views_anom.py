@@ -27,12 +27,13 @@ def informe_anomalia_list(request):
     if request.method == 'GET':
         try:
             informes = InformeAnomalia.objects.all()
-            
+            print(f"[DEBUG] Total de informes no banco: {informes.count()}")
             data = []
             for informe in informes:
                 data.append({
                     'id': informe.id,
                     'tipo': informe.tipo,
+                    'status': informe.status,
                     'siteInstalacao': informe.siteInstalacao,
                     'empresa': informe.empresa,
                     'dataEvento': str(informe.dataEvento),
@@ -807,9 +808,7 @@ def enviar_informe(request, informe_id):
         print(f"[EMAIL][ERRO] Erro ao processar envio: {str(e)}")
         import traceback
         traceback.print_exc()
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
-    """Retorna o HTML formatado do informe (mesmo formato do e-mail)
-    para exibição no modal do frontend"""
+
     try:
         # 1) Carregar Informe
         try:

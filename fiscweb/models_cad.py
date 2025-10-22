@@ -164,3 +164,22 @@ class subTabcontatosUeps(models.Model):
         verbose_name = 'Sub Tabela Contato UEP'
         verbose_name_plural = "Sub Tabela Contatos UEPs"
         ordering = ['idxcontatoUep', 'tipoContato']
+
+#==================================MODELO MATERIAIS OPERAÇÃO CADASTRO================================================#
+class materiaisOperacao(models.Model):
+    """Cadastro de tipos de materiais"""
+    
+    # Campos
+    descMat = models.CharField(max_length=50, verbose_name='Descrição do Material', unique=True)
+    obsDescMat = models.TextField(max_length=400, verbose_name='Observações', blank=True, null=True)
+    
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Material Operação'
+        verbose_name_plural = 'Materiais Operação'
+        ordering = ['descMat']
+    
+    def __str__(self):
+        return self.descMat

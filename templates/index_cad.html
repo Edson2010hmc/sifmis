@@ -213,7 +213,7 @@
       </div>
       </div>
 
-      <!-- ========== ACCORDION ITEM: UEPs ========== -->
+      <!--  ACCORDION ITEM: Contatos de UEPs  -->
       <div class="accordion-item">
         <div class="accordion-header" data-target="ueps">
           <h3>🏭 Contatos das UEPs</h3>
@@ -296,7 +296,7 @@
         </div>
       </div>
 
-      <!-- ========== ACCORDION ITEM: PASSAGENS DE SERVIÇO (ADM) ========== -->
+      <!--  ACCORDION ITEM: PASSAGENS DE SERVIÇO   -->
       <div class="accordion-item">
         <div class="accordion-header" data-target="passagens">
           <h3>📄 Passagens de Serviço</h3>
@@ -343,7 +343,42 @@
           </div>
         </div>
       </div>
+      
+      <!--  ACCORDION ITEM: MATERIAIS DE OPERAÇÃO  -->
+      <div class="accordion-item">
+        <div class="accordion-header" data-target="materiais">
+          <h3>📦 Tipos de Materiais de Operações</h3>
+          <span class="toggle">▼</span>
+        </div>
+        <div class="accordion-content" id="acc-materiais">
+          <div class="card fadein">
+            <div class="col">
+              <label>Descrição do Material</label>
+              <input id="cad_mat_desc" type="text" maxlength="50" style="width:100%; max-width:600px">
+            </div>
+            <div class="col">
+              <label>Observações</label>
+              <textarea id="cad_mat_obs" maxlength="400" rows="3" style="width:100%; resize:vertical;"></textarea>
+            </div>
 
+            <div class="row" style="align-items:flex-end; gap:8px; margin-top:8px">
+              <div class="col" style="min-width:300px">
+                <label>Materiais cadastrados</label>
+                <select id="cad_mat_list"><option value="">— selecione —</option></select>
+              </div>
+              <div class="col" style="flex:0 0 auto; display:flex; gap:8px">
+                <button id="btnSaveMat" class="btn ghost">Salvar</button>
+                <button id="btnMatEditar" class="btn ghost" disabled>Editar</button>
+                <button id="btnMatExcluir" class="btn ghost" disabled>Excluir</button>
+                <div class="col" id="matEditActions" style="flex:0 0 auto; display:none; gap:8px">
+                  <button id="btnMatConfirma" class="btn">Confirmar</button>
+                  <button id="btnMatCancela" class="btn ghost">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
 
     </div>
@@ -356,6 +391,7 @@
 <script src="/static/js/ueps.js"></script>
 <script src="/static/js/cad-passagens.js"></script>
 <script src="/static/js/cad-informes.js"></script>
+<script src="/static/js/materiais_op.js"></script>
 <script src="/static/js/cadastros.js"></script>
 
 </body>

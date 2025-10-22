@@ -1,21 +1,21 @@
 from django.contrib import admin
 
-from .models_cad import FiscaisCad,BarcosCad,ModalBarco,contatoUep,subTabcontatosUeps # Seção cadastro
+from .models_cad import FiscaisCad,BarcosCad,ModalBarco,contatoUep,subTabcontatosUeps,materiaisOperacao # Seção cadastro
 
 from .models_ps import PassServ, PortoTrocaTurma,PortoManutPrev,PortoAbast,PortoInspNorm,subTabPortoInspNorm,PortoInspPetr,subTabPortoInspPetr,PortoEmbEquip,subTabPortoEmbEquip,PortoEmbMat,subTabPortoEmbMat,PortoDesMat,PortoMobD # Seção 1
 from .models_ps import anomSMS,desvSMS 
 from .models_ps import inoPendContr 
 from .models_ps import iapo, smsLvMang,smsLvSeg
 
-from .models_anom import InformeAnomalia, SubTabPessoasAnomalia
-
-
+from .models_anom import InformeAnomalia, SubTabPessoasAnomalia # MODULO INFORME DE ANOMALIA
+from .models_invmater import contentoresCestasMateriais,matBordo # MODULO INVENTARIO DE MATERIAIS
 #======================= MODULO CADASTROS================================
 admin.site.register(FiscaisCad)
 admin.site.register(BarcosCad)
 admin.site.register(ModalBarco)
 admin.site.register(contatoUep)
 admin.site.register(subTabcontatosUeps)
+admin.site.register(materiaisOperacao)
   
 #============================MODULO PASSAGEM DE SERVIÇO=================
 admin.site.register(PassServ)
@@ -45,3 +45,7 @@ admin.site.register(smsLvSeg)
 #=============================MODULO INFORME DE ANOMALIA===========================
 admin.site.register(InformeAnomalia)
 admin.site.register(SubTabPessoasAnomalia)
+
+#==============================MODULO INVENTARIO DE MATERIAIS=======================
+admin.site.register(contentoresCestasMateriais)
+admin.site.register(matBordo)   

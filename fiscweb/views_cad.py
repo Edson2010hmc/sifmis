@@ -15,7 +15,7 @@ import json
 from django.http.multipartparser import MultiPartParser
 from django.core.files.uploadhandler import MemoryFileUploadHandler
 
-from .models_cad import FiscaisCad, BarcosCad, ModalBarco, contatoUep, subTabcontatosUeps
+from .models_cad import FiscaisCad, BarcosCad, ModalBarco, contatoUep, subTabcontatosUeps,materiaisOperacao
 
 from .models_ps import PassServ
 from .models_ps import PortoTrocaTurma
@@ -946,3 +946,151 @@ def uep_choices(request, uep_id):
 
 
 
+#========================================== MATERIAIS OPERAÇÃO API REST==========================================
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def materiais_operacao_list(request):
+    """
+    GET: Lista todos os materiais de operação
+    POST: Cria novo material de operação
+    """
+    
+    if request.method == 'GET':
+        try:
+            materiais = materiaisOperacao.objects.all()
+            
+            data = []
+            for mat in materiais:
+                data.append({
+                    'id': mat.id,
+                    'descMat': mat.descMat,
+                    'obsDescMat': mat.obsDescMat or '',
+                    'criado_em': mat.criado_em.isoformat(),
+                    'atualizado_em': mat.atualizado_em.isoformat()
+                })
+            
+            print(f"[API] GET /api/materiais-operacao/ - {len(data)} materiais retornados")
+            
+            return JsonResponse({
+                'success': True,
+                'data': data
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] GET /api/materiais-operacao/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            print(f"[API] POST /api/materiais-operacao/ - Criando material")
+            
+            material = materiaisOperacao.objects.create(
+                descMat=data.get('descMat', ''),
+                obsDescMat=data.get('obsDescMat', '')
+            )
+            
+            print(f"[API] POST /api/materiais-operacao/ - Material {material.id} criado")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Material criado com sucesso',
+                'data': {
+                    'id': material.id,
+                    'descMat': material.descMat
+                }
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] POST /api/materiais-operacao/ - {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+
+@csrf_exempt
+@require_http_methods(["GET", "PUT", "DELETE"])
+def materiais_operacao_detail(request, material_id):
+    """
+    GET: Retorna dados do material
+    PUT: Atualiza material
+    DELETE: Remove material
+    """
+    
+    try:
+        material = materiaisOperacao.objects.get(id=material_id)
+    except materiaisOperacao.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Material não encontrado'
+        }, status=404)
+    
+    if request.method == 'GET':
+        try:
+            data = {
+                'id': material.id,
+                'descMat': material.descMat,
+                'obsDescMat': material.obsDescMat or '',
+                'criado_em': material.criado_em.isoformat(),
+                'atualizado_em': material.atualizado_em.isoformat()
+            }
+            
+            return JsonResponse({
+                'success': True,
+                'data': data
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    elif request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            
+            material.descMat = data.get('descMat', material.descMat)
+            material.obsDescMat = data.get('obsDescMat', material.obsDescMat)
+            material.save()
+            
+            print(f"[API] PUT /api/materiais-operacao/{material_id}/ - Material atualizado")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Material atualizado com sucesso',
+                'data': {
+                    'id': material.id
+                }
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] PUT /api/materiais-operacao/{material_id}/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    elif request.method == 'DELETE':
+        try:
+            material.delete()
+            
+            print(f"[API] DELETE /api/materiais-operacao/{material_id}/ - Material removido")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Material removido com sucesso'
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] DELETE /api/materiais-operacao/{material_id}/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
