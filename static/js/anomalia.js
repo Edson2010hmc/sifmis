@@ -657,7 +657,7 @@ async function salvar() {
 
     const dados = {
       tipo: elementos.tipo.value,
-      status: 'SALVO', // NOVO: Define status como SALVO
+      status: 'SALVO', 
       siteInstalacao: siteInstalacaoTexto,
       empresa: elementos.empresa.value,
       subcontratada: elementos.subcontratadaNA.checked ? null : elementos.subcontratada.value,
