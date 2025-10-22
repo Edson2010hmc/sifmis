@@ -1,0 +1,34 @@
+@echo off
+REM Script para executar Django + PyWebView
+REM Execução: run_desktop.bat
+
+echo === Iniciando Sistema  (Desktop) ===
+
+REM Verificar se estamos no diretório correto
+if not exist "manage.py" (
+    echo ERRO: manage.py não encontrado!
+    echo Execute este script dentro do diretório do projeto Django
+    pause
+    exit /b 1
+)
+
+REM Ativar ambiente virtual
+if exist "venv\Scripts\activate.bat" (
+    echo Ativando ambiente virtual...
+    call venv\Scripts\activate.bat
+) else (
+    echo AVISO: Ambiente virtual não encontrado
+)
+
+REM Verificar se PyWebView está instalado
+python -c "import webview" 2>nul
+if %errorlevel% neq 0 (
+    echo PyWebView não encontrado. Instalando...
+    pip install pywebview
+)
+
+REM Executar aplicação desktop
+echo Iniciando aplicação desktop...
+python run_server.py
+cls
+

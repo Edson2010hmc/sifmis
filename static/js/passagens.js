@@ -369,7 +369,7 @@ async function abrirPS(psId) {
 
     
     if (typeof AnomSMSModule !== 'undefined' && AnomSMSModule.carregarDados) {
-          AnomSMSModule.carregarDados(psId.id);
+          AnomSMSModule.carregarDados(psId);
     } 
 
 

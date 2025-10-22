@@ -5,11 +5,19 @@ const AnomSMSModule = (() => {
 
   // ===== CARREGAR DADOS =====
   async function carregarDados(psId) {
-    if (!psId) return;
+    console.log('[AnomSMS] carregarDados chamada com psId:', psId);
+    
+    if (!psId) {
+      console.log('[AnomSMS] psId inválido');
+      return;
+    }
 
     try {
+      console.log('[AnomSMS] Fazendo fetch para /api/ps/' + psId + '/anom-sms/');
       const response = await fetch(`/api/ps/${psId}/anom-sms/`);
       const result = await response.json();
+
+      console.log('[AnomSMS] Resultado:', result);
 
       if (!result.success) {
         throw new Error(result.error);
@@ -18,7 +26,8 @@ const AnomSMSModule = (() => {
       renderizarTabela(result.data || []);
 
     } catch (error) {
-      console.error('[AnomSMS] Erro ao carregar:', error);
+      console.log('[AnomSMS] ERRO:', error);
+      alert('Erro ao carregar anomalias SMS: ' + error.message);
     }
   }
 
