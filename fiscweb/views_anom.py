@@ -64,6 +64,7 @@ def informe_anomalia_list(request):
             # Criar informe
             informe = InformeAnomalia.objects.create(
                 tipo=data.get('tipo', ''),
+                status=data.get('status', 'RASCUNHO'),  
                 siteInstalacao=data.get('siteInstalacao', ''),
                 empresa=data.get('empresa', ''),
                 subcontratada=data.get('subcontratada', ''),
@@ -412,10 +413,7 @@ def buscar_empresas_embarcacao(request, embarcacao_id):
             'error': str(e)
         }, status=400)
 
-#========================================== ENVIAR INFORME ==========================================
-# ========================================
-# FUNÇÃO AUXILIAR - GERA HTML DO INFORME
-# ========================================
+#========================= FUNÇÃO AUXILIAR - GERA HTML DO INFORME===========================
 def _gerar_html_informe(informe, incluir_dados_envio=False):
     """
     Função auxiliar que gera o HTML formatado do informe.
@@ -651,9 +649,8 @@ def _gerar_html_informe(informe, incluir_dados_envio=False):
     
     return corpo_html
 
-# ========================================
-# ENDPOINT - OBTER HTML PARA MODAL
-# ========================================
+
+#========================= FUNÇÃO AUXILIAR - OBTER HTML PARA MODAL======================
 @csrf_exempt
 @require_http_methods(["GET"])
 def obter_html_informe(request, informe_id):
@@ -686,9 +683,7 @@ def obter_html_informe(request, informe_id):
         }, status=500)
 
 
-
 # ====================================ENVIAR INFORME ====================================
-
 @csrf_exempt
 def enviar_informe(request, informe_id):
     """
@@ -754,7 +749,7 @@ def enviar_informe(request, informe_id):
     <!-- Cabeçalho -->
     <div style="background-color:#0b7a66; color:white; padding:20px; text-align:center; border-radius:8px 8px 0 0;">
         <h1 style="margin:0; font-size:24px;">INFORME DE ANOMALIA</h1>
-        <p style="margin:5px 0 0 0; font-size:16px; font-weight:bold;">{barco.tipoBarco} {barco.nomeBarco}</p>
+        <p style="margin:5px 0 0 0; font-size:16px; font-weight:bold;">SUB/OPSUB/MIS</p>
     </div>
 
     <!-- Corpo -->
@@ -799,6 +794,7 @@ def enviar_informe(request, informe_id):
         informe.horaEnvioInforme = agora.time()
         destinatarios_total = [to_addr] + cc_list
         informe.destInforme = ";".join(destinatarios_total)
+        informe.status = 'ENVIADO'  # ADICIONAR ESTA LINHA
         informe.save(update_fields=['dataEnvioInforme', 'horaEnvioInforme', 'destInforme'])
 
         print(f"[EMAIL][OK] Informe {informe_id} enviado para {to_addr} CC={cc_list}")

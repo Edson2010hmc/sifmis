@@ -46,7 +46,13 @@ const AnomaliaModule = (() => {
     tblPessoas: document.getElementById('tblPessoas').querySelector('tbody'),
     // Botões
     btnSalvar: document.getElementById('btnSalvarAnomalia'),
-    btnLimpar: document.getElementById('btnLimparAnomalia')
+    btnLimpar: document.getElementById('btnLimparAnomalia'),
+    botoesEstadoInicial: document.getElementById('botoesEstadoInicial'),
+    botoesEstadoSalvo: document.getElementById('botoesEstadoSalvo'),
+    btnConcluir: document.getElementById('btnConcluirInforme'),
+    btnEditar: document.getElementById('btnEditarInforme'),
+    btnCancelar: document.getElementById('btnCancelarInforme')
+
   };
 
 // ==== Botão "Enviar Informe" ====
@@ -160,18 +166,188 @@ function executarLimpeza() {
   
 }
 
+// ===== ALTERNAR VISIBILIDADE DOS BOTÕES =====
+function alternarBotoes(estadoSalvo) {
+  if (estadoSalvo) {
+    // Ocultar botões iniciais (Salvar + Limpar)
+    elementos.botoesEstadoInicial.style.display = 'none';
+    
+    // Exibir botões do estado salvo (Concluir + Editar + Cancelar)
+    elementos.botoesEstadoSalvo.style.display = 'flex';
+  } else {
+    // Exibir botões iniciais (Salvar + Limpar)
+    elementos.botoesEstadoInicial.style.display = 'flex';
+    
+    // Ocultar botões do estado salvo
+    elementos.botoesEstadoSalvo.style.display = 'none';
+  }
+}
 
-  // ===== INICIALIZAR ==========================
- function init() {
+// ===== DESABILITAR/HABILITAR TODOS OS CAMPOS =====
+function desabilitarCampos(desabilitar) {
+  // Desabilitar todos os inputs
+  const inputs = document.querySelectorAll('#tab-novo-informe input');
+  inputs.forEach(input => {
+    input.disabled = desabilitar;
+  });
+  
+  // Desabilitar todos os selects
+  const selects = document.querySelectorAll('#tab-novo-informe select');
+  selects.forEach(select => {
+    select.disabled = desabilitar;
+  });
+  
+  // Desabilitar todos os textareas
+  const textareas = document.querySelectorAll('#tab-novo-informe textarea');
+  textareas.forEach(textarea => {
+    textarea.disabled = desabilitar;
+  });
+  
+  // Desabilitar/habilitar botão de adicionar pessoa
+  if (elementos.btnAddPessoa) {
+    elementos.btnAddPessoa.disabled = desabilitar;
+  }
+  
+  // Desabilitar/habilitar botões de remover da subtabela
+  const botoesRemover = document.querySelectorAll('#tblPessoas button');
+  botoesRemover.forEach(btn => {
+    btn.disabled = desabilitar;
+  });
+}
+
+// ===== VERIFICAR E CARREGAR INFORME SALVO =====
+async function verificarInformeSalvo() {
+  try {
+    // Buscar todos os informes
+    const response = await fetch('/api/informes/');
+    const result = await response.json();
+    
+    if (!result.success) {
+      return;
+    }
+    
+    // Procurar informe com status='SALVO' (mais recente)
+    const informesSalvos = result.data.filter(inf => inf.status === 'SALVO');
+    
+    if (informesSalvos.length === 0) {
+      return; // Nenhum informe salvo
+    }
+    
+    // Ordenar por data de atualização (mais recente primeiro)
+    informesSalvos.sort((a, b) => {
+      const dataA = new Date(a.atualizado_em || a.criado_em);
+      const dataB = new Date(b.atualizado_em || b.criado_em);
+      return dataB - dataA;
+    });
+    
+    const informe = informesSalvos[0]; // Pegar o mais recente
+    
+    // Carregar detalhes completos do informe
+    const responseDetail = await fetch(`/api/informes/${informe.id}/`);
+    const resultDetail = await responseDetail.json();
+    
+    if (!resultDetail.success) {
+      return;
+    }
+    
+    const informeCompleto = resultDetail.data;
+    
+    // Preencher formulário
+    await preencherFormularioComInforme(informeCompleto);
+    
+    // Aplicar estado congelado
+    desabilitarCampos(true);
+    alternarBotoes(true);
+    
+    
+    
+  } catch (error) {
+    // Pass
+  }
+}
+
+// ===== PREENCHER FORMULÁRIO COM INFORME =====
+async function preencherFormularioComInforme(informe) {
+  informeAtualId = informe.id;
+  
+  elementos.tipo.value = informe.tipo || '';
+  elementos.descricao.value = informe.descricao || '';
+  elementos.data.value = informe.dataEvento || '';
+  elementos.horario.value = informe.horarioEvento || '';
+  elementos.municipioUF.value = informe.municipioUF || '';
+  
+  if (informe.municipioUF === 'OUTRO') {
+    elementos.containerMunicipioOutro.style.display = 'block';
+    elementos.municipioOutro.value = informe.municipioOutro || '';
+  }
+  
+  elementos.relacaoEvento.value = informe.relacaoEvento || '';
+  elementos.acoesAdotadas.value = informe.acoesAdotadas || '';
+  elementos.os1.value = informe.ordemServico1 || '';
+  elementos.os2.value = informe.ordemServico2 || '';
+  elementos.operacaoParalisada.value = informe.operacaoParalisada || '';
+  elementos.infoComplementares.value = informe.informacoesComplementares || '';
+  
+  elementos.subcontratada.value = informe.subcontratada || '';
+  elementos.subcontratadaNA.checked = informe.subcontratadaNaoAplicavel || false;
+  if (elementos.subcontratadaNA.checked) {
+    elementos.subcontratada.disabled = true;
+  }
+  
+  // Campos de embarcação
+  if (informe.relacaoEvento === 'EMBARCACAO') {
+    elementos.containerCamposEmbarcacao.style.display = 'block';
+    elementos.sistemaDegradado.value = informe.sistemaDegradado || '';
+    elementos.embarcacaoDerivou.value = informe.embarcacaoDerivou || '';
+    elementos.embarcacaoPerdeuPosicao.value = informe.embarcacaoPerdeuPosicao || '';
+  }
+  
+  // Carregar embarcações primeiro
+  await carregarEmbarcacoes();
+  
+  // Selecionar embarcação pelo texto
+  const siteTexto = informe.siteInstalacao;
+  for (let i = 0; i < elementos.siteInstalacao.options.length; i++) {
+    if (elementos.siteInstalacao.options[i].text === siteTexto) {
+      elementos.siteInstalacao.selectedIndex = i;
+      break;
+    }
+  }
+  
+  // Carregar empresas
+  if (elementos.siteInstalacao.value) {
+    await carregarEmpresas(elementos.siteInstalacao.value);
+    
+    // Selecionar empresa
+    elementos.empresa.value = informe.empresa || '';
+  }
+  
+  // Carregar pessoas se houver
+  if (informe.relacaoEvento === 'PESSOAS') {
+    elementos.containerSubtabelaPessoas.style.display = 'block';
+    
+    const responsePessoas = await fetch(`/api/informes/${informe.id}/pessoas/`);
+    const resultPessoas = await responsePessoas.json();
+    
+    if (resultPessoas.success && resultPessoas.data) {
+      pessoasSubtabela = resultPessoas.data;
+      renderizarTabelaPessoas();
+    }
+  }
+}
+
+// ===== INICIALIZAR ==========================
+async function init() {
   configurarEventos();
   configurarNavegacaoTabs();
   configurarEventosConsulta();
   carregarEmbarcacoes();
   carregarEmbarcacoesFiltro();
   setDataHoraAtual();
+  await verificarInformeSalvo();
 }
 
-  // ===== CONFIGURAR EVENTOS =====
+// ===== CONFIGURAR EVENTOS =====
   function configurarEventos() {
     // Checkbox Não Aplicável
     elementos.subcontratadaNA.addEventListener('change', function() {
@@ -207,17 +383,16 @@ function executarLimpeza() {
       }
     });
 
-    // Adicionar pessoa
+    
     elementos.btnAddPessoa.addEventListener('click', adicionarPessoa);
-
-    // Salvar
     elementos.btnSalvar.addEventListener('click', salvar);
-
-    // Limpar
     elementos.btnLimpar.addEventListener('click', limpar);
+    elementos.btnConcluir.addEventListener('click', concluirInforme);
+    elementos.btnEditar.addEventListener('click', editarInforme);
+    elementos.btnCancelar.addEventListener('click', cancelarInforme);
   }
 
-  // ===== SETAR DATA E HORA ATUAL =====
+// ===== SETAR DATA E HORA ATUAL =====
   function setDataHoraAtual() {
     const hoje = new Date();
     const ano = hoje.getFullYear();
@@ -230,8 +405,8 @@ function executarLimpeza() {
     elementos.horario.value = `${hora}:${min}`;
   }
 
-  // ===== CARREGAR EMBARCAÇÕES =====
-  async function carregarEmbarcacoes() {
+// ===== CARREGAR EMBARCAÇÕES =====
+async function carregarEmbarcacoes() {
     try {
       const response = await fetch('/api/barcos/');
       const result = await response.json();
@@ -254,7 +429,7 @@ function executarLimpeza() {
     }
   }
 
-  // ===== CARREGAR EMPRESAS DA EMBARCAÇÃO =====
+// ===== CARREGAR EMPRESAS DA EMBARCAÇÃO =====
 async function carregarEmpresas(embarcacaoId) {
   // Limpa e mantém placeholder
   elementos.empresa.innerHTML = '<option value="">— selecione —</option>';
@@ -294,10 +469,8 @@ async function carregarEmpresas(embarcacaoId) {
   }
 }
 
-
-
-  // ===== TOGGLE CAMPOS POR RELAÇÃO DO EVENTO =====
-  function toggleCamposPorRelacao(relacao) {
+// ===== TOGGLE CAMPOS POR RELAÇÃO DO EVENTO =====
+function toggleCamposPorRelacao(relacao) {
     // Subtabela de pessoas
     if (relacao === 'PESSOAS') {
       elementos.containerSubtabelaPessoas.style.display = 'block';
@@ -357,8 +530,8 @@ function aplicarNaoAplicavelCamposEmbarcacao(aplicarNA) {
   }
 }
 
-  // ===== ADICIONAR PESSOA À SUBTABELA =====
-  function adicionarPessoa() {
+// ===== ADICIONAR PESSOA À SUBTABELA =====
+function adicionarPessoa() {
     const nome = elementos.pessoaNome.value.trim();
     const idade = elementos.pessoaIdade.value.trim();
     const funcao = elementos.pessoaFuncao.value.trim();
@@ -386,8 +559,8 @@ function aplicarNaoAplicavelCamposEmbarcacao(aplicarNA) {
     limparCamposPessoa();
   }
 
-  // ===== RENDERIZAR TABELA DE PESSOAS =====
-  function renderizarTabelaPessoas() {
+// ===== RENDERIZAR TABELA DE PESSOAS =====
+function renderizarTabelaPessoas() {
     elementos.tblPessoas.innerHTML = '';
 
     pessoasSubtabela.forEach((pessoa, index) => {
@@ -407,8 +580,8 @@ function aplicarNaoAplicavelCamposEmbarcacao(aplicarNA) {
     });
   }
 
-  // ===== REMOVER PESSOA =====
-  function removerPessoa(index) {
+// ===== REMOVER PESSOA =====
+function removerPessoa(index) {
     if (pessoasSubtabela[index].id) {
       pessoasParaDeletar.push(pessoasSubtabela[index].id);
     }
@@ -417,8 +590,8 @@ function aplicarNaoAplicavelCamposEmbarcacao(aplicarNA) {
     renderizarTabelaPessoas();
   }
 
-  // ===== LIMPAR CAMPOS DE PESSOA =====
-  function limparCamposPessoa() {
+ // ===== LIMPAR CAMPOS DE PESSOA =====
+function limparCamposPessoa() {
     elementos.pessoaNome.value = '';
     elementos.pessoaIdade.value = '';
     elementos.pessoaFuncao.value = '';
@@ -430,122 +603,276 @@ function aplicarNaoAplicavelCamposEmbarcacao(aplicarNA) {
     elementos.pessoaSituacao.value = '';
   }
 
-  // ===== SALVAR INFORME =====
-  async function salvar() {
-    try {
-      // Validações básicas
+// ===== SALVAR INFORME =====
+async function salvar() {
+  try {
+    // Validações básicas
+    if (!elementos.siteInstalacao.value) {
+      alert('Selecione a instalação');
+      return;
+    }
 
+    if (!elementos.empresa.value) {
+      alert('Selecione a empresa');
+      return;
+    }
 
-      if (!elementos.siteInstalacao.value) {
-        alert('Selecione a instalação');
-        return;
-      }
+    if (!elementos.data.value) {
+      alert('Informe a data do evento');
+      return;
+    }
 
-      if (!elementos.empresa.value) {
-        alert('Selecione a empresa');
-        return;
-      }
+    if (!elementos.horario.value) {
+      alert('Informe a Hora do evento');
+      return;
+    }
 
-      if (!elementos.data.value) {
-        alert('Informe a data do evento');
-        return;
-      }
+    if (!elementos.municipioUF.value) {
+      alert('Informe o Municipio/UF');
+      return;
+    }
 
-       if (!elementos.horario.value) {
-        alert('Informe a Hora do evento');
-        return;
-      }
+    if (!elementos.descricao.value) {
+      alert('Descreva o evento');
+      return;
+    }
 
-       if (!elementos.municipioUF.value) {
-        alert('Informe o Municipio/UF');
-        return;
-      }
+    if (!elementos.relacaoEvento.value) {
+      alert('Sinalize a relação do evento');
+      return;
+    }
+    
+    if (!elementos.acoesAdotadas.value) {
+      alert('Informe as ações adotadas');
+      return;
+    }
+    
+    if (!elementos.operacaoParalisada.value) {
+      alert('Sinalize o status da operação');
+      return;
+    }
 
-       if (!elementos.descricao.value) {
-        alert('Descreva o evento');
-        return;
-      }
+    // Obter texto da embarcação selecionada
+    const siteInstalacaoTexto = elementos.siteInstalacao.options[elementos.siteInstalacao.selectedIndex].text;
 
-       if (!elementos.relacaoEvento.value) {
-        alert('Sinalize a relação do evento');
-        return;
-      }
-       if (!elementos.acoesAdotadas.value) {
-        alert('Informe as ações adotadas');
-        return;
-      }
-       if (!elementos.operacaoParalisada.value) {
-        alert('Sinalize o status da operação');
-        return;
-      }
+    const dados = {
+      tipo: elementos.tipo.value,
+      status: 'SALVO', // NOVO: Define status como SALVO
+      siteInstalacao: siteInstalacaoTexto,
+      empresa: elementos.empresa.value,
+      subcontratada: elementos.subcontratadaNA.checked ? null : elementos.subcontratada.value,
+      subcontratadaNaoAplicavel: elementos.subcontratadaNA.checked,
+      dataEvento: elementos.data.value,
+      horarioEvento: elementos.horario.value,
+      municipioUF: elementos.municipioUF.value,
+      municipioOutro: elementos.municipioUF.value === 'OUTRO' ? elementos.municipioOutro.value : null,
+      descricao: elementos.descricao.value,
+      relacaoEvento: elementos.relacaoEvento.value,
+      acoesAdotadas: elementos.acoesAdotadas.value,
+      ordemServico1: elementos.os1.value,
+      ordemServico2: elementos.os2.value,
+      operacaoParalisada: elementos.operacaoParalisada.value,
+      sistemaDegradado: elementos.relacaoEvento.value === 'EMBARCACAO' ? elementos.sistemaDegradado.value : null,
+      embarcacaoDerivou: elementos.relacaoEvento.value === 'EMBARCACAO' ? elementos.embarcacaoDerivou.value : null,
+      embarcacaoPerdeuPosicao: elementos.relacaoEvento.value === 'EMBARCACAO' ? elementos.embarcacaoPerdeuPosicao.value : null,
+      informacoesComplementares: elementos.infoComplementares.value
+    };
 
+    let response, result;
 
-      // Obter texto da embarcação selecionada
-      const siteInstalacaoTexto = elementos.siteInstalacao.options[elementos.siteInstalacao.selectedIndex].text;
+    if (informeAtualId) {
+      // Atualizar existente
+      response = await fetch(`/api/informes/${informeAtualId}/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      });
+    } else {
+      // Criar novo
+      response = await fetch('/api/informes/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      });
+    }
 
-      const dados = {
-        tipo: elementos.tipo.value,
-        siteInstalacao: siteInstalacaoTexto,
-        empresa: elementos.empresa.value,
-        subcontratada: elementos.subcontratadaNA.checked ? null : elementos.subcontratada.value,
-        subcontratadaNaoAplicavel: elementos.subcontratadaNA.checked,
-        dataEvento: elementos.data.value,
-        horarioEvento: elementos.horario.value,
-        municipioUF: elementos.municipioUF.value,
-        municipioOutro: elementos.municipioUF.value === 'OUTRO' ? elementos.municipioOutro.value : null,
-        descricao: elementos.descricao.value,
-        relacaoEvento: elementos.relacaoEvento.value,
-        acoesAdotadas: elementos.acoesAdotadas.value,
-        ordemServico1: elementos.os1.value,
-        ordemServico2: elementos.os2.value,
-        operacaoParalisada: elementos.operacaoParalisada.value,
-        sistemaDegradado: elementos.relacaoEvento.value === 'EMBARCACAO' ? elementos.sistemaDegradado.value : null,
-        embarcacaoDerivou: elementos.relacaoEvento.value === 'EMBARCACAO' ? elementos.embarcacaoDerivou.value : null,
-        embarcacaoPerdeuPosicao: elementos.relacaoEvento.value === 'EMBARCACAO' ? elementos.embarcacaoPerdeuPosicao.value : null,
-        informacoesComplementares: elementos.infoComplementares.value
-      };
+    result = await response.json();
 
-      let response, result;
+    if (!result.success) {
+      throw new Error(result.error);
+    }
 
-      if (informeAtualId) {
-        // Atualizar existente
-        response = await fetch(`/api/informes/${informeAtualId}/`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(dados)
-        });
-      } else {
-        // Criar novo
-        response = await fetch('/api/informes/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(dados)
-        });
-      }
+    informeAtualId = result.data.id;
 
-      result = await response.json();
+    // Salvar pessoas se relação for PESSOAS
+    if (elementos.relacaoEvento.value === 'PESSOAS') {
+      await salvarPessoas();
+    }
 
+    alert('Informe de anomalia salvo com sucesso!');
+    
+    // NOVO: Aplicar estado "SALVO"
+    desabilitarCampos(true);  // Desabilita todos os campos
+    alternarBotoes(true);      // Mostra os 3 botões novos
+
+  } catch (error) {
+    alert('Erro ao salvar: ' + error.message);
+  }
+}
+
+// ===== CANCELAR INFORME =====
+async function cancelarInforme() {
+  if (!confirm('Deseja cancelar a emissão do Informe de anomalia?')) {
+    return;
+  }
+  
+  try {
+    // Deletar informe do banco de dados
+    if (informeAtualId) {
+      const response = await fetch(`/api/informes/${informeAtualId}/`, {
+        method: 'DELETE'
+      });
+      
+      const result = await response.json();
+      
       if (!result.success) {
         throw new Error(result.error);
       }
-
-      informeAtualId = result.data.id;
-      criarBotaoEnviarInforme(informeAtualId);
-
-      // Salvar pessoas se relação for PESSOAS
-      if (elementos.relacaoEvento.value === 'PESSOAS') {
-        await salvarPessoas();
-      }
-
-      alert('Informe de anomalia salvo com sucesso!');
-
-    } catch (error) {
-      alert('Erro ao salvar: ' + error.message);
     }
+    
+    // Limpar variáveis
+    informeAtualId = null;
+    pessoasSubtabela = [];
+    pessoasParaDeletar = [];
+    
+    // Limpar todos os campos
+    elementos.tipo.value = '';
+    elementos.siteInstalacao.value = '';
+    elementos.empresa.innerHTML = '<option value="">— selecione —</option>';
+    elementos.subcontratada.value = '';
+    elementos.subcontratadaNA.checked = false;
+    elementos.subcontratada.disabled = false;
+    elementos.descricao.value = '';
+    elementos.relacaoEvento.value = '';
+    elementos.acoesAdotadas.value = '';
+    elementos.os1.value = '';
+    elementos.os2.value = '';
+    elementos.operacaoParalisada.value = '';
+    elementos.municipioUF.value = '';
+    elementos.municipioOutro.value = '';
+    elementos.containerMunicipioOutro.style.display = 'none';
+    elementos.infoComplementares.value = '';
+    elementos.sistemaDegradado.value = '';
+    elementos.embarcacaoDerivou.value = '';
+    elementos.embarcacaoPerdeuPosicao.value = '';
+    
+    // Resetar data/hora
+    setDataHoraAtual();
+    
+    // Ocultar containers condicionais
+    elementos.containerSubtabelaPessoas.style.display = 'none';
+    elementos.containerCamposEmbarcacao.style.display = 'none';
+    
+    // Limpar subtabela pessoas
+    elementos.tblPessoas.innerHTML = '';
+    limparCamposPessoa();
+    
+    // Habilitar campos
+    desabilitarCampos(false);
+    
+    // Voltar aos botões iniciais
+    alternarBotoes(false);
+    
+    alert('Informe cancelado com sucesso.');
+    
+  } catch (error) {
+    alert('Erro ao cancelar informe: ' + error.message);
   }
+}
 
-  // ===== SALVAR PESSOAS =====
-  async function salvarPessoas() {
+// ===== EDITAR INFORME =====
+function editarInforme() {
+  // Habilitar todos os campos
+  desabilitarCampos(false);
+  
+  // Voltar aos botões iniciais (Salvar + Limpar)
+  alternarBotoes(false);
+}
+
+// ===== CONCLUIR INFORME =====
+async function concluirInforme() {
+  if (!confirm('Deseja concluir e enviar o informe de Anomalia?')) {
+    return;
+  }
+  
+  try {
+    // Enviar e-mail
+    const response = await fetch(`/api/informes/${informeAtualId}/enviar/`, {
+      method: 'POST'
+    });
+    
+    const result = await response.json();
+    
+    if (!result.success) {
+      // FALHA NO ENVIO: mantém estado congelado
+      alert('Erro ao enviar e-mail: ' + (result.error || 'Falha desconhecida'));
+      return; // Não limpa, mantém os 3 botões visíveis
+    }
+    
+    // ENVIO BEM-SUCEDIDO
+    alert('Informe enviado com sucesso!');
+    
+    // Limpar variáveis
+    informeAtualId = null;
+    pessoasSubtabela = [];
+    pessoasParaDeletar = [];
+    
+    // Limpar todos os campos
+    elementos.tipo.value = '';
+    elementos.siteInstalacao.value = '';
+    elementos.empresa.innerHTML = '<option value="">— selecione —</option>';
+    elementos.subcontratada.value = '';
+    elementos.subcontratadaNA.checked = false;
+    elementos.subcontratada.disabled = false;
+    elementos.descricao.value = '';
+    elementos.relacaoEvento.value = '';
+    elementos.acoesAdotadas.value = '';
+    elementos.os1.value = '';
+    elementos.os2.value = '';
+    elementos.operacaoParalisada.value = '';
+    elementos.municipioUF.value = '';
+    elementos.municipioOutro.value = '';
+    elementos.containerMunicipioOutro.style.display = 'none';
+    elementos.infoComplementares.value = '';
+    elementos.sistemaDegradado.value = '';
+    elementos.embarcacaoDerivou.value = '';
+    elementos.embarcacaoPerdeuPosicao.value = '';
+    
+    // Resetar data/hora
+    setDataHoraAtual();
+    
+    // Ocultar containers condicionais
+    elementos.containerSubtabelaPessoas.style.display = 'none';
+    elementos.containerCamposEmbarcacao.style.display = 'none';
+    
+    // Limpar subtabela pessoas
+    elementos.tblPessoas.innerHTML = '';
+    limparCamposPessoa();
+    
+    // Habilitar campos
+    desabilitarCampos(false);
+    
+    // Voltar aos botões iniciais
+    alternarBotoes(false);
+    
+  } catch (error) {
+    alert('Erro ao concluir informe: ' + error.message);
+    // Em caso de erro, mantém estado congelado (não limpa)
+  }
+}
+
+// ===== SALVAR PESSOAS =====
+async function salvarPessoas() {
     try {
       // Deletar pessoas removidas
       for (const pessoaId of pessoasParaDeletar) {
@@ -576,8 +903,8 @@ function aplicarNaoAplicavelCamposEmbarcacao(aplicarNA) {
     }
   }
 
-  // ===== LIMPAR FORMULÁRIO =====
-  function limpar() {
+// ===== LIMPAR FORMULÁRIO =====
+function limpar() {
     if (informeAtualId) {
       if (!confirm('Deseja realmente limpar o formulário?')) {
         return;
@@ -615,8 +942,6 @@ function aplicarNaoAplicavelCamposEmbarcacao(aplicarNA) {
     limparCamposPessoa();
   }
 
-
-
 // ===== VISUALIZAR INFORME (ABRIR MODAL)===================== 
 async function visualizarInforme(informeId) {
   try {
@@ -644,7 +969,6 @@ async function visualizarInforme(informeId) {
     alert('Erro ao carregar informe: ' + error.message);
   }
 }
-
 
 // ===== CONFIGURAR NAVEGAÇÃO ENTRE TABS =====
 function configurarNavegacaoTabs() {
@@ -821,11 +1145,7 @@ function fecharModal() {
   document.getElementById('modalVisualizarInforme').classList.remove('active');
 }
 
-
-// ============================================================
-// RETURN
-// ============================================================
-
+// =============================RETURN
 return {
   init,
   removerPessoa,

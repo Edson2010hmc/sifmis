@@ -236,10 +236,20 @@
         <textarea id="anInfoComplementares" maxlength="2000" rows="6" style="width:100%; resize:vertical;"></textarea>
       </div>
 
-      <div class="btns" style="margin-top:20px;">
-        <button id="btnSalvarAnomalia" class="btn">Salvar</button>
-        <button id="btnLimparAnomalia" class="btn secondary">Limpar</button>
-      </div>
+<div class="btns" style="margin-top:20px;">
+  <!-- Botões padrão (visíveis inicialmente) -->
+  <div id="botoesEstadoInicial" style="display:flex; gap:12px;">
+    <button id="btnSalvarAnomalia" class="btn">Salvar</button>
+    <button id="btnLimparAnomalia" class="btn secondary">Limpar</button>
+  </div>
+  
+  <!-- Botões do estado "SALVO" (ocultos inicialmente) -->
+  <div id="botoesEstadoSalvo" style="display:none; gap:12px;">
+    <button id="btnConcluirInforme" class="btn">Concluir Informe</button>
+    <button id="btnEditarInforme" class="btn secondary">Editar Informe</button>
+    <button id="btnCancelarInforme" class="btn ghost">Cancelar Informe</button>
+  </div>
+</div>
     </div>
   </section>
 

@@ -10,7 +10,7 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
 
-
+#================================MODELO INFORME DE ANOMALIA
 class InformeAnomalia(models.Model):
     """Modelo para Informe de Anomalia"""
     
@@ -48,11 +48,18 @@ class InformeAnomalia(models.Model):
         ('NAO', 'Não'),
         ('N/A', 'N/A'),
     ]
+
+    STATUS_CHOICES = [
+        ('RASCUNHO', 'Rascunho'),
+        ('SALVO', 'Salvo'),
+        ('ENVIADO', 'Enviado'),
+    ]
+    
     
     # Campos principais
     tipo = models.CharField( max_length=30, choices=TIPO_CHOICES,verbose_name='Tipo',blank=True
     )
-    
+    status = models.CharField(max_length=12,choices=STATUS_CHOICES,default='RASCUNHO',verbose_name='Status do Informe')    
     siteInstalacao = models.CharField(max_length=100,verbose_name='Site/Instalação', help_text='Formato: [tipo] [Nome da embarcação]' )
     empresa = models.CharField(max_length=100,verbose_name='Empresa' )
     subcontratada = models.CharField(max_length=50,verbose_name='Subcontratada',blank=True,null=True )
@@ -75,6 +82,7 @@ class InformeAnomalia(models.Model):
     dataEnvioInforme = models.DateField(verbose_name='Data do envio',blank=True,null=True )    
     horaEnvioInforme = models.TimeField(verbose_name='Hora do envio',blank=True,null=True )
     destInforme = models.TextField(max_length=400,verbose_name='Destinatários do Informe',blank=True,null=True )
+    
     
     # Metadados
     criado_em = models.DateTimeField(auto_now_add=True)
