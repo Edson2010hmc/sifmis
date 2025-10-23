@@ -1081,17 +1081,23 @@ function renderizarTabelaInformes() {
     const data = new Date(informe.dataEvento + 'T00:00:00');
     const dataFormatada = data.toLocaleDateString('pt-BR');
     
-    const tipoMap = {
-      'DESVIO': 'Desvio',
-      'NAO_CONFORMIDADE': 'Não Conformidade',
-      'INCIDENTE_ALTO_POTENCIAL': 'Incidente Alto Potencial',
-      'ACIDENTE': 'Acidente'
+    const relacaoMap = {
+      'EMBARCACAO': 'Embarcação',
+      'PESSOAS': 'Pessoas',
+      'AMBOS': 'Ambos'
     };
-        
+    
+    const relacaoFormatada = relacaoMap[informe.relacaoEvento] || informe.relacaoEvento || '';
+    const descricao = informe.descricao || '';
+    const statusFormatado = informe.status || '';
+    
     tr.innerHTML = `
       <td>${dataFormatada}</td>
       <td>${informe.horarioEvento || '--:--'}</td>
       <td>${informe.siteInstalacao || ''}</td>
+      <td>${relacaoFormatada}</td>
+      <td>${descricao}</td>
+      <td>${statusFormatado}</td>
       <td style="text-align:center;">
         <button class="btn-visualizar" onclick="AnomaliaModule.visualizarInforme(${informe.id})">
           Visualizar

@@ -39,6 +39,7 @@ def informe_anomalia_list(request):
                     'empresa': informe.empresa,
                     'dataEvento': str(informe.dataEvento),
                     'horarioEvento': informe.horarioEvento.strftime('%H:%M') if informe.horarioEvento else '',
+                    'descricao': informe.descricao or '',
                     'relacaoEvento': informe.relacaoEvento,
                     'criado_em': informe.criado_em.isoformat()
                 })
