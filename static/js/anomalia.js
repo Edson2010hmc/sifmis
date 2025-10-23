@@ -776,7 +776,16 @@ async function concluirInforme() {
     
     // ENVIO BEM-SUCEDIDO
     alert('Informe enviado com sucesso!');
-    
+    const dados = {status: 'ENVIADO'}
+    if (informeAtualId) {
+      
+      response = await fetch(`/api/informes/${informeAtualId}/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      });}
+
+    await verificarInformeSalvo();
     // Limpar variáveis
     informeAtualId = null;
     pessoasSubtabela = [];

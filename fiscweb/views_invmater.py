@@ -182,6 +182,16 @@ def materiais_bordo_detail(request, material_id):
         try:
             data = json.loads(request.body)
             
+            # VALIDAR se contentor existe (se informado)
+            if data.get('contCestaMat') and data.get('descContCestaMatId'):
+                try:
+                    contentoresCestasMateriais.objects.get(id=data.get('descContCestaMatId'))
+                except contentoresCestasMateriais.DoesNotExist:
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Contentor/Cesta não encontrado. Pode ter sido excluído.'
+                    }, status=400)
+            
             material.descMat_id = data.get('descMatId', material.descMat.id if material.descMat else None)
             material.numSerIden = data.get('numSerIden', material.numSerIden)
             material.dataReceb = data.get('dataReceb', material.dataReceb)

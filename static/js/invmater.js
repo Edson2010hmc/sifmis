@@ -233,6 +233,11 @@ const ContentoresModule = (() => {
       limpar();
       await carregarContentores();
       
+      // ATUALIZAR lista de contentores no módulo de Materiais a Bordo
+      if (typeof MateriaisBordoModule !== 'undefined' && MateriaisBordoModule.recarregarContentores) {
+        MateriaisBordoModule.recarregarContentores();
+      }
+      
     } catch (error) {
       alert('Erro ao excluir: ' + error.message);
     }
@@ -315,7 +320,8 @@ const ContentoresModule = (() => {
 
   // ===== EXPORTAR =====
   return {
-    init
+    init,
+    recarregarContentores: carregarContentores
   };
 
 })();
@@ -487,6 +493,7 @@ const MateriaisBordoModule = (() => {
 
   // ===== CARREGAR LISTA DE MATERIAIS =====
   async function carregarMateriais() {
+    carregarContentores();
     try {
       const response = await fetch(API_URL);
       const result = await response.json();
@@ -559,7 +566,7 @@ const MateriaisBordoModule = (() => {
   // ===== SALVAR =====
   async function salvar() {
     if (!validarCampos()) return;
-    
+    carregarContentores();
     try {
       const dados = {
         descMatId: elementos.desc.value,
@@ -602,6 +609,7 @@ const MateriaisBordoModule = (() => {
 
   // ===== HABILITAR EDIÇÃO =====
   function habilitarEdicao() {
+    carregarContentores();
     modoEdicao = true;
     desabilitarCampos(false);
     elementos.btnSave.style.display = 'none';
@@ -614,7 +622,7 @@ const MateriaisBordoModule = (() => {
   // ===== CONFIRMAR EDIÇÃO =====
   async function confirmarEdicao() {
     if (!validarCampos()) return;
-    
+    carregarContentores();
     try {
       const dados = {
         descMatId: elementos.desc.value,
@@ -658,6 +666,7 @@ const MateriaisBordoModule = (() => {
   // ===== CANCELAR EDIÇÃO =====
   function cancelarEdicao() {
     modoEdicao = false;
+    carregarContentores();
     limpar();
     elementos.btnSave.style.display = 'inline-block';
     elementos.btnEditar.style.display = 'inline-block';
@@ -668,6 +677,7 @@ const MateriaisBordoModule = (() => {
 
   // ===== EXCLUIR =====
   async function excluir() {
+    carregarContentores();
     if (!materialEditandoId) return;
     
     if (!confirm('Deseja excluir este material?')) return;
@@ -783,6 +793,7 @@ const MateriaisBordoModule = (() => {
     elementos.btnExcluir.disabled = true;
     materialEditandoId = null;
     desabilitarCampos(false);
+    carregarContentores();
   }
 
   // ===== EXPORTAR =====
