@@ -2426,13 +2426,21 @@ def anom_sms_list(request, ps_id):
 
         data = []
         for anom in anomalias:
-            data.append({
-                'id': anom.id,
-                'dataAnomSMS': str(anom.dataAnomSMS),
-                'horaAnomSMS': anom.horaAnomSMS.strftime('%H:%M') if anom.horaAnomSMS else '',
-                'relacAnomSMS': anom.relacAnomSMS,
-                'linkAnomSMS': anom.linkAnomSMS
-            })
+            # Buscar descrição do informe relacionado
+                try:
+                    informe = InformeAnomalia.objects.get(id=anom.linkAnomSMS)
+                    descricao = informe.descricao or ''
+                except InformeAnomalia.DoesNotExist:
+                    descricao = ''
+                    
+                data.append({
+                        'id': anom.id,
+                        'dataAnomSMS': str(anom.dataAnomSMS),
+                        'horaAnomSMS': anom.horaAnomSMS.strftime('%H:%M') if anom.horaAnomSMS else '',
+                        'relacAnomSMS': anom.relacAnomSMS,
+                        'descricao': descricao,
+                        'linkAnomSMS': anom.linkAnomSMS
+                    })
 
         print(f"[API] Retornando {len(data)} anomalias SMS")
 

@@ -50,10 +50,11 @@ const AnomSMSModule = (() => {
       
       const dataFormatada = new Date(anom.dataAnomSMS + 'T00:00:00').toLocaleDateString('pt-BR');
       
-      tr.innerHTML = `
+     tr.innerHTML = `
         <td style="border:1px solid #ddd; padding:8px; text-align:center;">${dataFormatada}</td>
         <td style="border:1px solid #ddd; padding:8px; text-align:center;">${anom.horaAnomSMS}</td>
         <td style="border:1px solid #ddd; padding:8px;">${anom.relacAnomSMS}</td>
+        <td style="border:1px solid #ddd; padding:8px;">${anom.descricao || ''}</td>
         <td style="border:1px solid #ddd; padding:8px; text-align:center;">
           <button class="btn small" onclick="AnomSMSModule.visualizarInforme(${anom.linkAnomSMS})">Ver Informe</button>
         </td>
