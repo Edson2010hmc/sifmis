@@ -12,10 +12,11 @@ import smtplib
 
 from .models_anom import InformeAnomalia, SubTabPessoasAnomalia
 from .models_cad import BarcosCad
+from .models_ps import anomSMS
 from .views import validar_usuario
 
 
-#========================================== LISTAR INFORMES DE ANOMALIA ==========================================
+#==========================================  INFORMES DE ANOMALIA API REST ==========================================
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def informe_anomalia_list(request):
@@ -108,7 +109,6 @@ def informe_anomalia_list(request):
                 'error': str(e)
             }, status=400)
 
-#========================================== DETALHES DO INFORME DE ANOMALIA ==========================================
 @csrf_exempt
 @require_http_methods(["GET", "PUT", "DELETE"])
 def informe_anomalia_detail(request, informe_id):
@@ -240,6 +240,15 @@ def informe_anomalia_detail(request, informe_id):
     
     elif request.method == 'DELETE':
         try:
+            # EXCLUIR registros de anomSMS que referenciam este informe
+            anomalias_vinculadas = anomSMS.objects.filter(linkAnomSMS=informe.id)
+            count_anom = anomalias_vinculadas.count()
+            
+            if count_anom > 0:
+                anomalias_vinculadas.delete()
+                print(f"[API] DELETE /api/informes/{informe_id}/ - {count_anom} registros de anomSMS removidos")
+            
+            # Excluir o informe
             informe.delete()
             
             print(f"[API] DELETE /api/informes/{informe_id}/ - Informe removido")

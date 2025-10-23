@@ -761,7 +761,7 @@ async function concluirInforme() {
   }
   
   try {
-    // Enviar e-mail
+    // 1. Enviar e-mail
     const response = await fetch(`/api/informes/${informeAtualId}/enviar/`, {
       method: 'POST'
     });
@@ -769,29 +769,34 @@ async function concluirInforme() {
     const result = await response.json();
     
     if (!result.success) {
-      // FALHA NO ENVIO: mantém estado congelado
       alert('Erro ao enviar e-mail: ' + (result.error || 'Falha desconhecida'));
-      return; // Não limpa, mantém os 3 botões visíveis
+      return;
     }
     
-    // ENVIO BEM-SUCEDIDO
+    // 2. Atualizar status para ENVIADO
+    const dados = {status: 'ENVIADO'};
+    const responseUpdate = await fetch(`/api/informes/${informeAtualId}/`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados)
+    });
+    
+    const resultUpdate = await responseUpdate.json();
+    
+    if (!resultUpdate.success) {
+      alert('Erro ao atualizar status: ' + resultUpdate.error);
+      return;
+    }
+    
+    // 3. Sucesso - limpar tudo
     alert('Informe enviado com sucesso!');
-    const dados = {status: 'ENVIADO'}
-    if (informeAtualId) {
-      
-      response = await fetch(`/api/informes/${informeAtualId}/`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados)
-      });}
-
-    await verificarInformeSalvo();
+    
     // Limpar variáveis
     informeAtualId = null;
     pessoasSubtabela = [];
     pessoasParaDeletar = [];
     
-    // Limpar todos os campos
+    // Limpar campos
     elementos.tipo.value = '';
     elementos.siteInstalacao.value = '';
     elementos.empresa.innerHTML = '<option value="">— selecione —</option>';
@@ -815,11 +820,11 @@ async function concluirInforme() {
     // Resetar data/hora
     setDataHoraAtual();
     
-    // Ocultar containers condicionais
+    // Ocultar containers
     elementos.containerSubtabelaPessoas.style.display = 'none';
     elementos.containerCamposEmbarcacao.style.display = 'none';
     
-    // Limpar subtabela pessoas
+    // Limpar subtabela
     elementos.tblPessoas.innerHTML = '';
     limparCamposPessoa();
     
@@ -831,7 +836,6 @@ async function concluirInforme() {
     
   } catch (error) {
     alert('Erro ao concluir informe: ' + error.message);
-    // Em caso de erro, mantém estado congelado (não limpa)
   }
 }
 
