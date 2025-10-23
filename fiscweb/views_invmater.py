@@ -400,8 +400,21 @@ def contentores_detail(request, contentor_id):
                 'error': str(e)
             }, status=400)
     
+# No arquivo views_invmater.py
+# Localizar a função contentores_detail, método DELETE
+# Substituir TODO o bloco elif request.method == 'DELETE': por:
+
     elif request.method == 'DELETE':
         try:
+            # VALIDAR se contentor está vinculado a algum material
+            materiais_vinculados = matBordo.objects.filter(descContCestaMat=contentor)
+            
+            if materiais_vinculados.exists():
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Este contentor/cesta não pode ser excluído pois está vinculado a materiais a bordo.'
+                }, status=400)
+            
             contentor.delete()
             
             print(f"[API] DELETE /api/contentores/{contentor_id}/ - Contentor removido")
@@ -413,35 +426,6 @@ def contentores_detail(request, contentor_id):
             
         except Exception as e:
             print(f"[API ERROR] DELETE /api/contentores/{contentor_id}/ - {str(e)}")
-            return JsonResponse({
-                'success': False,
-                'error': str(e)
-            }, status=400)
-    
-    elif request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            
-            print(f"[API] POST /api/materiais-operacao/ - Criando material")
-            
-            material = materiaisOperacao.objects.create(
-                descMat=data.get('descMat', ''),
-                obsDescMat=data.get('obsDescMat', '')
-            )
-            
-            print(f"[API] POST /api/materiais-operacao/ - Material {material.id} criado")
-            
-            return JsonResponse({
-                'success': True,
-                'message': 'Material criado com sucesso',
-                'data': {
-                    'id': material.id,
-                    'descMat': material.descMat
-                }
-            })
-            
-        except Exception as e:
-            print(f"[API ERROR] POST /api/materiais-operacao/ - {str(e)}")
             return JsonResponse({
                 'success': False,
                 'error': str(e)
