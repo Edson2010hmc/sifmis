@@ -1045,8 +1045,8 @@ function filtrarInformes() {
   }
   
   informesFiltrados.sort((a, b) => {
-    const dataA = new Date(a.dataEvento + ' ' + (a.horarioEvento || '00:00'));
-    const dataB = new Date(b.dataEvento + ' ' + (b.horarioEvento || '00:00'));
+    const dataA = new Date(a.dataEvento + 'T' + (a.horarioEvento || '00:00'));
+    const dataB = new Date(b.dataEvento + 'T' + (b.horarioEvento || '00:00'));
     return dataB - dataA;
   });
   
@@ -1078,7 +1078,7 @@ function renderizarTabelaInformes() {
   informesFiltrados.forEach(informe => {
     const tr = document.createElement('tr');
     
-    const data = new Date(informe.dataEvento);
+    const data = new Date(informe.dataEvento + 'T00:00:00');
     const dataFormatada = data.toLocaleDateString('pt-BR');
     
     const tipoMap = {
