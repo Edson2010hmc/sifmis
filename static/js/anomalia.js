@@ -1067,7 +1067,7 @@ function renderizarTabelaInformes() {
   if (informesFiltrados.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6" style="text-align:center; padding:40px; color:#999;">
+        <td colspan="7" style="text-align:center; padding:40px; color:#999;">
           Nenhum informe encontrado
         </td>
       </tr>
@@ -1087,12 +1087,7 @@ function renderizarTabelaInformes() {
       'INCIDENTE_ALTO_POTENCIAL': 'Incidente Alto Potencial',
       'ACIDENTE': 'Acidente'
     };
-    //const tipoFormatado = tipoMap[informe.tipo] || informe.tipo;
-    
-    //const status = informe.dataEnvioInforme ? 
-     // '<span class="badge badge-enviado">ENVIADO</span>' : 
-    //  '<span class="badge badge-rascunho">RASCUNHO</span>';
-    
+        
     tr.innerHTML = `
       <td>${dataFormatada}</td>
       <td>${informe.horarioEvento || '--:--'}</td>
