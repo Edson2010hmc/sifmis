@@ -27,6 +27,7 @@ import json
 
 from .models_cad import materiaisOperacao
 from .models_invmater import contentoresCestasMateriais, matBordo
+from .models_cad import FiscaisCad
 
 
 #========================================== MATERIAIS A BORDO API REST ==========================================
@@ -63,6 +64,15 @@ def materiais_bordo_list(request):
                     'numCertContCestaMat': mat.numCertContCestaMat or '',
                     'valCertContCestaMat': str(mat.valCertContCestaMat) if mat.valCertContCestaMat else '',
                     'obsMat': mat.obsMat or '',
+                    'barcoMat': mat.barcoMat.nomeBarco if mat.barcoMat else '',
+                    'barcoMatId': mat.barcoMat.id if mat.barcoMat else None,
+                    'altMat': str(mat.altMat) if mat.altMat else '',
+                    'largMat': str(mat.largMat) if mat.largMat else '',
+                    'comprMat': str(mat.comprMat) if mat.comprMat else '',
+                    'pesoMat': str(mat.pesoMat) if mat.pesoMat else '',
+                    'solicDesembMat': mat.solicDesembMat,
+                    'dataDesembMat': str(mat.dataDesembMat) if mat.dataDesembMat else '',
+                    'DesembMat': mat.DesembMat,
                     'criado_em': mat.criado_em.isoformat(),
                     'atualizado_em': mat.atualizado_em.isoformat()
                 })
@@ -102,7 +112,15 @@ def materiais_bordo_list(request):
                 identContCestaMat=data.get('identContCestaMat', ''),
                 numCertContCestaMat=data.get('numCertContCestaMat', ''),
                 valCertContCestaMat=data.get('valCertContCestaMat') if data.get('valCertContCestaMat') else None,
-                obsMat=data.get('obsMat', '')
+                obsMat=data.get('obsMat', ''),
+                barcoMat_id=data.get('barcoMatId'),
+                altMat=data.get('altMat') if data.get('altMat') else None,
+                largMat=data.get('largMat') if data.get('largMat') else None,
+                comprMat=data.get('comprMat') if data.get('comprMat') else None,
+                pesoMat=data.get('pesoMat') if data.get('pesoMat') else None,
+                solicDesembMat=data.get('solicDesembMat', False),
+                dataDesembMat=data.get('dataDesembMat') if data.get('dataDesembMat') else None,
+                DesembMat=data.get('DesembMat', False)
             )
             
             print(f"[API] POST /api/materiais-bordo/ - Material {material.id} criado")
@@ -163,6 +181,15 @@ def materiais_bordo_detail(request, material_id):
                 'numCertContCestaMat': material.numCertContCestaMat or '',
                 'valCertContCestaMat': str(material.valCertContCestaMat) if material.valCertContCestaMat else '',
                 'obsMat': material.obsMat or '',
+                'barcoMat': material.barcoMat.nomeBarco if material.barcoMat else '',
+                'barcoMatId': material.barcoMat.id if material.barcoMat else None,
+                'altMat': str(material.altMat) if material.altMat else '',
+                'largMat': str(material.largMat) if material.largMat else '',
+                'comprMat': str(material.comprMat) if material.comprMat else '',
+                'pesoMat': str(material.pesoMat) if material.pesoMat else '',
+                'solicDesembMat': material.solicDesembMat,
+                'dataDesembMat': str(material.dataDesembMat) if material.dataDesembMat else '',
+                'DesembMat': material.DesembMat,
                 'criado_em': material.criado_em.isoformat(),
                 'atualizado_em': material.atualizado_em.isoformat()
             }
@@ -207,6 +234,14 @@ def materiais_bordo_detail(request, material_id):
             material.numCertContCestaMat = data.get('numCertContCestaMat', material.numCertContCestaMat)
             material.valCertContCestaMat = data.get('valCertContCestaMat') if data.get('valCertContCestaMat') else None
             material.obsMat = data.get('obsMat', material.obsMat)
+            material.barcoMat_id = data.get('barcoMatId', material.barcoMat.id if material.barcoMat else None)
+            material.altMat = data.get('altMat') if data.get('altMat') else None
+            material.largMat = data.get('largMat') if data.get('largMat') else None
+            material.comprMat = data.get('comprMat') if data.get('comprMat') else None
+            material.pesoMat = data.get('pesoMat') if data.get('pesoMat') else None
+            material.solicDesembMat = data.get('solicDesembMat', material.solicDesembMat)
+            material.dataDesembMat = data.get('dataDesembMat') if data.get('dataDesembMat') else None
+            material.DesembMat = data.get('DesembMat', material.DesembMat)
             material.save()
             
             print(f"[API] PUT /api/materiais-bordo/{material_id}/ - Material atualizado")
@@ -272,6 +307,15 @@ def contentores_list(request):
                     'outRespContCesta': cont.outRespContCesta or '',
                     'numCertContCesta': cont.numCertContCesta,
                     'valCertContCesta': str(cont.valCertContCesta),
+                    'barcoCertContCesta': cont.barcoCertContCesta.nomeBarco if cont.barcoCertContCesta else '',
+                    'barcoCertContCestaId': cont.barcoCertContCesta.id if cont.barcoCertContCesta else None,
+                    'altCertContCesta': str(cont.altCertContCesta) if cont.altCertContCesta else '',
+                    'largCertContCesta': str(cont.largCertContCesta) if cont.largCertContCesta else '',
+                    'comprCertContCesta': str(cont.comprCertContCesta) if cont.comprCertContCesta else '',
+                    'pesoCertContCesta': str(cont.pesoCertContCesta) if cont.pesoCertContCesta else '',
+                    'solicDesembContCesta': cont.solicDesembContCesta,
+                    'dataDesembContCesta': str(cont.dataDesembContCesta) if cont.dataDesembContCesta else '',
+                    'DesembContCesta': cont.DesembContCesta,
                     'criado_em': cont.criado_em.isoformat(),
                     'atualizado_em': cont.atualizado_em.isoformat()
                 })
@@ -304,7 +348,15 @@ def contentores_list(request):
                 respContCesta=data.get('respContCesta', ''),
                 outRespContCesta=data.get('outRespContCesta', ''),
                 numCertContCesta=data.get('numCertContCesta', ''),
-                valCertContCesta=data.get('valCertContCesta')
+                valCertContCesta=data.get('valCertContCesta'),
+                barcoCertContCesta_id=data.get('barcoCertContCestaId'),
+                altCertContCesta=data.get('altCertContCesta') if data.get('altCertContCesta') else None,
+                largCertContCesta=data.get('largCertContCesta') if data.get('largCertContCesta') else None,
+                comprCertContCesta=data.get('comprCertContCesta') if data.get('comprCertContCesta') else None,
+                pesoCertContCesta=data.get('pesoCertContCesta') if data.get('pesoCertContCesta') else None,
+                solicDesembContCesta=data.get('solicDesembContCesta', False),
+                dataDesembContCesta=data.get('dataDesembContCesta') if data.get('dataDesembContCesta') else None,
+                DesembContCesta=data.get('DesembContCesta', False)
             )
             
             print(f"[API] POST /api/contentores/ - Contentor {contentor.id} criado")
@@ -354,6 +406,15 @@ def contentores_detail(request, contentor_id):
                 'outRespContCesta': contentor.outRespContCesta or '',
                 'numCertContCesta': contentor.numCertContCesta,
                 'valCertContCesta': str(contentor.valCertContCesta),
+                'barcoCertContCesta': contentor.barcoCertContCesta.nomeBarco if contentor.barcoCertContCesta else '',
+                'barcoCertContCestaId': contentor.barcoCertContCesta.id if contentor.barcoCertContCesta else None,
+                'altCertContCesta': str(contentor.altCertContCesta) if contentor.altCertContCesta else '',
+                'largCertContCesta': str(contentor.largCertContCesta) if contentor.largCertContCesta else '',
+                'comprCertContCesta': str(contentor.comprCertContCesta) if contentor.comprCertContCesta else '',
+                'pesoCertContCesta': str(contentor.pesoCertContCesta) if contentor.pesoCertContCesta else '',
+                'solicDesembContCesta': contentor.solicDesembContCesta,
+                'dataDesembContCesta': str(contentor.dataDesembContCesta) if contentor.dataDesembContCesta else '',
+                'DesembContCesta': contentor.DesembContCesta,
                 'criado_em': contentor.criado_em.isoformat(),
                 'atualizado_em': contentor.atualizado_em.isoformat()
             }
@@ -381,6 +442,14 @@ def contentores_detail(request, contentor_id):
             contentor.outRespContCesta = data.get('outRespContCesta', contentor.outRespContCesta)
             contentor.numCertContCesta = data.get('numCertContCesta', contentor.numCertContCesta)
             contentor.valCertContCesta = data.get('valCertContCesta', contentor.valCertContCesta)
+            contentor.barcoCertContCesta_id = data.get('barcoCertContCestaId', contentor.barcoCertContCesta.id if contentor.barcoCertContCesta else None)
+            contentor.altCertContCesta = data.get('altCertContCesta') if data.get('altCertContCesta') else None
+            contentor.largCertContCesta = data.get('largCertContCesta') if data.get('largCertContCesta') else None
+            contentor.comprCertContCesta = data.get('comprCertContCesta') if data.get('comprCertContCesta') else None
+            contentor.pesoCertContCesta = data.get('pesoCertContCesta') if data.get('pesoCertContCesta') else None
+            contentor.solicDesembContCesta = data.get('solicDesembContCesta', contentor.solicDesembContCesta)
+            contentor.dataDesembContCesta = data.get('dataDesembContCesta') if data.get('dataDesembContCesta') else None
+            contentor.DesembContCesta = data.get('DesembContCesta', contentor.DesembContCesta)
             contentor.save()
             
             print(f"[API] PUT /api/contentores/{contentor_id}/ - Contentor atualizado")
