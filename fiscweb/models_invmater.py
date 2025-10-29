@@ -28,7 +28,14 @@ class contentoresCestasMateriais(models.Model):
     outRespContCesta = models.CharField(max_length=40, verbose_name='Outro Responsável', blank=True, null=True)
     numCertContCesta = models.CharField(max_length=20, verbose_name='Número do Certificado')
     valCertContCesta = models.DateField(verbose_name='Validade do Certificado')
-    
+    barcoCertContCesta = models.ForeignKey('BarcosCad',on_delete=models.PROTECT,verbose_name='Embarcação')
+    altCertContCesta = models.DecimalField(max_digits=6,decimal_places=2,null=True,blank=True,verbose_name='Altura (m)')
+    largCertContCesta = models.DecimalField(max_digits=6,decimal_places=2,null=True,blank=True,verbose_name='Largura (m)')
+    comprCertContCesta = models.DecimalField(max_digits=6,decimal_places=2,null=True,blank=True,verbose_name='Comprimento (m)')
+    pesoCertContCesta = models.DecimalField(max_digits=6,decimal_places=2,null=True,blank=True,verbose_name='Peso (kg)')
+    solicDesembContCesta = models.BooleanField(default=False,verbose_name='Solicitar Desembarque' ) 
+    dataDesembContCesta = models.DateField(verbose_name='Data de Desembarquem')
+    DesembContCesta = models.BooleanField(default=False,verbose_name='A bordo?' )
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
     
@@ -93,3 +100,6 @@ class matBordo(models.Model):
     
     def __str__(self):
         return f"{self.descMat} - {self.numSerIden}"
+    
+
+
