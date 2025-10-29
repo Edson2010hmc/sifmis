@@ -80,16 +80,19 @@ class matBordo(models.Model):
     osAplicMat = models.CharField(max_length=13, verbose_name='Ordem de Serviço de Aplicação')
     numReqTranspMat = models.CharField(max_length=12, verbose_name='Número da Requisição de Transporte', blank=True, null=True)
     contCestaMat = models.BooleanField(default=False, verbose_name='Está em Contentor/Cesta?')
-    
-    # Campos relacionados ao contentor/cesta (visíveis se contCestaMat=True)
-    descContCestaMat = models.ForeignKey(contentoresCestasMateriais, on_delete=models.SET_NULL, null=True, blank=True, 
-                                         related_name='desc_contentor', verbose_name='Descrição do Contentor/Cesta')
+    descContCestaMat = models.ForeignKey(contentoresCestasMateriais, on_delete=models.SET_NULL, null=True, blank=True,related_name='desc_contentor', verbose_name='Descrição do Contentor/Cesta')
     identContCestaMat = models.CharField(max_length=20, verbose_name='Identificação do Contentor/Cesta', blank=True, null=True)
     numCertContCestaMat = models.CharField(max_length=20, verbose_name='Número do Certificado Contentor/Cesta', blank=True, null=True)
     valCertContCestaMat = models.DateField(verbose_name='Validade do Certificado Contentor/Cesta', null=True, blank=True)
-    
     obsMat = models.TextField(max_length=400, verbose_name='Observações', blank=True, null=True)
-    
+    barcoMat = models.ForeignKey('BarcosCad', on_delete=models.PROTECT, verbose_name='Embarcação')
+    altMat = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name='Altura (m)')
+    largMat = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name='Largura (m)')
+    comprMat = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name='Comprimento (m)')
+    pesoMat = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, verbose_name='Peso (kg)')
+    solicDesembMat = models.BooleanField(default=False, verbose_name='Solicitar Desembarque')
+    dataDesembMat = models.DateField(null=True, blank=True, verbose_name='Data de Desembarque')
+    DesembMat = models.BooleanField(default=False, verbose_name='A bordo?')
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
     
