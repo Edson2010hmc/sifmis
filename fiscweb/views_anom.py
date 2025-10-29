@@ -21,14 +21,35 @@ from .views import validar_usuario
 @require_http_methods(["GET", "POST"])
 def informe_anomalia_list(request):
     """
-    GET: Lista todos os informes de anomalia
+    GET: Lista informes de anomalia com filtros opcionais
     POST: Cria novo informe de anomalia
     """
     
     if request.method == 'GET':
         try:
+            # Iniciar queryset
             informes = InformeAnomalia.objects.all()
-            print(f"[DEBUG] Total de informes no banco: {informes.count()}")
+            
+            # FILTRO POR FISCAL CRIADOR (query param: fiscal_criador)
+            fiscal_criador = request.GET.get('fiscal_criador')
+            if fiscal_criador:
+                try:
+                    from .models_cad import FiscaisCad
+                    fiscal = FiscaisCad.objects.get(chave=fiscal_criador)
+                    informes = informes.filter(fiscalCriador=fiscal)
+                    print(f"[API] Filtrando por fiscal criador: {fiscal_criador}")
+                except FiscaisCad.DoesNotExist:
+                    print(f"[API WARNING] Fiscal {fiscal_criador} não encontrado")
+                    informes = informes.none()
+            
+            # FILTRO POR STATUS (query param: status)
+            status = request.GET.get('status')
+            if status:
+                informes = informes.filter(status=status)
+                print(f"[API] Filtrando por status: {status}")
+            
+            print(f"[API] GET /api/informes/ - Total após filtros: {informes.count()}")
+            
             data = []
             for informe in informes:
                 data.append({
@@ -41,10 +62,9 @@ def informe_anomalia_list(request):
                     'horarioEvento': informe.horarioEvento.strftime('%H:%M') if informe.horarioEvento else '',
                     'descricao': informe.descricao or '',
                     'relacaoEvento': informe.relacaoEvento,
-                    'criado_em': informe.criado_em.isoformat()
+                    'criado_em': informe.criado_em.isoformat(),
+                    'atualizado_em': informe.atualizado_em.isoformat()
                 })
-            
-            print(f"[API] GET /api/informes/ - {len(data)} informes retornados")
             
             return JsonResponse({
                 'success': True,
@@ -62,10 +82,23 @@ def informe_anomalia_list(request):
         try:
             data = json.loads(request.body)
             
+            # CAPTURAR CHAVE DO FISCAL CRIADOR (vem do frontend)
+            chave_fiscal = data.get('fiscalCriador')
+            fiscal_obj = None
+            
+            if chave_fiscal:
+                try:
+                    from .models_cad import FiscaisCad
+                    fiscal_obj = FiscaisCad.objects.get(chave=chave_fiscal)
+                    print(f"[API] Fiscal criador: {fiscal_obj.nome} ({fiscal_obj.chave})")
+                except FiscaisCad.DoesNotExist:
+                    print(f"[API WARNING] Fiscal {chave_fiscal} não encontrado")
+            
             print(f"[API] POST /api/informes/ - Criando novo informe")
             
-            # Criar informe
+            
             informe = InformeAnomalia.objects.create(
+                fiscalCriador=fiscal_obj,  
                 tipo=data.get('tipo', ''),
                 status=data.get('status', 'RASCUNHO'),  
                 siteInstalacao=data.get('siteInstalacao', ''),
@@ -88,7 +121,7 @@ def informe_anomalia_list(request):
                 informacoesComplementares=data.get('informacoesComplementares', '')
             )
             
-            print(f"[API] POST /api/informes/ - Informe {informe.id} criado com sucesso")
+            print(f"[API] POST /api/informes/ - Informe {informe.id} criado (fiscal={chave_fiscal})")
             
             return JsonResponse({
                 'success': True,
