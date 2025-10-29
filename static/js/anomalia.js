@@ -173,29 +173,33 @@ function desabilitarCampos(desabilitar) {
 // ===== VERIFICAR E CARREGAR INFORME SALVO =====
 async function verificarInformeSalvo() {
   try {
-    // Buscar todos os informes
-    const response = await fetch('/api/informes/');
+    // Obter usuário logado
+    const usuario = AuthModule.getUsuarioLogado();
+    if (!usuario || !usuario.chave) {
+      return; // Sem usuário, não busca
+    }
+    
+    // Buscar informes SALVO do fiscal logado
+    const response = await fetch(`/api/informes/?fiscal_criador=${usuario.chave}&status=SALVO`);
     const result = await response.json();
     
     if (!result.success) {
       return;
     }
     
-    // Procurar informe com status='SALVO' (mais recente)
-    const informesSalvos = result.data.filter(inf => inf.status === 'SALVO');
-    
-    if (informesSalvos.length === 0) {
-      return; // Nenhum informe salvo
+    // Se não há informes SALVO, retorna
+    if (!result.data || result.data.length === 0) {
+      return;
     }
     
     // Ordenar por data de atualização (mais recente primeiro)
-    informesSalvos.sort((a, b) => {
+    result.data.sort((a, b) => {
       const dataA = new Date(a.atualizado_em || a.criado_em);
       const dataB = new Date(b.atualizado_em || b.criado_em);
       return dataB - dataA;
     });
     
-    const informe = informesSalvos[0]; // Pegar o mais recente
+    const informe = result.data[0]; // Pegar o mais recente
     
     // Carregar detalhes completos do informe
     const responseDetail = await fetch(`/api/informes/${informe.id}/`);
@@ -214,10 +218,8 @@ async function verificarInformeSalvo() {
     desabilitarCampos(true);
     alternarBotoes(true);
     
-    
-    
   } catch (error) {
-    console.log('');
+    // Silencioso no front - mensagens no terminal do servidor
   }
 }
 
@@ -293,6 +295,12 @@ async function preencherFormularioComInforme(informe) {
 
 // ===== INICIALIZAR ==========================
 async function init() {
+  if (typeof AuthModule !== 'undefined' && AuthModule.validarUsuario) {
+    const autorizado = await AuthModule.validarUsuario();
+    if (!autorizado) {
+      return; // Para aqui se não autorizado
+    }
+  }
   configurarEventos();
   configurarNavegacaoTabs();
   configurarEventosConsulta();
@@ -561,6 +569,11 @@ function limparCamposPessoa() {
 // ===== SALVAR INFORME =====
 async function salvar() {
   try {
+    const usuario = AuthModule.getUsuarioLogado();
+    if (!usuario || !usuario.chave) {
+      alert('Erro: Usuário não identificado');
+      return;
+    }
     // Validações básicas
     if (!elementos.siteInstalacao.value) {
       alert('Selecione a instalação');
@@ -611,6 +624,7 @@ async function salvar() {
     const siteInstalacaoTexto = elementos.siteInstalacao.options[elementos.siteInstalacao.selectedIndex].text;
 
     const dados = {
+      fiscalCriador: usuario.chave,
       tipo: elementos.tipo.value,
       status: 'SALVO', 
       siteInstalacao: siteInstalacaoTexto,
@@ -1009,7 +1023,7 @@ function configurarEventosConsulta() {
 // ===== CARREGAR TODOS OS INFORMES =====
 async function carregarInformes() {
   try {
-    const response = await fetch('/api/informes/');
+    const response = await fetch('/api/informes/?status=ENVIADO');
     const result = await response.json();
     
     if (!result.success) {

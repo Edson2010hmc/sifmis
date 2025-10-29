@@ -23,12 +23,12 @@ class InformeAnomalia(models.Model):
     ]
     
     MUNICIPIO_CHOICES = [
-        ('RIO_DE_JANEIRO_RJ', 'Rio de Janeiro – RJ'),
-        ('MACAE_RJ', 'Macaé – RJ'),
-        ('SAO_JOAO_DA_BARRA_RJ', 'S. João da Barra – RJ'),
-        ('VITORIA_ES', 'Vitória – ES'),
-        ('BACIA_CAMPOS_OFFSHORE', 'Bacia de Campos – Offshore'),
-        ('BACIA_SANTOS_OFFSHORE', 'Bacia de Santos – Offshore'),
+        ('RIO DE JANEIRO-RJ', 'Rio de Janeiro – RJ'),
+        ('MACAE-RJ', 'Macaé – RJ'),
+        ('SAO JOAO DA BARRA_RJ', 'S. João da Barra – RJ'),
+        ('VITORIA-ES', 'Vitória – ES'),
+        ('BACIA DE CAMPOS-OFFSHORE', 'Bacia de Campos – Offshore'),
+        ('BACIA DE SANTOS-OFFSHORE', 'Bacia de Santos – Offshore'),
         ('OUTRO', 'Outro'),
     ]
     
@@ -57,8 +57,8 @@ class InformeAnomalia(models.Model):
     
     
     # Campos principais
-    tipo = models.CharField( max_length=30, choices=TIPO_CHOICES,verbose_name='Tipo',blank=True
-    )
+    fiscalCriador = models.ForeignKey('FiscaisCad',on_delete=models.PROTECT,null=True,blank=True,verbose_name='Fiscal Criador')
+    tipo = models.CharField( max_length=30, choices=TIPO_CHOICES,verbose_name='Tipo',blank=True)
     status = models.CharField(max_length=12,choices=STATUS_CHOICES,default='RASCUNHO',verbose_name='Status do Informe')    
     siteInstalacao = models.CharField(max_length=100,verbose_name='Site/Instalação', help_text='Formato: [tipo] [Nome da embarcação]' )
     empresa = models.CharField(max_length=100,verbose_name='Empresa' )
