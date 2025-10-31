@@ -138,6 +138,51 @@
             <textarea id="inv_mat_obs" maxlength="400" rows="3" style="width:100%; resize:vertical;"></textarea>
           </div>
 
+          <!-- templates/index_invmater.html -->
+<!-- LOCALIZAR o bloco </div> que fecha inv_mat_campos_contentor -->
+<!-- ADICIONAR logo APÓS esse </div>: -->
+
+          <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:15px;">
+            <div class="col" style="flex:1 1 300px;">
+              <label>Embarcação</label>
+              <select id="inv_mat_barco" style="width:100%">
+                <option value="">— selecione —</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:10px;">
+            <div class="col" style="flex:0 0 auto;">
+              <label>Altura (m)</label>
+              <input id="inv_mat_alt" type="number" step="0.01" style="width:120px">
+            </div>
+            <div class="col" style="flex:0 0 auto;">
+              <label>Largura (m)</label>
+              <input id="inv_mat_larg" type="number" step="0.01" style="width:120px">
+            </div>
+            <div class="col" style="flex:0 0 auto;">
+              <label>Comprimento (m)</label>
+              <input id="inv_mat_compr" type="number" step="0.01" style="width:150px">
+            </div>
+            <div class="col" style="flex:0 0 auto;">
+              <label>Peso (kg)</label>
+              <input id="inv_mat_peso" type="number" step="0.01" style="width:120px">
+            </div>
+          </div>
+
+          <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:10px;">
+            <div class="col" style="flex:0 0 auto;">
+              <label>
+                <input id="inv_mat_solic_desemb" type="checkbox">
+                Solicitar Desembarque
+              </label>
+            </div>
+            <div class="col" style="flex:0 0 auto;">
+              <label>Data de Desembarque</label>
+              <input id="inv_mat_data_desemb" type="date" style="width:180px">
+            </div>
+          </div>
+
           <div class="row" style="align-items:flex-end; gap:8px; margin-top:16px">
             <div class="col" style="min-width:300px">
               <label>Materiais cadastrados</label>
@@ -213,6 +258,46 @@
                 <label>Validade do Certificado</label>
                 <input id="inv_cont_val" type="date" style="width:180px">
               </div>
+            <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:10px;">
+              <div class="col" style="flex:1 1 300px;">
+                <label>Embarcação</label>
+                <select id="inv_cont_barco" style="width:100%">
+                  <option value="">— selecione —</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:15px; flex-wrap:wrap; margin-top:10px;">
+              <div class="col" style="flex:0 0 auto;">
+                <label>Altura (m)</label>
+                <input id="inv_cont_alt" type="number" step="0.01" style="width:120px">
+              </div>
+              <div class="col" style="flex:0 0 auto;">
+                <label>Largura (m)</label>
+                <input id="inv_cont_larg" type="number" step="0.01" style="width:120px">
+              </div>
+              <div class="col" style="flex:0 0 auto;">
+                <label>Comprimento (m)</label>
+                <input id="inv_cont_compr" type="number" step="0.01" style="width:150px">
+              </div>
+              <div class="col" style="flex:0 0 auto;">
+                <label>Peso (kg)</label>
+                <input id="inv_cont_peso" type="number" step="0.01" style="width:120px">
+              </div>
+            </div>
+
+            <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:10px;">
+              <div class="col" style="flex:0 0 auto;">
+                <label>
+                  <input id="inv_cont_solic_desemb" type="checkbox">
+                  Solicitar Desembarque
+                </label>
+              </div>
+              <div class="col" style="flex:0 0 auto;">
+                <label>Data de Desembarque</label>
+                <input id="inv_cont_data_desemb" type="date" style="width:180px">
+              </div>
+            </div>
             </div>
 
             <div class="row" style="align-items:flex-end; gap:8px; margin-top:16px">
