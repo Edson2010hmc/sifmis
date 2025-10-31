@@ -85,7 +85,30 @@ const ContentoresModule = (() => {
     }
   }
 
-  // ===== CARREGAR LISTA DE CONTENTORES =====
+//========CARREGAR CONTENTORES==================
+    async function carregarContentores() {
+    try {
+      const response = await fetch(API_URL);
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      
+      elementos.list.innerHTML = '<option value="">— selecione —</option>';
+      
+      result.data.forEach(cont => {
+        const option = document.createElement('option');
+        option.value = cont.id;
+        option.textContent = `${cont.identContCesta} - ${cont.descContCesta}`;
+        elementos.list.appendChild(option);
+      });
+      
+    } catch (error) {
+      console.error('Erro ao carregar contentores:', error);
+    }
+  }
+  // ===== CARREGAR CONTENTOR ESPECÍFICO===========
   async function carregarContentor(id) {
     try {
       const response = await fetch(`${API_URL}${id}/`);
@@ -339,6 +362,7 @@ const ContentoresModule = (() => {
     contentorEditandoId = null;
     desabilitarCampos(false);
   }
+
   // ===== EXPORTAR =====
   return {
     init,
