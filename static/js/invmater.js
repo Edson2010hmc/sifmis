@@ -29,6 +29,7 @@ const ContentoresModule = (() => {
   // ===== INICIALIZAR =====
   function init() {
     configurarEventos();
+    carregarBarcos();
     carregarContentores();
   }
 
@@ -60,31 +61,31 @@ const ContentoresModule = (() => {
     });
   }
 
-  // ===== CARREGAR LISTA DE CONTENTORES =====
-  async function carregarContentores() {
+// =======CARREGAR BARCOS===============
+  async function carregarBarcos() {
     try {
-      const response = await fetch(API_URL);
+      const response = await fetch('/api/barcos/');
       const result = await response.json();
       
       if (!result.success) {
         throw new Error(result.error);
       }
       
-      elementos.list.innerHTML = '<option value="">— selecione —</option>';
+      elementos.barco.innerHTML = '<option value="">— selecione —</option>';
       
-      result.data.forEach(cont => {
+      result.data.forEach(barco => {
         const option = document.createElement('option');
-        option.value = cont.id;
-        option.textContent = `${cont.identContCesta} - ${cont.descContCesta}`;
-        elementos.list.appendChild(option);
+        option.value = barco.id;
+        option.textContent = `${barco.tipoBarco} ${barco.nomeBarco}`;
+        elementos.barco.appendChild(option);
       });
       
     } catch (error) {
-      alert('Erro ao carregar contentores: ' + error.message);
+      console.error('Erro ao carregar barcos:', error);
     }
   }
 
-  // ===== CARREGAR CONTENTOR =====
+  // ===== CARREGAR LISTA DE CONTENTORES =====
   async function carregarContentor(id) {
     try {
       const response = await fetch(`${API_URL}${id}/`);
@@ -103,6 +104,13 @@ const ContentoresModule = (() => {
       elementos.outroResp.value = cont.outRespContCesta || '';
       elementos.cert.value = cont.numCertContCesta;
       elementos.val.value = cont.valCertContCesta;
+      elementos.barco.value = cont.barcoCertContCestaId || '';
+      elementos.alt.value = cont.altCertContCesta || '';
+      elementos.larg.value = cont.largCertContCesta || '';
+      elementos.compr.value = cont.comprCertContCesta || '';
+      elementos.peso.value = cont.pesoCertContCesta || '';
+      elementos.solicDesemb.checked = cont.solicDesembContCesta || false;
+      elementos.dataDesemb.value = cont.dataDesembContCesta || '';
       
       if (cont.respContCesta === 'OUTROS') {
         elementos.outroRespContainer.style.display = 'block';
@@ -298,6 +306,13 @@ const ContentoresModule = (() => {
     elementos.outroResp.disabled = desabilitar;
     elementos.cert.disabled = desabilitar;
     elementos.val.disabled = desabilitar;
+    elementos.barco.disabled = desabilitar;
+    elementos.alt.disabled = desabilitar;
+    elementos.larg.disabled = desabilitar;
+    elementos.compr.disabled = desabilitar;
+    elementos.peso.disabled = desabilitar;
+    elementos.solicDesemb.disabled = desabilitar;
+    elementos.dataDesemb.disabled = desabilitar;
   }
 
   // ===== LIMPAR =====
@@ -311,12 +326,18 @@ const ContentoresModule = (() => {
     elementos.outroRespContainer.style.display = 'none';
     elementos.cert.value = '';
     elementos.val.value = '';
+    elementos.barco.value = '';
+    elementos.alt.value = '';
+    elementos.larg.value = '';
+    elementos.compr.value = '';
+    elementos.peso.value = '';
+    elementos.solicDesemb.checked = false;
+    elementos.dataDesemb.value = '';
     elementos.list.value = '';
     elementos.btnEditar.disabled = true;
     elementos.btnExcluir.disabled = true;
     contentorEditandoId = null;
     desabilitarCampos(false);
-  }
 
   // ===== EXPORTAR =====
   return {
@@ -326,7 +347,7 @@ const ContentoresModule = (() => {
 
 })();
 
-// ===== MÓDULO MATERIAIS A BORDO =====
+// ===== MÓDULO MATERIAIS A BORDO ===================================================================
 const MateriaisBordoModule = (() => {
   const API_URL = '/api/materiais-bordo/';
   const API_MATERIAIS_OP = '/api/materiais-operacao/';
@@ -538,6 +559,13 @@ const MateriaisBordoModule = (() => {
       elementos.req.value = mat.numReqTranspMat || '';
       elementos.contCesta.checked = mat.contCestaMat;
       elementos.obs.value = mat.obsMat || '';
+      elementos.barco.value = mat.barcoMatId || '';
+      elementos.alt.value = mat.altMat || '';
+      elementos.larg.value = mat.largMat || '';
+      elementos.compr.value = mat.comprMat || '';
+      elementos.peso.value = mat.pesoMat || '';
+      elementos.solicDesemb.checked = mat.solicDesembMat || false;
+      elementos.dataDesemb.value = mat.dataDesembMat || '';
       
       if (mat.origMat === 'OUTROS') {
         elementos.outraOrigContainer.style.display = 'block';
@@ -766,6 +794,13 @@ const MateriaisBordoModule = (() => {
     elementos.contCesta.disabled = desabilitar;
     elementos.contDesc.disabled = desabilitar;
     elementos.obs.disabled = desabilitar;
+    elementos.barco.disabled = desabilitar;
+    elementos.alt.disabled = desabilitar;
+    elementos.larg.disabled = desabilitar;
+    elementos.compr.disabled = desabilitar;
+    elementos.peso.disabled = desabilitar;
+    elementos.solicDesemb.disabled = desabilitar;
+    elementos.dataDesemb.disabled = desabilitar;
   }
 
   // ===== LIMPAR =====
@@ -788,12 +823,18 @@ const MateriaisBordoModule = (() => {
     elementos.contCert.value = '';
     elementos.contVal.value = '';
     elementos.obs.value = '';
+    elementos.barco.value = '';
+    elementos.alt.value = '';
+    elementos.larg.value = '';
+    elementos.compr.value = '';
+    elementos.peso.value = '';
+    elementos.solicDesemb.checked = false;
+    elementos.dataDesemb.value = '';
     elementos.list.value = '';
     elementos.btnEditar.disabled = true;
     elementos.btnExcluir.disabled = true;
     materialEditandoId = null;
     desabilitarCampos(false);
-    carregarContentores();
   }
 
   // ===== EXPORTAR =====
