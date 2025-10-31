@@ -7,7 +7,7 @@ const ContentoresModule = (() => {
   let contentorEditandoId = null;
 
   // Referências aos elementos DOM
-  const elementos = {
+const elementos = {
     desc: document.getElementById('inv_cont_desc'),
     ident: document.getElementById('inv_cont_ident'),
     data: document.getElementById('inv_cont_data'),
@@ -17,6 +17,13 @@ const ContentoresModule = (() => {
     outroRespContainer: document.getElementById('inv_cont_outro_resp_container'),
     cert: document.getElementById('inv_cont_cert'),
     val: document.getElementById('inv_cont_val'),
+    barco: document.getElementById('inv_cont_barco'),
+    alt: document.getElementById('inv_cont_alt'),
+    larg: document.getElementById('inv_cont_larg'),
+    compr: document.getElementById('inv_cont_compr'),
+    peso: document.getElementById('inv_cont_peso'),
+    solicDesemb: document.getElementById('inv_cont_solic_desemb'),
+    dataDesemb: document.getElementById('inv_cont_data_desemb'),
     list: document.getElementById('inv_cont_list'),
     btnSave: document.getElementById('btnSaveCont'),
     btnEditar: document.getElementById('btnContEditar'),
