@@ -34,13 +34,9 @@
           return;
         }
         
-        document.querySelectorAll('.accordion-content').forEach(c => {
-          c.classList.remove('active');
-        });
-        
-        document.querySelectorAll('.accordion-header .toggle').forEach(t => {
-          t.textContent = '▼';
-        });
+        document.querySelectorAll('.accordion-content').forEach(c => {c.classList.remove('active');});
+        document.querySelectorAll('.accordion-header .toggle').forEach(t => {t.textContent = '▼'; });
+        document.querySelectorAll('.accordion-item').forEach(item => item.style.width = '600px');
         
         content.classList.add('active');
         toggle.textContent = '▲';
