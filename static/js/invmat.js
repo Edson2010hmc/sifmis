@@ -256,7 +256,7 @@ function configurarAccordion() {
     materialEditandoId = null;
     elementos.modalTitle.textContent = 'Programação de Embarque de Materiais';
     elementos.btnModalExcluir.style.display = 'none';
-    elementos.modal.style.display = 'block';
+    elementos.modal.style.display = 'flex';
     desabilitarCampos(false);
   }
 
@@ -275,7 +275,7 @@ function configurarAccordion() {
         
         elementos.modalTitle.textContent = 'Editar Material';
         elementos.btnModalExcluir.style.display = 'inline-block';
-        elementos.modal.style.display = 'block';
+        elementos.modal.style.display = 'flex';
         desabilitarCampos(false);
       }
     } catch (error) {
@@ -298,7 +298,7 @@ function configurarAccordion() {
         
         elementos.modalTitle.textContent = 'Detalhes do Material';
         elementos.btnModalExcluir.style.display = 'none';
-        elementos.modal.style.display = 'block';
+        elementos.modal.style.display = 'flex';
         desabilitarCampos(true);
       }
     } catch (error) {
