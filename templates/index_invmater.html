@@ -23,6 +23,10 @@
 
 <nav class="topnav">
   <button class="tablink" onclick="window.location.href='/'">⬅ Voltar</button>
+  <select id="filtro_barco_geral" style="width:300px; margin-left:20px;">
+    <option value="">— todas as embarcações —</option>
+  </select>
+  <button class="tablink" id="btnAddMaterialNav" style="margin-left:15px;">Adicionar Embarque de Material</button>
 </nav>
 
 <main>
@@ -117,7 +121,7 @@
 </main>
 
 <!-- ========== MODAL PROGRAMAÇÃO DE EMBARQUE ========== -->
-<div id="modalProgEmbarque" class="modal">
+<div id="modalProgEmbarque" class="modal" style="display:none;">
   <div class="modal-content" style="max-width:900px;">
     <span class="close">&times;</span>
     <h2 id="modalProgTitle">Programação de Embarque de Materiais</h2>

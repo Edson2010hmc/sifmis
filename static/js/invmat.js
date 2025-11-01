@@ -91,29 +91,32 @@
   }
 
   // ===== CONFIGURAR ACCORDION =====
-  function configurarAccordion() {
-    const headers = document.querySelectorAll('.accordion-header');
-    
-    headers.forEach(header => {
-      header.addEventListener('click', function() {
-        const target = this.getAttribute('data-target');
-        const content = document.getElementById(`acc-${target}`);
-        const toggle = this.querySelector('.toggle');
-        
-        if (content.classList.contains('active')) {
-          content.classList.remove('active');
-          toggle.textContent = '▼';
-          return;
-        }
-        
-        document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.accordion-header .toggle').forEach(t => t.textContent = '▼');
-        
-        content.classList.add('active');
-        toggle.textContent = '▲';
-      });
+function configurarAccordion() {
+  const headers = document.querySelectorAll('.accordion-header');
+  
+  headers.forEach(header => {
+    header.addEventListener('click', function() {
+      const target = this.getAttribute('data-target');
+      const content = document.getElementById(`acc-${target}`);
+      const toggle = this.querySelector('.toggle');
+      
+      if (content.classList.contains('active')) {
+        content.classList.remove('active');
+        toggle.textContent = '▼';
+        header.closest('.accordion-item').style.width = '600px';
+        return;
+      }
+      
+      document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.accordion-header .toggle').forEach(t => t.textContent = '▼');
+      document.querySelectorAll('.accordion-item').forEach(item => item.style.width = '600px');
+      
+      content.classList.add('active');
+      toggle.textContent = '▲';
+      header.closest('.accordion-item').style.width = '100%';
     });
-  }
+  });
+}
 
   // ===== CONFIGURAR EVENTOS =====
   function configurarEventos() {
