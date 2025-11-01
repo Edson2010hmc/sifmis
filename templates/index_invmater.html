@@ -40,15 +40,15 @@
           <div class="card fadein">
             
           <div style="display:flex; gap:15px; align-items:flex-end; margin-bottom:20px;">
-          <div class="col" style="flex:1 1 300px;">
-            <label>Filtrar por Embarcação</label>
-            <select id="filtro_barco_prog">
+            <div class="col" style="flex:0 0 auto;">
+              <label>Filtrar por Embarcação</label>
+              <select id="filtro_barco_prog" style="width:400px;">
               <option value="">— todas as embarcações —</option>
             </select>
           </div>
         </div>
 
-            <table id="tblProgEmbarque">
+            <table id="tblProgEmbarque" style="width:100%;">
               <thead>
                 <tr>
                   <th>Embarcação</th>
@@ -80,15 +80,15 @@
           <div class="card fadein">
             
             <div style="display:flex; gap:15px; align-items:flex-end; margin-bottom:20px;">
-              <div class="col" style="flex:1 1 300px;">
+              <div class="col" style="flex:0 0 auto;">
                 <label>Filtrar por Embarcação</label>
-                <select id="filtro_barco_bordo">
+                <select id="filtro_barco_bordo" style="width:400px;">
                   <option value="">— todas as embarcações —</option>
                 </select>
               </div>
             </div>
 
-            <table id="tblMatBordo">
+            <table id="tblMatBordo" style="width:100%;">
               <thead>
                 <tr>
                   <th>Embarcação</th>
@@ -125,7 +125,7 @@
       <!-- Embarcação -->
       <div class="col">
         <label>Embarcação <span style="color:red;">*</span></label>
-        <select id="modal_barco" style="width:100%;">
+        <select id="modal_barco" style="width:400px;">
           <option value="">— selecione —</option>
         </select>
       </div>
@@ -292,6 +292,13 @@
         </div>
 
       </div>
+
+
+
+
+
+
+
 
       <!-- Observações -->
       <div class="col" style="margin-top:15px;">
