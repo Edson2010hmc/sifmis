@@ -3,7 +3,7 @@ from . import views
 from . import views_cad
 from . import views_ps
 from . import views_anom
-
+from . import views_invmat
 
 
 
@@ -115,7 +115,12 @@ urlpatterns = [
     path('api/informes/<int:informe_id>/html/', views_anom.obter_html_informe, name='obter_html_informe'),
 
 
-
+#===========================================MODULO INVENTÁRIO DE MATERIAIS========================================
+    # API Materiais Embarque
+    path('api/materiais-embarque/', views_invmat.materiais_embarque_list, name='materiais_embarque_list'),
+    path('api/materiais-embarque/<int:material_id>/', views_invmat.materiais_embarque_detail, name='materiais_embarque_detail'),
+    path('api/materiais-embarque/<int:material_id>/status/', views_invmat.materiais_embarque_status, name='materiais_embarque_status'),
+    path('api/materiais-embarque/<int:material_id>/desembarque/', views_invmat.materiais_desembarque_add, name='materiais_desembarque_add'),
 
 
 

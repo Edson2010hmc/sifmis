@@ -8,7 +8,7 @@ from .models_ps import inoPendContr
 from .models_ps import iapo, smsLvMang,smsLvSeg
 
 from .models_anom import InformeAnomalia, SubTabPessoasAnomalia # MODULO INFORME DE ANOMALIA
-
+from .models_invmat import materialEmb, subMatEmb, subMatDesemb
 
 #======================= MODULO CADASTROS================================
 admin.site.register(FiscaisCad)
@@ -47,3 +47,7 @@ admin.site.register(smsLvSeg)
 admin.site.register(InformeAnomalia)
 admin.site.register(SubTabPessoasAnomalia)
 
+#=============================MODULO INVENTARIO DE MATERIAIS=======================
+admin.site(materialEmb)
+admin.site(subMatEmb)
+admin.site(subMatDesemb)

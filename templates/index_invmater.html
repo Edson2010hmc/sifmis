@@ -27,11 +27,300 @@
 
 <main>
   <section class="tab active">
-    
+    <div class="accordion">
+      
+      <!-- ========== ACCORDION 1: PROGRAMAÇÃO DE EMBARQUE DE MATERIAIS ========== -->
+      <div class="accordion-item">
+        <div class="accordion-header" data-target="prog-embarque">
+          <h3>📋 Programação de Embarque de Materiais</h3>
+          <span class="toggle">▼</span>
+        </div>
+        <div class="accordion-content" id="acc-prog-embarque">
+          <div class="card fadein">
+            
+            <div style="display:flex; gap:15px; align-items:flex-end; margin-bottom:20px;">
+              <div class="col" style="flex:1 1 300px;">
+                <label>Filtrar por Embarcação</label>
+                <select id="filtro_barco_prog">
+                  <option value="">— todas as embarcações —</option>
+                </select>
+              </div>
+              <div class="col" style="flex:0 0 auto;">
+                <button id="btnAddProgEmbarque" class="btn">Adicionar Embarque de Material</button>
+              </div>
+            </div>
+
+            <table id="tblProgEmbarque">
+              <thead>
+                <tr>
+                  <th>Embarcação</th>
+                  <th>Data Previsão Embarque</th>
+                  <th>Nº RT</th>
+                  <th>Descrição do Material</th>
+                  <th>Ordem de Serviço</th>
+                  <th style="width:280px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="6" style="text-align:center; color:#999;">Nenhum material programado</td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== ACCORDION 2: MATERIAIS A BORDO ========== -->
+      <div class="accordion-item">
+        <div class="accordion-header" data-target="mat-bordo">
+          <h3>📦 Materiais a Bordo</h3>
+          <span class="toggle">▼</span>
+        </div>
+        <div class="accordion-content" id="acc-mat-bordo">
+          <div class="card fadein">
+            
+            <div style="display:flex; gap:15px; align-items:flex-end; margin-bottom:20px;">
+              <div class="col" style="flex:1 1 300px;">
+                <label>Filtrar por Embarcação</label>
+                <select id="filtro_barco_bordo">
+                  <option value="">— todas as embarcações —</option>
+                </select>
+              </div>
+            </div>
+
+            <table id="tblMatBordo">
+              <thead>
+                <tr>
+                  <th>Embarcação</th>
+                  <th>Meio de Recebimento</th>
+                  <th>Nº RT</th>
+                  <th>Ordem de Serviço</th>
+                  <th>Descrição do Material</th>
+                  <th style="width:320px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="6" style="text-align:center; color:#999;">Nenhum material a bordo</td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
   </section>
 </main>
 
+<!-- ========== MODAL PROGRAMAÇÃO DE EMBARQUE ========== -->
+<div id="modalProgEmbarque" class="modal">
+  <div class="modal-content" style="max-width:900px;">
+    <span class="close">&times;</span>
+    <h2 id="modalProgTitle">Programação de Embarque de Materiais</h2>
+    
+    <div class="modal-body">
+      
+      <!-- Embarcação -->
+      <div class="col">
+        <label>Embarcação <span style="color:red;">*</span></label>
+        <select id="modal_barco" style="width:100%;">
+          <option value="">— selecione —</option>
+        </select>
+      </div>
+
+      <!-- Descrição e Identificação -->
+      <div style="display:flex; gap:15px; flex-wrap:wrap;">
+        <div class="col" style="flex:1 1 400px;">
+          <label>Descrição do Material <span style="color:red;">*</span></label>
+          <input id="modal_desc" type="text" maxlength="40" style="width:100%;">
+        </div>
+        <div class="col" style="flex:0 0 auto;">
+          <label>Identificação/N.Série</label>
+          <input id="modal_ident" type="text" maxlength="15" style="width:200px;">
+        </div>
+      </div>
+
+      <!-- Peso e Dimensões -->
+      <div style="display:flex; gap:15px; flex-wrap:wrap;">
+        <div class="col" style="flex:0 0 auto;">
+          <label>Peso (kg)</label>
+          <input id="modal_peso" type="number" style="width:120px;">
+        </div>
+        <div class="col" style="flex:0 0 auto;">
+          <label>Altura (m)</label>
+          <input id="modal_altura" type="number" step="0.01" style="width:100px;">
+        </div>
+        <div class="col" style="flex:0 0 auto;">
+          <label>Largura (m)</label>
+          <input id="modal_largura" type="number" step="0.01" style="width:100px;">
+        </div>
+        <div class="col" style="flex:0 0 auto;">
+          <label>Comprimento (m)</label>
+          <input id="modal_compr" type="number" step="0.01" style="width:100px;">
+        </div>
+      </div>
+
+      <!-- Responsável pelo Material -->
+      <div style="display:flex; gap:15px; flex-wrap:wrap;">
+        <div class="col" style="flex:0 0 auto;">
+          <label>Responsável pelo Material</label>
+          <select id="modal_resp" style="width:150px;">
+            <option value="">— selecione —</option>
+            <option value="CRD">CRD</option>
+            <option value="MIS">MIS</option>
+            <option value="CENPES">CENPES</option>
+            <option value="EQSE">EQSE</option>
+            <option value="ISBM">ISBM</option>
+            <option value="ANC">ANC</option>
+            <option value="OUTRO">Outro</option>
+          </select>
+        </div>
+        <div class="col" id="modal_outro_resp_container" style="flex:0 0 auto; display:none;">
+          <label>Outro Responsável</label>
+          <input id="modal_outro_resp" type="text" maxlength="20" style="width:250px;">
+        </div>
+      </div>
+
+      <!-- Material em contentor? -->
+      <div class="col" style="margin-top:10px;">
+        <label>Material em contentor que ficará a bordo? <span style="color:red;">*</span></label>
+        <select id="modal_cont_bordo" style="width:200px;">
+          <option value="">— selecione —</option>
+          <option value="SIM">SIM</option>
+          <option value="NÃO">NÃO</option>
+          <option value="N/A">N/A</option>
+        </select>
+      </div>
+
+      <!-- Campos do Contentor (aparecem se SIM) -->
+      <div id="modal_campos_contentor" style="display:none; border-left:3px solid #0b7a66; padding-left:15px; margin-top:15px;">
+        <div class="col">
+          <label>Descrição do contentor <span style="color:red;">*</span></label>
+          <input id="modal_desc_cont" type="text" maxlength="30" style="width:100%; max-width:500px;">
+        </div>
+        
+        <div style="display:flex; gap:15px; flex-wrap:wrap;">
+          <div class="col" style="flex:0 0 auto;">
+            <label>Identificação do Contentor</label>
+            <input id="modal_id_cont" type="text" maxlength="20" style="width:200px;">
+          </div>
+          <div class="col" style="flex:0 0 auto;">
+            <label>Responsável pelo Contentor <span style="color:red;">*</span></label>
+            <select id="modal_resp_cont" style="width:150px;">
+              <option value="">— selecione —</option>
+              <option value="CRD">CRD</option>
+              <option value="LOEP">LOEP</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:15px; flex-wrap:wrap;">
+          <div class="col" style="flex:0 0 auto;">
+            <label>Nº Certificado do Contentor</label>
+            <input id="modal_cert_cont" type="text" maxlength="12" style="width:180px;">
+          </div>
+          <div class="col" style="flex:0 0 auto;">
+            <label>Validade do Certificado <span style="color:red;">*</span></label>
+            <input id="modal_val_cont" type="date" style="width:180px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Campos da Subtabela Embarque -->
+      <div style="border-top:2px solid #ddd; margin-top:20px; padding-top:20px;">
+        <h3 style="color:#0b7a66; margin-bottom:15px;">Dados do Embarque</h3>
+        
+        <div style="display:flex; gap:15px; flex-wrap:wrap;">
+          <div class="col" style="flex:0 0 auto;">
+            <label>Data Prevista Embarque <span style="color:red;">*</span></label>
+            <input id="modal_data_prev" type="date" style="width:180px;">
+          </div>
+          <div class="col" style="flex:0 0 auto;">
+            <label>Nº RT <span id="label_rt_obrig" style="color:red; display:none;">*</span></label>
+            <input id="modal_rt" type="text" maxlength="12" style="width:150px;">
+          </div>
+          <div class="col" style="flex:0 0 auto;">
+            <label>Nº Nota Fiscal</label>
+            <input id="modal_nf" type="text" maxlength="12" style="width:150px;">
+          </div>
+          <div class="col" style="flex:0 0 auto;">
+            <label>Ordem de Serviço <span id="label_os_obrig" style="color:red; display:none;">*</span></label>
+            <input id="modal_os" type="text" maxlength="15" style="width:150px;">
+          </div>
+        </div>
+
+        <!-- Meio de Recebimento -->
+        <div class="col" style="margin-top:10px;">
+          <label>Meio de recebimento</label>
+          <select id="modal_meio_rec" style="width:250px;">
+            <option value="">— selecione —</option>
+            <option value="PORTO">PORTO</option>
+            <option value="TRANSBORDO UEP">TRANSBORDO UEP</option>
+            <option value="TRANSBORDO BARCO">TRANSBORDO BARCO</option>
+            <option value="RETIRADO DE OS">RETIRADO DE OS</option>
+          </select>
+        </div>
+
+        <!-- Campos condicionais do meio de recebimento -->
+        <div id="modal_campo_uep" style="display:none; margin-top:10px;">
+          <div class="col" style="flex:0 0 auto;">
+            <label>UEP Transbordo</label>
+            <input id="modal_uep" type="text" maxlength="20" style="width:300px;">
+          </div>
+        </div>
+
+        <div id="modal_campo_barco" style="display:none; margin-top:10px;">
+          <div style="display:flex; gap:15px; align-items:flex-end;">
+            <div class="col" style="flex:0 0 auto;">
+              <label style="display:inline-flex; align-items:center; gap:6px;">
+                <input id="modal_mis_flag" type="checkbox" checked> Barco MIS?
+              </label>
+            </div>
+            <div class="col" id="modal_mis_barco_container" style="flex:1 1 300px;">
+              <label>Barco MIS</label>
+              <select id="modal_mis_barco" style="width:100%;">
+                <option value="">— selecione —</option>
+              </select>
+            </div>
+            <div class="col" id="modal_barco_nao_mis_container" style="flex:1 1 300px; display:none;">
+              <label>Barco Não MIS</label>
+              <input id="modal_barco_nao_mis" type="text" maxlength="30" style="width:100%;">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Observações -->
+      <div class="col" style="margin-top:15px;">
+        <label>Observações</label>
+        <textarea id="modal_obs" maxlength="500" rows="3" style="width:100%; resize:vertical;"></textarea>
+      </div>
+
+      <!-- Status (somente leitura) -->
+      <div class="col" style="margin-top:15px;">
+        <label>Status do Material</label>
+        <input id="modal_status" type="text" readonly style="width:100%; max-width:400px; background:#f5f5f5;">
+      </div>
+
+    </div>
+
+    <!-- Botões do Modal -->
+    <div class="modal-footer" style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+      <button id="btnModalSalvar" class="btn">Salvar</button>
+      <button id="btnModalCancelar" class="btn ghost">Cancelar</button>
+      <button id="btnModalExcluir" class="btn ghost" style="display:none;">Excluir</button>
+    </div>
+
+  </div>
+</div>
+
 <script src="/static/js/auth.js"></script>
+<script src="/static/js/invmat.js"></script>
 
 </body>
 </html>
