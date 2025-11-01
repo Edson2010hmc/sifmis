@@ -3,7 +3,7 @@ from . import views
 from . import views_cad
 from . import views_ps
 from . import views_anom
-from . import views_invmater
+
 
 
 
@@ -114,15 +114,6 @@ urlpatterns = [
     path('api/informes/<int:informe_id>/enviar/', views_anom.enviar_informe, name='enviar_informe'),
     path('api/informes/<int:informe_id>/html/', views_anom.obter_html_informe, name='obter_html_informe'),
 
-
-    #===========================================MODULO INVENTÁRIO DE MATERIAIS========================================
-    # API Contentores/Cestas
-    path('api/contentores/', views_invmater.contentores_list, name='contentores_list'),
-    path('api/contentores/<int:contentor_id>/', views_invmater.contentores_detail, name='contentores_detail'),
-
-    # API Materiais a Bordo
-    path('api/materiais-bordo/', views_invmater.materiais_bordo_list, name='materiais_bordo_list'),
-    path('api/materiais-bordo/<int:material_id>/', views_invmater.materiais_bordo_detail, name='materiais_bordo_detail'),
 
 
 
