@@ -48,6 +48,6 @@ admin.site.register(InformeAnomalia)
 admin.site.register(SubTabPessoasAnomalia)
 
 #=============================MODULO INVENTARIO DE MATERIAIS=======================
-admin.site(materialEmb)
-admin.site(subMatEmb)
-admin.site(subMatDesemb)
+admin.site.register(materialEmb)
+admin.site.register(subMatEmb)
+admin.site.register(subMatDesemb)
