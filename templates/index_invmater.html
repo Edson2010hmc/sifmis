@@ -23,10 +23,7 @@
 
 <nav class="topnav">
   <button class="tablink" onclick="window.location.href='/'">⬅ Voltar</button>
-  <select id="filtro_barco_geral" style="width:300px; margin-left:20px;">
-    <option value="">— todas as embarcações —</option>
-  </select>
-  <button class="tablink" id="btnAddMaterialNav" style="margin-left:15px;">Adicionar Embarque de Material</button>
+  <button class="tablink" id="btnAddMaterialNav">Adicionar Embarque de Material</button>
 </nav>
 
 <main>
@@ -42,17 +39,14 @@
         <div class="accordion-content" id="acc-prog-embarque">
           <div class="card fadein">
             
-            <div style="display:flex; gap:15px; align-items:flex-end; margin-bottom:20px;">
-              <div class="col" style="flex:1 1 300px;">
-                <label>Filtrar por Embarcação</label>
-                <select id="filtro_barco_prog">
-                  <option value="">— todas as embarcações —</option>
-                </select>
-              </div>
-              <div class="col" style="flex:0 0 auto;">
-                <button id="btnAddProgEmbarque" class="btn">Adicionar Embarque de Material</button>
-              </div>
-            </div>
+          <div style="display:flex; gap:15px; align-items:flex-end; margin-bottom:20px;">
+          <div class="col" style="flex:1 1 300px;">
+            <label>Filtrar por Embarcação</label>
+            <select id="filtro_barco_prog">
+              <option value="">— todas as embarcações —</option>
+            </select>
+          </div>
+        </div>
 
             <table id="tblProgEmbarque">
               <thead>

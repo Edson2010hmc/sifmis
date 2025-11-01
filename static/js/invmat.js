@@ -120,7 +120,9 @@ function configurarAccordion() {
 
   // ===== CONFIGURAR EVENTOS =====
   function configurarEventos() {
-    elementos.btnAddProgEmbarque.addEventListener('click', abrirModalNovo);
+    
+    const btnNav = document.getElementById('btnAddMaterialNav');
+    if (btnNav) btnNav.addEventListener('click', abrirModalNovo);
     elementos.modalClose.addEventListener('click', fecharModal);
     elementos.btnModalSalvar.addEventListener('click', salvarMaterial);
     elementos.btnModalCancelar.addEventListener('click', fecharModal);
