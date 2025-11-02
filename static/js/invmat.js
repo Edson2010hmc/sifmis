@@ -197,9 +197,11 @@ function configurarAccordion() {
             <td>${mat.descMatEmb}</td>
             <td>${mat.osEmb || '-'}</td>
             <td>
-              <button class="btn secondary small" onclick="InvMatModule.editarMaterial(${mat.id})">Editar</button>
-              <button class="btn small" onclick="InvMatModule.confirmarEmbarque(${mat.id})">Embarque Confirmado</button>
-              <button class="btn ghost small" onclick="InvMatModule.embarqueNaoConcluido(${mat.id})">Embarque Não Concluído</button>
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <button class="btn secondary small" onclick="InvMatModule.editarMaterial(${mat.id})">Editar dados material</button>
+                <button class="btn small" onclick="InvMatModule.confirmarEmbarque(${mat.id})">Confirmar Embarque</button>
+                <button class="btn ghost small" onclick="InvMatModule.embarqueNaoConcluido(${mat.id})">Material não embarcado</button>
+              </div>
             </td>
           `;
           tbody.appendChild(tr);
@@ -233,9 +235,11 @@ function configurarAccordion() {
             <td>${mat.osEmb || '-'}</td>
             <td>${mat.descMatEmb}</td>
             <td>
-              <button class="btn secondary small" onclick="InvMatModule.verDetalhes(${mat.id})">Detalhes</button>
-              <button class="btn small" onclick="InvMatModule.relacionarDesembarque(${mat.id})">Relacionar para Desembarque</button>
-              <button class="btn ghost small" onclick="InvMatModule.aplicarOperacao(${mat.id})">Aplicado à Operação</button>
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <button class="btn secondary small" onclick="InvMatModule.verDetalhes(${mat.id})">Exibir detalhes</button>
+                <button class="btn small" onclick="InvMatModule.relacionarDesembarque(${mat.id})">Preparar desembarque</button>
+                <button class="btn ghost small" onclick="InvMatModule.aplicarOperacao(${mat.id})">Aplicar à operação</button>
+              </div>
             </td>
           `;
           tbody.appendChild(tr);

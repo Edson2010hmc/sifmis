@@ -61,6 +61,7 @@ def materiais_embarque_list(request):
                     'statusProgMatEmb': mat.statusProgMatEmb,
                     'dataPrevEmb': str(ultimo_embarque.dataPrevEmbMat) if ultimo_embarque else '',
                     'numRtEmb': ultimo_embarque.numRtMatEmb if ultimo_embarque else '',
+                    'meioRecEmbMat': ultimo_embarque.meioRecEmbMat if ultimo_embarque else '',
                     'osEmb': ultimo_embarque.osEmbMat if ultimo_embarque else '',
                     'criado_em': mat.criado_em.isoformat(),
                     'atualizado_em': mat.atualizado_em.isoformat()
