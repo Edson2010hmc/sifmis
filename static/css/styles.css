@@ -39,7 +39,7 @@ main { padding:12px; }
 
 .btns { display:flex; gap:8px; }
 .btn { padding:8px 12px; background:var(--brand); color:#fff; border:none; border-radius:6px; cursor:pointer; }
-.btn.secondary { background:#2c5f54; }
+.btn.secondary { background:var(--brand); }
 .btn.small { padding:6px 10px; font-size:12px; }
 
 .tabs-sub { display:flex; gap:4px; margin:8px 0; }
