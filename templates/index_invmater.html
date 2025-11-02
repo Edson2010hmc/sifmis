@@ -111,6 +111,48 @@
         </div>
       </div>
 
+      <!-- ========== ACCORDION 3: MATERIAIS SELECIONADOS PARA DESEMBARQUE ========== -->
+      <div class="accordion-item">
+        <div class="accordion-header" data-target="mat-desembarque">
+          <h3>🚢 Materiais Selecionados para Desembarque</h3>
+          <span class="toggle">▼</span>
+        </div>
+        <div class="accordion-content" id="acc-mat-desembarque">
+          <div class="card fadein">
+            
+            <div style="display:flex; gap:15px; align-items:flex-end; margin-bottom:20px;">
+              <div class="col" style="flex:0 0 auto;">
+                <label>Embarcação <span style="color:red;">*</span></label>
+                <select id="filtro_barco_desembarque" style="width:400px;">
+                  <option value="">— selecione —</option>
+                </select>
+              </div>
+              <div style="flex:0 0 auto;">
+                <button id="btnSolicitarDesembarque" class="btn" style="display:none;">Solicitar Desembarque</button>
+              </div>
+            </div>
+
+            <table id="tblMatDesembarque" style="width:100%; text-align:center;">
+              <thead>
+                <tr>
+                  <th>Embarcação</th>
+                  <th>Descrição do Material</th>
+                  <th>Ordem de Serviço</th>
+                  <th>Responsável Pelo Material</th>
+                  <th style="width:450px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="5" style="text-align:center; color:#999;">Selecione uma embarcação</td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 </main>

@@ -22,6 +22,9 @@
     // Tabelas
     tblProgEmbarque: document.getElementById('tblProgEmbarque'),
     tblMatBordo: document.getElementById('tblMatBordo'),
+    filtroBarcoDesembarque: document.getElementById('filtro_barco_desembarque'),
+    btnSolicitarDesembarque: document.getElementById('btnSolicitarDesembarque'),
+    tblMatDesembarque: document.getElementById('tblMatDesembarque'),
     
     // Modal
     modal: document.getElementById('modalProgEmbarque'),

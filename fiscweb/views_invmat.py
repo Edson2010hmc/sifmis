@@ -428,3 +428,505 @@ def emails_solic_desemb(request):
         except Exception as e:
             print(f"[API ERROR] PUT /api/emails-desembarque/ - {str(e)}")
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        
+
+#========================================== MATERIAIS DESEMBARQUE - LISTAGEM ==========================================
+@csrf_exempt
+@require_http_methods(["GET"])
+def materiais_desembarque_list(request):
+    """
+    GET: Lista materiais com status 'RELACIONADO PARA DESEMBARQUE' filtrados por embarcação
+    """
+    
+    try:
+        barco_id = request.GET.get('barco_id')
+        
+        if not barco_id:
+            return JsonResponse({'success': False, 'error': 'ID da embarcação não fornecido'}, status=400)
+        
+        materiais = materialEmb.objects.filter(
+            barcoMatEmb_id=barco_id,
+            statusProgMatEmb='RELACIONADO PARA DESEMBARQUE'
+        )
+        
+        data = []
+        for mat in materiais:
+            # Buscar primeiro embarque para pegar OS
+            primeiro_embarque = mat.embarques.first()
+            
+            data.append({
+                'id': mat.id,
+                'barcoMatEmb': mat.barcoMatEmb.nomeBarco,
+                'tipoBarco': mat.barcoMatEmb.tipoBarco,
+                'descMatEmb': mat.descMatEmb,
+                'identMatEmb': mat.identMatEmb or '',
+                'respEmbMat': mat.respEmbMat or '',
+                'outRespEmbMat': mat.outRespEmbMat or '',
+                'contBordoEmbMat': mat.contBordoEmbMat,
+                'descContMatEmb': mat.descContMatEmb or '',
+                'idContMatEmb': mat.idContMatEmb or '',
+                'pesoMatEmb': mat.pesoMatEmb,
+                'alturaMatEmb': str(mat.alturaMatEmb) if mat.alturaMatEmb else '',
+                'larguraMatEmb': str(mat.larguraMatEmb) if mat.larguraMatEmb else '',
+                'comprimentoMatEmb': str(mat.comprimentoMatEmb) if mat.comprimentoMatEmb else '',
+                'osEmb': primeiro_embarque.osEmbMat if primeiro_embarque else ''
+            })
+        
+        print(f"[API] GET /api/materiais-desembarque/ - {len(data)} materiais retornados para barco {barco_id}")
+        
+        return JsonResponse({'success': True, 'data': data})
+        
+    except Exception as e:
+        print(f"[API ERROR] GET /api/materiais-desembarque/ - {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+#========================================== VERIFICAR PS RASCUNHO ==========================================
+@csrf_exempt
+@require_http_methods(["POST"])
+def verificar_ps_rascunho_material(request):
+    """
+    POST: Verifica se existe PS em rascunho para o usuário e embarcação
+    Retorna dados da PS se existir
+    """
+    
+    try:
+        data = json.loads(request.body)
+        barco_id = data.get('barcoId')
+        fiscal_nome = data.get('fiscalNome', '').strip()
+        
+        if not barco_id:
+            return JsonResponse({'success': False, 'error': 'ID da embarcação não fornecido'}, status=400)
+        
+        if not fiscal_nome:
+            return JsonResponse({'success': False, 'error': 'Nome do fiscal não fornecido'}, status=400)
+        
+        # Buscar embarcação
+        try:
+            barco = BarcosCad.objects.get(id=barco_id)
+        except BarcosCad.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Embarcação não encontrada'}, status=404)
+        
+        # Buscar PS em rascunho
+        from .models_ps import PassServ, PortoTrocaTurma
+        
+        barco_nome = f"{barco.tipoBarco} - {barco.nomeBarco}"
+        ps_rascunho = PassServ.objects.filter(
+            BarcoPS=barco_nome,
+            fiscalDes=fiscal_nome,
+            statusPS='RASCUNHO'
+        ).first()
+        
+        if not ps_rascunho:
+            return JsonResponse({
+                'success': True,
+                'existeRascunho': False
+            })
+        
+        # Buscar dados de porto da PS
+        troca_turma = PortoTrocaTurma.objects.filter(idxPortoTT=ps_rascunho).first()
+        
+        if not troca_turma or not troca_turma.Porto or not troca_turma.AtracPorto or not troca_turma.DuracPorto:
+            return JsonResponse({
+                'success': True,
+                'existeRascunho': True,
+                'dadosCompletos': False
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'existeRascunho': True,
+            'dadosCompletos': True,
+            'psData': {
+                'id': ps_rascunho.id,
+                'dataEmissao': str(ps_rascunho.dataEmissaoPS),
+                'porto': troca_turma.Porto,
+                'atracacao': str(troca_turma.AtracPorto),
+                'duracao': troca_turma.DuracPorto
+            }
+        })
+        
+    except Exception as e:
+        print(f"[API ERROR] POST /api/verificar-ps-rascunho-material/ - {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+#========================================== SOLICITAR DESEMBARQUE ==========================================
+@csrf_exempt
+@require_http_methods(["POST"])
+def solicitar_desembarque_materiais(request):
+    """
+    POST: Processa solicitação de desembarque com envio de e-mail
+    """
+    
+    try:
+        data = json.loads(request.body)
+        barco_id = data.get('barcoId')
+        fiscal_nome = data.get('fiscalNome', '').strip()
+        ps_data = data.get('psData')
+        modelo = data.get('modelo')  # 001, 002, 003, 004
+        dados_modal = data.get('dadosModal', {})  # Para modelos 002 e 003
+        
+        print(f"[API] POST /api/solicitar-desembarque/ - Modelo: {modelo}, Barco: {barco_id}")
+        
+        if not barco_id or not fiscal_nome or not ps_data or not modelo:
+            return JsonResponse({'success': False, 'error': 'Dados incompletos'}, status=400)
+        
+        # Buscar embarcação
+        try:
+            barco = BarcosCad.objects.get(id=barco_id)
+        except BarcosCad.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Embarcação não encontrada'}, status=404)
+        
+        # Buscar materiais relacionados para desembarque
+        materiais = materialEmb.objects.filter(
+            barcoMatEmb_id=barco_id,
+            statusProgMatEmb='RELACIONADO PARA DESEMBARQUE'
+        )
+        
+        if not materiais.exists():
+            return JsonResponse({'success': False, 'error': 'Nenhum material encontrado'}, status=404)
+        
+        # Buscar e-mails
+        emails_config = emailsSolicDesemb.objects.first()
+        if not emails_config:
+            return JsonResponse({'success': False, 'error': 'Configuração de e-mails não encontrada'}, status=404)
+        
+        # Preparar dados do fiscal
+        nome_fiscal = fiscal_nome.split(' - ')[1] if ' - ' in fiscal_nome else fiscal_nome
+        
+        # Importar módulo de envio de e-mail
+        import smtplib
+        from email.message import EmailMessage
+        from django.utils import timezone
+        from datetime import datetime, timedelta
+        
+        # Calcular horário de saída
+        hora_atrac = datetime.strptime(ps_data['atracacao'], '%H:%M')
+        duracao_horas = int(ps_data['duracao'])
+        hora_saida = (hora_atrac + timedelta(hours=duracao_horas)).strftime('%H:%M')
+        
+        # Preparar assunto e destinatários baseado no modelo
+        if modelo == '004':
+            # Modelo CRD
+            to_addr_list = [e.strip() for e in (emails_config.emailMatCrd or '').split(';') if e.strip()]
+            assunto_tipo = 'CRD'
+        else:
+            # Modelos MIS
+            to_addr_list = [e.strip() for e in (emails_config.emailMatMis or '').split(';') if e.strip()]
+            assunto_tipo = ''
+        
+        cc_list = [e.strip() for e in (emails_config.emailsMatCc or '').split(';') if e.strip()]
+        from_addr = barco.emailPetr or ''
+        
+        if not to_addr_list or not from_addr:
+            return JsonResponse({'success': False, 'error': 'E-mails não configurados corretamente'}, status=400)
+        
+        # Montar assunto
+        tipo_texto = f" {assunto_tipo}" if assunto_tipo else ""
+        assunto = f"#### IMPORTANTE #### SOLICITAÇÃO DE DESEMBARQUE DE MATERIAIS{tipo_texto} - {barco.tipoBarco} {barco.nomeBarco} {ps_data['dataEmissao']}"
+        
+        # Gerar corpo do e-mail baseado no modelo
+        corpo_html = gerar_corpo_email_desembarque(
+            modelo=modelo,
+            materiais=materiais,
+            barco=barco,
+            ps_data=ps_data,
+            hora_saida=hora_saida,
+            nome_fiscal=nome_fiscal,
+            from_addr=from_addr,
+            dados_modal=dados_modal
+        )
+        
+        # Enviar e-mail
+        msg = EmailMessage()
+        msg.set_content("Este e-mail requer visualização em HTML.")
+        msg.add_alternative(corpo_html, subtype='html')
+        msg['Subject'] = assunto
+        msg['From'] = from_addr
+        msg['To'] = ", ".join(to_addr_list)
+        if cc_list:
+            msg['Cc'] = ", ".join(cc_list)
+        
+        try:
+            s = smtplib.SMTP('smtp.petrobras.com.br', 25)
+            s.send_message(msg)
+            s.quit()
+        except Exception as e:
+            print(f"[EMAIL][ERRO] Falha no envio: {e}")
+            return JsonResponse({'success': False, 'error': 'Falha ao enviar e-mail'}, status=500)
+        
+        # Atualizar status e observações dos materiais
+        agora = timezone.localtime()
+        data_envio = agora.strftime('%d/%m/%Y')
+        hora_envio = agora.strftime('%H:%M')
+        
+        for mat in materiais:
+            # Atualizar status
+            mat.statusProgMatEmb = 'DESEMBARQUE SOLICITADO'
+            
+            # Adicionar observação
+            obs_adicional = f"\nSolicitado o desembarque deste material em e-mail enviado em {data_envio} às {hora_envio} por {nome_fiscal}."
+            
+            if modelo in ['002', '003']:
+                qtde_cont = dados_modal.get('qtdeContentores', '')
+                desc_cont = dados_modal.get('descContentores', '')
+                obs_adicional += f" Solicitados {qtde_cont} {desc_cont} para o desembarque dos materiais."
+            
+            mat.obsMatEmb = (mat.obsMatEmb or '') + obs_adicional
+            mat.save()
+            
+            # Replicar status para subtabelas
+            mat.embarques.update(statusRegEmb='DESEMBARQUE SOLICITADO')
+            mat.desembarques.update(statusRegDesemb='DESEMBARQUE SOLICITADO')
+        
+        print(f"[EMAIL][OK] Desembarque solicitado - {materiais.count()} materiais")
+        
+        return JsonResponse({'success': True, 'message': 'Desembarque solicitado com sucesso'})
+        
+    except Exception as e:
+        print(f"[API ERROR] POST /api/solicitar-desembarque/ - {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+#========================================== GERAR CORPO EMAIL DESEMBARQUE ==========================================
+def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, hora_saida, nome_fiscal, from_addr, dados_modal):
+    """
+    Gera o corpo HTML do e-mail baseado no modelo
+    """
+    
+    # Filtrar materiais baseado no modelo
+    if modelo == '004':
+        # CRD
+        mats_filtrados = [m for m in materiais if m.respEmbMat == 'CRD']
+    else:
+        # Não CRD
+        mats_filtrados = [m for m in materiais if m.respEmbMat != 'CRD']
+    
+    # Construir lista de materiais
+    if modelo == '001':
+        # Materiais com contentor
+        lista_materiais = ""
+        for mat in mats_filtrados:
+            if mat.contBordoEmbMat == 'SIM':
+                primeiro_emb = mat.embarques.first()
+                os_texto = primeiro_emb.osEmbMat if primeiro_emb else ''
+                lista_materiais += f"""
+                <tr>
+                    <td style="border:1px solid #ddd; padding:8px;">{mat.descMatEmb}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{mat.identMatEmb or ''}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{os_texto}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{mat.descContMatEmb or ''}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{mat.idContMatEmb or ''}</td>
+                </tr>
+                """
+        
+        corpo = f"""
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {ps_data['atracacao']} às {hora_saida}h</p>
+        
+        <table style="width:100%; border-collapse:collapse; margin:20px 0;">
+            <thead>
+                <tr style="background-color:#0b7a66; color:white;">
+                    <th style="border:1px solid #ddd; padding:10px;">Descrição Material</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Identificador/Num Série</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Ordem de serviço</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Contentor</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Identificação do contentor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {lista_materiais}
+            </tbody>
+        </table>
+        
+        <p>Importante destacar que é fundamental que a coleta do material seja realizada dentro do período de estadia.</p>
+        """
+    
+    elif modelo == '002':
+        # Materiais sem contentor
+        lista_materiais = ""
+        for mat in mats_filtrados:
+            if mat.contBordoEmbMat != 'SIM':
+                primeiro_emb = mat.embarques.first()
+                os_texto = primeiro_emb.osEmbMat if primeiro_emb else ''
+                dimensoes = f"A{mat.alturaMatEmb or ''}m x L{mat.larguraMatEmb or ''}m x C{mat.comprimentoMatEmb or ''}m"
+                lista_materiais += f"""
+                <tr>
+                    <td style="border:1px solid #ddd; padding:8px;">{mat.descMatEmb}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{mat.identMatEmb or ''}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{os_texto}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{mat.pesoMatEmb or ''}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{dimensoes}</td>
+                </tr>
+                """
+        
+        qtde_cont = dados_modal.get('qtdeContentores', '')
+        desc_cont = dados_modal.get('descContentores', '')
+        
+        corpo = f"""
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {ps_data['atracacao']} às {hora_saida}h</p>
+        
+        <table style="width:100%; border-collapse:collapse; margin:20px 0;">
+            <thead>
+                <tr style="background-color:#0b7a66; color:white;">
+                    <th style="border:1px solid #ddd; padding:10px;">Descrição Material</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Identificador/Num Série</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Ordem de serviço</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Peso</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Dimensões</th>
+                </tr>
+            </thead>
+            <tbody>
+                {lista_materiais}
+            </tbody>
+        </table>
+        
+        <p>Para o desembarque dos materiais acima, serão necessários {qtde_cont} contentores {desc_cont} para acomodação do material.</p>
+        
+        <p>Informo que os contentores não poderão permanecer a bordo para coleta posterior devido espaço restrito de convés. Dessa forma os contentores deverão ser entregues à embarcação, onde posicionaremos os materiais e o contentor deve ser coletado em seguida. Importante destacar que é fundamental que a manobra para coleta do material seja realizada dentro do período de estadia de porto informada.</p>
+        """
+    
+    elif modelo == '003':
+        # Misto - com e sem contentor
+        lista_sem_cont = ""
+        lista_com_cont = ""
+        
+        for mat in mats_filtrados:
+            primeiro_emb = mat.embarques.first()
+            os_texto = primeiro_emb.osEmbMat if primeiro_emb else ''
+            
+            if mat.contBordoEmbMat == 'SIM':
+                lista_com_cont += f"""
+                <tr>
+                    <td style="border:1px solid #ddd; padding:8px;">{mat.descMatEmb}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{mat.identMatEmb or ''}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{os_texto}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{mat.descContMatEmb or ''}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{mat.idContMatEmb or ''}</td>
+                </tr>
+                """
+            else:
+                dimensoes = f"A{mat.alturaMatEmb or ''}m x L{mat.larguraMatEmb or ''}m x C{mat.comprimentoMatEmb or ''}m"
+                lista_sem_cont += f"""
+                <tr>
+                    <td style="border:1px solid #ddd; padding:8px;">{mat.descMatEmb}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{mat.identMatEmb or ''}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{os_texto}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{mat.pesoMatEmb or ''}</td>
+                    <td style="border:1px solid #ddd; padding:8px;">{dimensoes}</td>
+                </tr>
+                """
+        
+        qtde_cont = dados_modal.get('qtdeContentores', '')
+        desc_cont = dados_modal.get('descContentores', '')
+        
+        corpo = f"""
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {ps_data['atracacao']} às {hora_saida}h</p>
+        
+        <table style="width:100%; border-collapse:collapse; margin:20px 0;">
+            <thead>
+                <tr style="background-color:#0b7a66; color:white;">
+                    <th style="border:1px solid #ddd; padding:10px;">Descrição Material</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Identificador/Num Série</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Ordem de serviço</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Peso</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Dimensões</th>
+                </tr>
+            </thead>
+            <tbody>
+                {lista_sem_cont}
+            </tbody>
+        </table>
+        
+        <p>Para o desembarque dos materiais acima, serão necessários {qtde_cont} contentores {desc_cont} para acomodação do material. Informo que os contentores não poderão permanecer a bordo para coleta posterior devido espaço restrito de convés. Dessa forma os contentores deverão ser entregues à embarcação, onde posicionaremos os materiais e o contentor deve ser coletado em seguida.</p>
+        
+        <p>Da mesma forma, solicito o desembarque dos materiais relacionados abaixo que já se encontram acondicionados em contentores:</p>
+        
+        <table style="width:100%; border-collapse:collapse; margin:20px 0;">
+            <thead>
+                <tr style="background-color:#0b7a66; color:white;">
+                    <th style="border:1px solid #ddd; padding:10px;">Descrição Material</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Identificador/Num Série</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Ordem de serviço</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Contentor</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Identificação do contentor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {lista_com_cont}
+            </tbody>
+        </table>
+        
+        <p>Importante destacar que é fundamental que a manobra para coleta do material seja realizada dentro do período de estadia de porto informada.</p>
+        """
+    
+    elif modelo == '004':
+        # CRD
+        lista_materiais = ""
+        for mat in mats_filtrados:
+            primeiro_emb = mat.embarques.first()
+            os_texto = primeiro_emb.osEmbMat if primeiro_emb else ''
+            lista_materiais += f"""
+            <tr>
+                <td style="border:1px solid #ddd; padding:8px;">{mat.descMatEmb}</td>
+                <td style="border:1px solid #ddd; padding:8px;">{mat.identMatEmb or ''}</td>
+                <td style="border:1px solid #ddd; padding:8px;">{os_texto}</td>
+            </tr>
+            """
+        
+        corpo = f"""
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {ps_data['atracacao']} às {hora_saida}h</p>
+        
+        <table style="width:100%; border-collapse:collapse; margin:20px 0;">
+            <thead>
+                <tr style="background-color:#0b7a66; color:white;">
+                    <th style="border:1px solid #ddd; padding:10px;">Descrição Material</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Identificador/Num Série</th>
+                    <th style="border:1px solid #ddd; padding:10px;">Ordem de serviço</th>
+                </tr>
+            </thead>
+            <tbody>
+                {lista_materiais}
+            </tbody>
+        </table>
+        
+        <p>Importante destacar que é fundamental que a manobra para coleta do material seja realizada dentro do período de estadia de porto informada.</p>
+        """
+    
+    # Template completo
+    html_completo = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 20px;">
+    
+    <div style="background-color:#0b7a66; color:white; padding:20px; text-align:center; border-radius:8px 8px 0 0;">
+        <h1 style="margin:0; font-size:24px;">SOLICITAÇÃO DE DESEMBARQUE DE MATERIAIS</h1>
+        <p style="margin:5px 0 0 0; font-size:16px; font-weight:bold;">SUB/OPSUB/MIS</p>
+    </div>
+
+    <div style="background-color:#fff; padding:20px; border:1px solid #ddd; border-top:none;">
+        {corpo}
+    </div>
+
+    <div style="background-color:#f8f9fa; padding:20px; border:1px solid #ddd; border-top:none; border-radius:0 0 8px 8px; text-align:center;">
+        <p style="margin:0; font-size:14px; line-height:1.8;">
+            <strong>Atenciosamente,</strong><br>
+            {nome_fiscal}<br>
+            <span style="color:#0b7a66; font-weight:bold;">Fiscal Offshore – Petróleo Brasileiro S/A</span><br>
+            SSUB/OPSUB/MIS<br>
+            {barco.tipoBarco} {barco.nomeBarco}<br>
+            <a href="mailto:{from_addr}" style="color:#0b7a66; text-decoration:none;">{from_addr}</a>
+        </p>
+    </div>
+
+</body>
+</html>
+    """
+    
+    return html_completo
