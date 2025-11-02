@@ -258,7 +258,7 @@ function configurarAccordion() {
     modoEdicao = false;
     modoSomenteLeitura = false;
     materialEditandoId = null;
-    elementos.modalTitle.textContent = 'Programação de Embarque de Materiais';
+    elementos.modalTitle.textContent = 'EMBARQUE DE MATERIAIS';
     elementos.btnModalExcluir.style.display = 'none';
     elementos.modal.style.display = 'flex';
     desabilitarCampos(false);
@@ -277,7 +277,7 @@ function configurarAccordion() {
         
         preencherModal(mat);
         
-        elementos.modalTitle.textContent = 'Editar Material';
+        elementos.modalTitle.textContent = 'EDITAR MATERIAL';
         elementos.btnModalExcluir.style.display = 'inline-block';
         elementos.modal.style.display = 'flex';
         desabilitarCampos(false);
@@ -300,7 +300,7 @@ function configurarAccordion() {
         
         preencherModal(mat);
         
-        elementos.modalTitle.textContent = 'Detalhes do Material';
+        elementos.modalTitle.textContent = 'EXIBIR DETALHES DE MATERIAL';
         elementos.btnModalExcluir.style.display = 'none';
         elementos.modal.style.display = 'flex';
         desabilitarCampos(true);
