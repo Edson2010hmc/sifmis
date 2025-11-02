@@ -1,14 +1,16 @@
 from django.contrib import admin
 
-from .models_cad import FiscaisCad,BarcosCad,ModalBarco,contatoUep,subTabcontatosUeps,materiaisOperacao # Seção cadastro
+from .models_cad import FiscaisCad,BarcosCad,ModalBarco,contatoUep,subTabcontatosUeps,materiaisOperacao 
 
 from .models_ps import PassServ, PortoTrocaTurma,PortoManutPrev,PortoAbast,PortoInspNorm,subTabPortoInspNorm,PortoInspPetr,subTabPortoInspPetr,PortoEmbEquip,subTabPortoEmbEquip,PortoEmbMat,subTabPortoEmbMat,PortoDesMat,PortoMobD # Seção 1
 from .models_ps import anomSMS,desvSMS 
 from .models_ps import inoPendContr 
 from .models_ps import iapo, smsLvMang,smsLvSeg
 
-from .models_anom import InformeAnomalia, SubTabPessoasAnomalia # MODULO INFORME DE ANOMALIA
-from .models_invmat import materialEmb, subMatEmb, subMatDesemb
+from .models_anom import InformeAnomalia, SubTabPessoasAnomalia 
+from .models_invmat import materialEmb, subMatEmb, subMatDesemb, emailsSolicDesemb 
+
+
 
 #======================= MODULO CADASTROS================================
 admin.site.register(FiscaisCad)
@@ -51,3 +53,4 @@ admin.site.register(SubTabPessoasAnomalia)
 admin.site.register(materialEmb)
 admin.site.register(subMatEmb)
 admin.site.register(subMatDesemb)
+admin.site.register(emailsSolicDesemb)

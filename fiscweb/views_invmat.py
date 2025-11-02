@@ -7,7 +7,7 @@ from django.views.decorators.http import require_http_methods
 import json
 from django.utils.dateparse import parse_date
 
-from .models_invmat import materialEmb, subMatEmb, subMatDesemb
+from .models_invmat import materialEmb, subMatEmb, subMatDesemb,emailsSolicDesemb
 from .models_cad import BarcosCad
 
 
@@ -334,3 +334,97 @@ def materiais_desembarque_add(request, material_id):
     except Exception as e:
         print(f"[API ERROR] POST /api/materiais-embarque/{material_id}/desembarque/ - {str(e)}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+
+    #========================================== E-MAILS SOLICITAÇÃO DESEMBARQUE - API REST ==========================================
+
+@csrf_exempt
+@require_http_methods(["GET", "POST", "PUT"])
+def emails_solic_desemb(request):
+    """
+    GET: Retorna os e-mails cadastrados (sempre o último registro)
+    POST: Cria novo registro de e-mails
+    PUT: Atualiza registro existente
+    """
+    
+    if request.method == 'GET':
+        try:
+            emails = emailsSolicDesemb.objects.first()
+            
+            if emails:
+                data = {
+                    'id': emails.id,
+                    'emailMatCrd': emails.emailMatCrd or '',
+                    'emailMatMis': emails.emailMatMis or '',
+                    'emailsMatCc': emails.emailsMatCc or ''
+                }
+            else:
+                data = {
+                    'id': None,
+                    'emailMatCrd': '',
+                    'emailMatMis': '',
+                    'emailsMatCc': ''
+                }
+            
+            print(f"[API] GET /api/emails-desembarque/ - E-mails retornados")
+            
+            return JsonResponse({'success': True, 'data': data})
+            
+        except Exception as e:
+            print(f"[API ERROR] GET /api/emails-desembarque/ - {str(e)}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            print(f"[API] POST /api/emails-desembarque/ - Criando e-mails")
+            
+            emails = emailsSolicDesemb.objects.create(
+                emailMatCrd=data.get('emailMatCrd'),
+                emailMatMis=data.get('emailMatMis'),
+                emailsMatCc=data.get('emailsMatCc')
+            )
+            
+            print(f"[API] E-mails criados com sucesso - ID: {emails.id}")
+            
+            return JsonResponse({'success': True, 'id': emails.id, 'message': 'E-mails cadastrados com sucesso'})
+            
+        except Exception as e:
+            print(f"[API ERROR] POST /api/emails-desembarque/ - {str(e)}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+    elif request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            email_id = data.get('id')
+            
+            print(f"[API] PUT /api/emails-desembarque/ - Atualizando e-mails ID: {email_id}")
+            
+            if email_id:
+                emails = emailsSolicDesemb.objects.get(id=email_id)
+                emails.emailMatCrd = data.get('emailMatCrd')
+                emails.emailMatMis = data.get('emailMatMis')
+                emails.emailsMatCc = data.get('emailsMatCc')
+                emails.save()
+            else:
+                emails = emailsSolicDesemb.objects.first()
+                if emails:
+                    emails.emailMatCrd = data.get('emailMatCrd')
+                    emails.emailMatMis = data.get('emailMatMis')
+                    emails.emailsMatCc = data.get('emailsMatCc')
+                    emails.save()
+                else:
+                    emails = emailsSolicDesemb.objects.create(
+                        emailMatCrd=data.get('emailMatCrd'),
+                        emailMatMis=data.get('emailMatMis'),
+                        emailsMatCc=data.get('emailsMatCc')
+                    )
+            
+            print(f"[API] E-mails atualizados com sucesso")
+            
+            return JsonResponse({'success': True, 'message': 'E-mails atualizados com sucesso'})
+            
+        except Exception as e:
+            print(f"[API ERROR] PUT /api/emails-desembarque/ - {str(e)}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)

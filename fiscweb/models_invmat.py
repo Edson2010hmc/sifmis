@@ -5,7 +5,7 @@ from django.db import models
 from .models_cad import BarcosCad
 
 
-#================================ MODELO PRINCIPAL - MATERIAL EMBARQUE ================================================
+#================================ MODELO PRINCIPAL - MATERIAL EMBARQUE ====================================================
 class materialEmb(models.Model):
     """Modelo de Tabela de Programação de Embarque de Materiais"""
     
@@ -73,7 +73,7 @@ class materialEmb(models.Model):
         return f"{self.barcoMatEmb.nomeBarco} - {self.descMatEmb}"
 
 
-#================================ SUBTABELA - EMBARQUE DE MATERIAIS ================================================
+#================================ MODELO SUBTABELA - EMBARQUE DE MATERIAIS ================================================
 class subMatEmb(models.Model):
     """Modelo de subtabela para embarque de materiais"""
     
@@ -108,7 +108,7 @@ class subMatEmb(models.Model):
         return f"Embarque - {self.idxMatEmb.descMatEmb} - {self.dataPrevEmbMat}"
 
 
-#================================ SUBTABELA - DESEMBARQUE DE MATERIAIS ================================================
+#================================ MODELO SUBTABELA - DESEMBARQUE DE MATERIAIS ==============================================
 class subMatDesemb(models.Model):
     """Modelo de subtabela para desembarque de materiais"""
     
@@ -141,3 +141,20 @@ class subMatDesemb(models.Model):
     
     def __str__(self):
         return f"Desembarque - {self.idxMatDesemb.descMatEmb} - {self.dataPrevDesmbMat}"
+    
+#=================================MODELO TABELA EMAILS DAS EQUIPES DE MATERIAIS ============================================
+class emailsSolicDesemb(models.Model):
+    """Modelo para cadastro de e-mails para solicitação de desembarque de materiais"""
+    
+    emailMatCrd = models.TextField(max_length=200, verbose_name='E-mails materiais CRD', blank=True, null=True)
+    emailMatMis = models.TextField(max_length=200, verbose_name='E-mails materiais MIS', blank=True, null=True)
+    emailsMatCc = models.TextField(max_length=200, verbose_name='E-mails materiais C-C', blank=True, null=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'E-mail Solicitação Desembarque'
+        verbose_name_plural = 'E-mails Solicitação Desembarque'
+    
+    def __str__(self):
+        return f"E-mails Desembarque - {self.id}"

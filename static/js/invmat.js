@@ -8,6 +8,7 @@
   let modoEdicao = false;
   let materialEditandoId = null;
   let modoSomenteLeitura = false;
+  let emailsId = null;
 
   // ===== ELEMENTOS DOM =====
   const elementos = {
@@ -74,7 +75,24 @@
     // Botões do modal
     btnModalSalvar: document.getElementById('btnModalSalvar'),
     btnModalCancelar: document.getElementById('btnModalCancelar'),
-    btnModalExcluir: document.getElementById('btnModalExcluir')
+    btnModalExcluir: document.getElementById('btnModalExcluir'),
+    modalEmails: document.getElementById('modalEmailsEquipes'),
+    closeEmailsModal: document.getElementById('closeEmailsModal'),
+    btnEmailsEquipes: document.getElementById('btnEmailsEquipes'),
+    emailInputCrd: document.getElementById('email_input_crd'),
+    emailInputMis: document.getElementById('email_input_mis'),
+    emailInputCc: document.getElementById('email_input_cc'),
+    emailsCrd: document.getElementById('emails_crd'),
+    emailsMis: document.getElementById('emails_mis'),
+    emailsCc: document.getElementById('emails_cc'),
+    btnIncluirCrd: document.getElementById('btnIncluirCrd'),
+    btnIncluirMis: document.getElementById('btnIncluirMis'),
+    btnIncluirCc: document.getElementById('btnIncluirCc'),
+    btnLimparCrd: document.getElementById('btnLimparCrd'),
+    btnLimparMis: document.getElementById('btnLimparMis'),
+    btnLimparCc: document.getElementById('btnLimparCc'),
+    btnSalvarEmails: document.getElementById('btnSalvarEmails'),
+    btnCancelarEmails: document.getElementById('btnCancelarEmails')
   };
 
   // ===== INICIALIZAÇÃO =====
@@ -139,6 +157,22 @@ function configurarAccordion() {
     window.addEventListener('click', (e) => {
       if (e.target === elementos.modal) fecharModal();
     });
+
+    elementos.btnEmailsEquipes.addEventListener('click', abrirModalEmails);
+    elementos.closeEmailsModal.addEventListener('click', fecharModalEmails);
+    elementos.btnCancelarEmails.addEventListener('click', fecharModalEmails);
+    elementos.btnSalvarEmails.addEventListener('click', salvarEmails);
+    elementos.btnIncluirCrd.addEventListener('click', () => incluirEmail('crd'));
+    elementos.btnIncluirMis.addEventListener('click', () => incluirEmail('mis'));
+    elementos.btnIncluirCc.addEventListener('click', () => incluirEmail('cc'));
+    elementos.btnLimparCrd.addEventListener('click', () => limparCampoEmail('crd'));
+    elementos.btnLimparMis.addEventListener('click', () => limparCampoEmail('mis'));
+    elementos.btnLimparCc.addEventListener('click', () => limparCampoEmail('cc'));
+
+    window.addEventListener('click', (e) => {
+      if (e.target === elementos.modalEmails) fecharModalEmails();
+    });
+
   }
 
   // ===== CARREGAR EMBARCAÇÕES =====
@@ -615,6 +649,117 @@ function configurarAccordion() {
     const [ano, mes, dia] = data.split('-');
     return `${dia}/${mes}/${ano}`;
   }
+
+// ===== MODAL E-MAILS =====
+
+async function abrirModalEmails() {
+  try {
+    const response = await fetch('/api/emails-desembarque/');
+    const result = await response.json();
+    
+    if (result.success) {
+      const data = result.data;
+      emailsId = data.id;
+      elementos.emailsCrd.value = data.emailMatCrd;
+      elementos.emailsMis.value = data.emailMatMis;
+      elementos.emailsCc.value = data.emailsMatCc;
+    }
+    
+    elementos.modalEmails.style.display = 'flex';
+  } catch (error) {
+    alert('Erro ao carregar e-mails');
+  }
+}
+
+function fecharModalEmails() {
+  elementos.modalEmails.style.display = 'none';
+  elementos.emailInputCrd.value = '';
+  elementos.emailInputMis.value = '';
+  elementos.emailInputCc.value = '';
+}
+
+function incluirEmail(tipo) {
+  let input, textarea;
+  
+  if (tipo === 'crd') {
+    input = elementos.emailInputCrd;
+    textarea = elementos.emailsCrd;
+  } else if (tipo === 'mis') {
+    input = elementos.emailInputMis;
+    textarea = elementos.emailsMis;
+  } else if (tipo === 'cc') {
+    input = elementos.emailInputCc;
+    textarea = elementos.emailsCc;
+  }
+  
+  const email = input.value.trim();
+  
+  if (!email) {
+    alert('Digite um e-mail');
+    return;
+  }
+  
+  if (!validarEmail(email)) {
+    alert('E-mail inválido');
+    return;
+  }
+  
+  const emailsAtuais = textarea.value.trim();
+  if (emailsAtuais) {
+    textarea.value = emailsAtuais + ';' + email;
+  } else {
+    textarea.value = email;
+  }
+  
+  input.value = '';
+}
+
+function limparCampoEmail(tipo) {
+  if (tipo === 'crd') {
+    elementos.emailsCrd.value = '';
+  } else if (tipo === 'mis') {
+    elementos.emailsMis.value = '';
+  } else if (tipo === 'cc') {
+    elementos.emailsCc.value = '';
+  }
+}
+
+async function salvarEmails() {
+  const dados = {
+    id: emailsId,
+    emailMatCrd: elementos.emailsCrd.value.trim(),
+    emailMatMis: elementos.emailsMis.value.trim(),
+    emailsMatCc: elementos.emailsCc.value.trim()
+  };
+  
+  try {
+    const method = emailsId ? 'PUT' : 'POST';
+    const response = await fetch('/api/emails-desembarque/', {
+      method: method,
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(dados)
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      alert('E-mails salvos com sucesso!');
+      fecharModalEmails();
+    } else {
+      alert('Erro ao salvar: ' + result.error);
+    }
+  } catch (error) {
+    alert('Erro ao salvar e-mails');
+  }
+}
+
+function validarEmail(email) {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+}
+
+// ===== UTILITÁRIOS =====
+
 
   // ===== EXPORTAR MÓDULO =====
   window.InvMatModule = {

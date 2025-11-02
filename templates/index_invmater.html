@@ -24,6 +24,7 @@
 <nav class="topnav">
   <button class="tablink" onclick="window.location.href='/'">⬅ Voltar</button>
   <button class="tablink" id="btnAddMaterialNav">Adicionar Embarque de Material</button>
+  <button class="tablink" id="btnEmailsEquipes">E-mails das Equipes de Materiais</button>
 </nav>
 
 <main>
@@ -323,6 +324,77 @@
 
   </div>
 </div>
+
+<!-- ========== MODAL E-MAILS EQUIPES MATERIAIS ========== -->
+<div id="modalEmailsEquipes" class="modal hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:1000;">
+  <div class="modal-content" style="max-width:700px; background:#fff; border-radius:10px; padding:20px; max-height:90vh; overflow-y:auto; position:relative;">
+    <span class="close" id="closeEmailsModal">&times;</span>
+    <h2>Cadastro de E-mails - Materiais</h2>
+    
+    <div class="modal-body">
+      
+      <!-- E-mails CRD -->
+      <div style="border:1px solid #ddd; border-radius:8px; padding:15px; margin-bottom:15px;">
+        <h3 style="color:#0b7a66; margin-top:0;">E-mails CRD</h3>
+        <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:10px;">
+          <div class="col" style="flex:1;">
+            <label>E-mail</label>
+            <input id="email_input_crd" type="email" style="width:100%;" placeholder="exemplo@email.com">
+          </div>
+          <button id="btnIncluirCrd" class="btn secondary" style="height:34px;">Incluir</button>
+        </div>
+        <div class="col">
+          <label>E-mails CRD</label>
+          <textarea id="emails_crd" readonly style="width:100%; background:#f5f5f5; resize:vertical;" rows="2"></textarea>
+        </div>
+        <button id="btnLimparCrd" class="btn ghost small" style="margin-top:5px;">Limpar Campo</button>
+      </div>
+
+      <!-- E-mails MIS -->
+      <div style="border:1px solid #ddd; border-radius:8px; padding:15px; margin-bottom:15px;">
+        <h3 style="color:#0b7a66; margin-top:0;">E-mails MIS</h3>
+        <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:10px;">
+          <div class="col" style="flex:1;">
+            <label>E-mail</label>
+            <input id="email_input_mis" type="email" style="width:100%;" placeholder="exemplo@email.com">
+          </div>
+          <button id="btnIncluirMis" class="btn secondary" style="height:34px;">Incluir</button>
+        </div>
+        <div class="col">
+          <label>E-mails MIS</label>
+          <textarea id="emails_mis" readonly style="width:100%; background:#f5f5f5; resize:vertical;" rows="2"></textarea>
+        </div>
+        <button id="btnLimparMis" class="btn ghost small" style="margin-top:5px;">Limpar Campo</button>
+      </div>
+
+      <!-- E-mails C-C -->
+      <div style="border:1px solid #ddd; border-radius:8px; padding:15px; margin-bottom:15px;">
+        <h3 style="color:#0b7a66; margin-top:0;">E-mails C-C</h3>
+        <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:10px;">
+          <div class="col" style="flex:1;">
+            <label>E-mail</label>
+            <input id="email_input_cc" type="email" style="width:100%;" placeholder="exemplo@email.com">
+          </div>
+          <button id="btnIncluirCc" class="btn secondary" style="height:34px;">Incluir</button>
+        </div>
+        <div class="col">
+          <label>E-mails C-C</label>
+          <textarea id="emails_cc" readonly style="width:100%; background:#f5f5f5; resize:vertical;" rows="2"></textarea>
+        </div>
+        <button id="btnLimparCc" class="btn ghost small" style="margin-top:5px;">Limpar Campo</button>
+      </div>
+
+    </div>
+
+    <!-- Botões do Modal -->
+    <div class="modal-footer" style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+      <button id="btnSalvarEmails" class="btn">Salvar</button>
+      <button id="btnCancelarEmails" class="btn ghost">Cancelar</button>
+    </div>
+
+  </div>
+</div>
+
 
 <script src="/static/js/auth.js"></script>
 <script src="/static/js/invmat.js"></script>
