@@ -158,7 +158,9 @@ function configurarAccordion() {
       if (e.target === elementos.modal) fecharModal();
     });
 
-    elementos.btnEmailsEquipes.addEventListener('click', abrirModalEmails);
+
+    const btnEmail = document.getElementById('btnEmailsEquipes');
+    if (btnEmail) btnEmail.addEventListener('click', abrirModalEmails);
     elementos.closeEmailsModal.addEventListener('click', fecharModalEmails);
     elementos.btnCancelarEmails.addEventListener('click', fecharModalEmails);
     elementos.btnSalvarEmails.addEventListener('click', salvarEmails);
