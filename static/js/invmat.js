@@ -450,7 +450,7 @@ function configurarAccordion() {
     try {
 // Buscar fiscal logado
       const usuario = AuthModule.getUsuarioLogado();
-
+      let resp;
       if (!usuario || !usuario.chave) {
         alert('Fiscal não identificado');
         return;
@@ -525,7 +525,7 @@ function configurarAccordion() {
         } else if (semContentor.length > 0 && comContentor.length > 0) {
           // MODELO 003 - Perguntar se pode agrupar
           const resposta = confirm('Os materiais sem contentor associado podem ser acondicionados juntamente com os materiais que já estão em contentores?');
-          
+          resp = resposta;
           if (!resposta) {
             // MODELO 003 - Precisa modal
             dadosModal = await abrirModalContentoresPromise('003', barcoId, fiscalNome, psData);
@@ -551,8 +551,8 @@ function configurarAccordion() {
         if (semContentor.length > 0 && comContentor.length === 0) {
           modelo = '002';
         } else if (semContentor.length > 0 && comContentor.length > 0) {
-          const resposta = confirm('Os materiais sem contentor associado podem ser acondicionados juntamente com os materiais que já estão em contentores?');
-          modelo = resposta ? '001' : '003';
+          //const resposta = confirm('Os materiais sem contentor associado podem ser acondicionados juntamente com os materiais que já estão em contentores?');
+          modelo = resp ? '001' : '003';
         }
         
         await enviarSolicitacao(modelo, barcoId, fiscalNome, psData, dadosModal, 'NAO_CRD');
