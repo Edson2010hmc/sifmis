@@ -347,7 +347,7 @@ async function carregarTabelaMatBordo() {
     let materiaisFiltrados = result.data;
     
     if (barcoId) {
-      materiaisFiltrados = materiaisFiltrados.filter(m => m.barcoId == barcoId);
+      materiaisFiltrados = materiaisFiltrados.filter(m => m.barcoMatEmbId == barcoId);
     }
     
     if (rtFiltro) {
