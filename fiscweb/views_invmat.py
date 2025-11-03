@@ -611,7 +611,7 @@ def solicitar_desembarque_materiais(request):
         # Formatar horas com "h" no final
         hora_atrac_formatada = hora_atrac_str + 'h'
         hora_saida_formatada = hora_saida_str + 'h'
-        
+        data_emissao_formatada = datetime.strptime(ps_data['dataEmissao'], '%Y-%m-%d').strftime('%d/%m/%Y')
         # Preparar assunto e destinatários baseado no modelo
         if modelo == '004':
             # Modelo CRD
@@ -638,13 +638,13 @@ def solicitar_desembarque_materiais(request):
             materiais=materiais,
             barco=barco,
             ps_data=ps_data,
+            data_emissao_formatada=data_emissao_formatada,
             hora_atrac_formatada=hora_atrac_formatada,
             hora_saida_formatada=hora_saida_formatada,
             nome_fiscal=nome_fiscal,
             from_addr=from_addr,
             dados_modal=dados_modal
         )
-        
         # Enviar e-mail
         msg = EmailMessage()
         msg.set_content("Este e-mail requer visualização em HTML.")
@@ -699,7 +699,8 @@ def solicitar_desembarque_materiais(request):
 
 
 #========================================== GERAR CORPO EMAIL DESEMBARQUE ==========================================
-def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, hora_atrac_formatada, hora_saida_formatada, nome_fiscal, from_addr, dados_modal):
+def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, data_emissao_formatada, hora_atrac_formatada, hora_saida_formatada, nome_fiscal, from_addr, dados_modal):
+
     """
     Gera o corpo HTML do e-mail baseado no modelo
     """
@@ -731,7 +732,7 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, hora_atrac_
                 """
         
         corpo = f"""
-        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {hora_atrac_formatada} às {hora_saida_formatada}</p>
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {data_emissao_formatada} das {hora_atrac_formatada} às {hora_saida_formatada}</p>
       
         <table style="width:100%; border-collapse:collapse; margin:20px 0;">
             <thead>
@@ -773,7 +774,8 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, hora_atrac_
         desc_cont = dados_modal.get('descContentores', '')
         
         corpo = f"""
-        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {hora_atrac_formatada} às {hora_saida_formatada}</p>
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {data_emissao_formatada} das {hora_atrac_formatada} às {hora_saida_formatada}</p>
+
        
         <table style="width:100%; border-collapse:collapse; margin:20px 0;">
             <thead>
@@ -830,7 +832,7 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, hora_atrac_
         desc_cont = dados_modal.get('descContentores', '')
         
         corpo = f"""
-        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {hora_atrac_formatada} às {hora_saida_formatada}</p>
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {data_emissao_formatada} das {hora_atrac_formatada} às {hora_saida_formatada}</p>
        
         <table style="width:100%; border-collapse:collapse; margin:20px 0;">
             <thead>
@@ -884,7 +886,7 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, hora_atrac_
             """
         
         corpo = f"""
-        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {hora_atrac_formatada} às {hora_saida_formatada}</p>        
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {data_emissao_formatada} das {hora_atrac_formatada} às {hora_saida_formatada}</p>
         <table style="width:100%; border-collapse:collapse; margin:20px 0;">
             <thead>
                 <tr style="background-color:#0b7a66; color:white;">
@@ -913,15 +915,15 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, hora_atrac_
     
     <div style="background-color:#0b7a66; color:white; padding:20px; text-align:center; border-radius:8px 8px 0 0;">
         <h1 style="margin:0; font-size:24px;">SOLICITAÇÃO DE DESEMBARQUE DE MATERIAIS</h1>
-        <p style="margin:5px 0 0 0; font-size:16px; font-weight:bold;">SUB/OPSUB/MIS</p>
+        <p style="margin:5px 0 0 0; font-size:16px; font-weight:bold;">{barco.tipoBarco} {barco.nomeBarco}</p>
     </div>
 
     <div style="background-color:#fff; padding:20px; border:1px solid #ddd; border-top:none;">
         {corpo}
     </div>
 
-    <div style="background-color:#f8f9fa; padding:20px; border:1px solid #ddd; border-top:none; border-radius:0 0 8px 8px; text-align:center;">
-        <p style="margin:0; font-size:14px; line-height:1.8;">
+    <div style="background-color:#f8f9fa; padding:20px; border:1px solid #ddd; border-top:none; border-radius:0 0 8px 8px;">
+        <p style="margin:0; font-size:14px; line-height:1.8; text-align:left;">
             <strong>Atenciosamente,</strong><br>
             {nome_fiscal}<br>
             <span style="color:#0b7a66; font-weight:bold;">Fiscal Offshore – Petróleo Brasileiro S/A</span><br>
