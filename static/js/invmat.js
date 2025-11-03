@@ -445,11 +445,7 @@ function configurarAccordion() {
     await processarSolicitacaoDesembarque(barcoId, null);
   }
 
-  // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
-// NO ARQUIVO static/js/invmat.js
-// LOCALIZAR a função processarSolicitacaoDesembarque() completa
-// SUBSTITUIR toda a função POR:
-
+ 
   // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
   async function processarSolicitacaoDesembarque(barcoId, materiaisIds) {
     try {
@@ -477,7 +473,6 @@ function configurarAccordion() {
       }
       
       if (!resultPS.existeRascunho) {
-        // Buscar nome do barco para mensagem
         const respBarco = await fetch(`/api/barcos/`);
         const resBarco = await respBarco.json();
         const barco = resBarco.data.find(b => b.id == barcoId);
@@ -494,20 +489,20 @@ function configurarAccordion() {
       
       const psData = resultPS.psData;
       
-      // Buscar nome do barco para confirmação
+      // Buscar nome do barco
       const respBarco = await fetch(`/api/barcos/`);
       const resBarco = await respBarco.json();
       const barco = resBarco.data.find(b => b.id == barcoId);
       const barcoNome = barco ? `${barco.tipoBarco} ${barco.nomeBarco}` : 'a embarcação';
       
-      // Formatar data para exibição
+      // Formatar data
       const dataFormatada = psData.dataEmissao.split('-').reverse().join('/');
       
       if (!confirm(`Confirma a solicitação de Desembarque dos materiais relacionados para entrada de porto do ${barcoNome} no dia ${dataFormatada}?`)) {
         return;
       }
       
-      // Buscar materiais para determinar modelo
+      // Buscar materiais
       const responseMat = await fetch(`/api/materiais-desembarque/?barco_id=${barcoId}`);
       const resultMat = await responseMat.json();
       
@@ -518,22 +513,40 @@ function configurarAccordion() {
       
       const materiais = resultMat.data;
       
-      // Separar materiais CRD e NÃO CRD
+      // SEPARAR MATERIAIS POR TIPO
       const materiaisCrd = materiais.filter(m => m.respEmbMat === 'CRD');
       const materiaisNaoCrd = materiais.filter(m => m.respEmbMat !== 'CRD');
       
-      // Verificar se há ambos os tipos
-      if (materiaisCrd.length > 0 && materiaisNaoCrd.length > 0) {
-        // Processar NÃO CRD primeiro
-        await determinarModeloNaoCrd(barcoId, fiscalNome, psData, materiaisNaoCrd);
-        // Depois processar CRD
-        await enviarSolicitacao('004', barcoId, fiscalNome, psData, {});
-      } else if (materiaisCrd.length > 0) {
-        // Apenas CRD
-        await enviarSolicitacao('004', barcoId, fiscalNome, psData, {});
-      } else if (materiaisNaoCrd.length > 0) {
-        // Apenas NÃO CRD
-        await determinarModeloNaoCrd(barcoId, fiscalNome, psData, materiaisNaoCrd);
+      // PROCESSAR CRD (se existir)
+      if (materiaisCrd.length > 0) {
+        await enviarSolicitacao('004', barcoId, fiscalNome, psData, {}, 'CRD');
+      }
+      
+      // PROCESSAR NÃO CRD (se existir)
+      if (materiaisNaoCrd.length > 0) {
+        const comContentor = materiaisNaoCrd.filter(m => m.contBordoEmbMat === 'SIM');
+        const semContentor = materiaisNaoCrd.filter(m => m.contBordoEmbMat !== 'SIM');
+        
+        if (comContentor.length > 0 && semContentor.length === 0) {
+          // TODOS TÊM CONTENTOR - MODELO 001
+          await enviarSolicitacao('001', barcoId, fiscalNome, psData, {}, 'NAO_CRD');
+          
+        } else if (semContentor.length > 0 && comContentor.length === 0) {
+          // NENHUM TEM CONTENTOR - MODELO 002 (com modal)
+          await abrirModalContentores('002', barcoId, fiscalNome, psData, 'NAO_CRD');
+          
+        } else {
+          // ALGUNS COM E OUTROS SEM CONTENTOR - PERGUNTAR
+          const resposta = confirm('Os materiais sem contentor associado podem ser acondicionados juntamente com os materiais que já estão em contentores?');
+          
+          if (resposta) {
+            // SIM - MODELO 001 (todos juntos)
+            await enviarSolicitacao('001', barcoId, fiscalNome, psData, {}, 'NAO_CRD');
+          } else {
+            // NÃO - MODELO 003 (com modal)
+            await abrirModalContentores('003', barcoId, fiscalNome, psData, 'NAO_CRD');
+          }
+        }
       }
       
     } catch (error) {
@@ -541,32 +554,8 @@ function configurarAccordion() {
     }
   }
 
-  // ===== DETERMINAR MODELO NÃO CRD =====
-  async function determinarModeloNaoCrd(barcoId, fiscalNome, psData, materiais) {
-    const comContentor = materiais.filter(m => m.contBordoEmbMat === 'SIM');
-    const semContentor = materiais.filter(m => m.contBordoEmbMat !== 'SIM');
-    
-    if (comContentor.length > 0 && semContentor.length === 0) {
-      // Modelo 001 - Todos com contentor
-      await enviarSolicitacao('001', barcoId, fiscalNome, psData, {});
-    } else if (semContentor.length > 0 && comContentor.length === 0) {
-      // Modelo 002 - Todos sem contentor
-      await abrirModalContentores('002', barcoId, fiscalNome, psData);
-    } else {
-      // Modelo 003 - Misto
-      const resposta = confirm('Os materiais sem contentor associado podem ser acondicionados juntamente com os materiais que já estão em contentores?');
-      if (resposta) {
-        // Modelo 001
-        await enviarSolicitacao('001', barcoId, fiscalNome, psData, {});
-      } else {
-        // Modelo 003
-        await abrirModalContentores('003', barcoId, fiscalNome, psData);
-      }
-    }
-  }
-
   // ===== ABRIR MODAL CONTENTORES =====
-  function abrirModalContentores(modelo, barcoId, fiscalNome, psData) {
+  function abrirModalContentores(modelo, barcoId, fiscalNome, psData, tipoMaterial) {
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:2000;';
@@ -614,8 +603,39 @@ function configurarAccordion() {
       await enviarSolicitacao(modelo, barcoId, fiscalNome, psData, {
         qtdeContentores: qtde,
         descContentores: desc
-      });
+      }, tipoMaterial);
     });
+  }
+
+  // ===== ENVIAR SOLICITAÇÃO =====
+  async function enviarSolicitacao(modelo, barcoId, fiscalNome, psData, dadosModal, tipoMaterial) {
+    try {
+      const response = await fetch('/api/solicitar-desembarque/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          barcoId,
+          fiscalNome,
+          psData,
+          modelo,
+          dadosModal,
+          tipoMaterial
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        alert('Erro ao solicitar desembarque: ' + result.error);
+        return;
+      }
+      
+      alert('E-mail enviado com sucesso!');
+      await carregarTabelas();
+      
+    } catch (error) {
+      alert('Erro ao enviar solicitação: ' + error.message);
+    }
   }
 
   // ===== ENVIAR SOLICITAÇÃO =====

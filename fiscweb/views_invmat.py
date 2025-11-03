@@ -566,7 +566,7 @@ def solicitar_desembarque_materiais(request):
         ps_data = data.get('psData')
         modelo = data.get('modelo')  # 001, 002, 003, 004
         dados_modal = data.get('dadosModal', {})  # Para modelos 002 e 003
-        
+        tipo_material = data.get('tipoMaterial', '')  # 'CRD' ou 'NAO_CRD'
         print(f"[API] POST /api/solicitar-desembarque/ - Modelo: {modelo}, Barco: {barco_id}")
         
         if not barco_id or not fiscal_nome or not ps_data or not modelo:
@@ -579,10 +579,18 @@ def solicitar_desembarque_materiais(request):
             return JsonResponse({'success': False, 'error': 'Embarcação não encontrada'}, status=404)
         
         # Buscar materiais relacionados para desembarque
-        materiais = materialEmb.objects.filter(
+        materiais_query = materialEmb.objects.filter(
             barcoMatEmb_id=barco_id,
             statusProgMatEmb='RELACIONADO PARA DESEMBARQUE'
         )
+        
+        # Filtrar por tipo de responsável
+        if tipo_material == 'CRD':
+            materiais = materiais_query.filter(respEmbMat='CRD')
+        elif tipo_material == 'NAO_CRD':
+            materiais = materiais_query.exclude(respEmbMat='CRD')
+        else:
+            materiais = materiais_query
         
         if not materiais.exists():
             return JsonResponse({'success': False, 'error': 'Nenhum material encontrado'}, status=404)
