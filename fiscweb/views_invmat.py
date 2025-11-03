@@ -602,9 +602,15 @@ def solicitar_desembarque_materiais(request):
         from datetime import datetime, timedelta
         
         # Calcular horário de saída
-        hora_atrac = datetime.strptime(ps_data['atracacao'], '%H:%M')
+        # Extrair apenas HH:MM (ignorar segundos se existir)
+        hora_atrac_str = ps_data['atracacao'][:5]  # Pega apenas HH:MM
+        hora_atrac = datetime.strptime(hora_atrac_str, '%H:%M')
         duracao_horas = int(ps_data['duracao'])
-        hora_saida = (hora_atrac + timedelta(hours=duracao_horas)).strftime('%H:%M')
+        hora_saida_str = (hora_atrac + timedelta(hours=duracao_horas)).strftime('%H:%M')
+        
+        # Formatar horas com "h" no final
+        hora_atrac_formatada = hora_atrac_str + 'h'
+        hora_saida_formatada = hora_saida_str + 'h'
         
         # Preparar assunto e destinatários baseado no modelo
         if modelo == '004':
@@ -632,7 +638,8 @@ def solicitar_desembarque_materiais(request):
             materiais=materiais,
             barco=barco,
             ps_data=ps_data,
-            hora_saida=hora_saida,
+            hora_atrac_formatada=hora_atrac_formatada,
+            hora_saida_formatada=hora_saida_formatada,
             nome_fiscal=nome_fiscal,
             from_addr=from_addr,
             dados_modal=dados_modal
@@ -692,7 +699,7 @@ def solicitar_desembarque_materiais(request):
 
 
 #========================================== GERAR CORPO EMAIL DESEMBARQUE ==========================================
-def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, hora_saida, nome_fiscal, from_addr, dados_modal):
+def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, hora_atrac_formatada, hora_saida_formatada, nome_fiscal, from_addr, dados_modal):
     """
     Gera o corpo HTML do e-mail baseado no modelo
     """
@@ -724,8 +731,8 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, hora_saida,
                 """
         
         corpo = f"""
-        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {ps_data['atracacao']} às {hora_saida}h</p>
-        
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {hora_atrac_formatada} às {hora_saida_formatada}</p>
+      
         <table style="width:100%; border-collapse:collapse; margin:20px 0;">
             <thead>
                 <tr style="background-color:#0b7a66; color:white;">
@@ -766,8 +773,8 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, hora_saida,
         desc_cont = dados_modal.get('descContentores', '')
         
         corpo = f"""
-        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {ps_data['atracacao']} às {hora_saida}h</p>
-        
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {hora_atrac_formatada} às {hora_saida_formatada}</p>
+       
         <table style="width:100%; border-collapse:collapse; margin:20px 0;">
             <thead>
                 <tr style="background-color:#0b7a66; color:white;">
@@ -823,8 +830,8 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, hora_saida,
         desc_cont = dados_modal.get('descContentores', '')
         
         corpo = f"""
-        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {ps_data['atracacao']} às {hora_saida}h</p>
-        
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {hora_atrac_formatada} às {hora_saida_formatada}</p>
+       
         <table style="width:100%; border-collapse:collapse; margin:20px 0;">
             <thead>
                 <tr style="background-color:#0b7a66; color:white;">
@@ -877,8 +884,7 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, hora_saida,
             """
         
         corpo = f"""
-        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {ps_data['atracacao']} às {hora_saida}h</p>
-        
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {ps_data['dataEmissao']} das {hora_atrac_formatada} às {hora_saida_formatada}</p>        
         <table style="width:100%; border-collapse:collapse; margin:20px 0;">
             <thead>
                 <tr style="background-color:#0b7a66; color:white;">

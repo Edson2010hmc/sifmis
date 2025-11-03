@@ -251,12 +251,12 @@ function configurarAccordion() {
         result.data.forEach(mat => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>${mat.tipoBarco} ${mat.barcoMatEmb}</td>
-            <td>${formatarData(mat.dataPrevEmb)}</td>
-            <td>${mat.numRtEmb || '-'}</td>
-            <td>${mat.descMatEmb}</td>
-            <td>${mat.osEmb || '-'}</td>
-            <td>
+            <td style="border:1px solid #ddd; padding:8px;">${mat.tipoBarco} ${mat.barcoMatEmb}</td>
+            <td style="border:1px solid #ddd; padding:8px;">${formatarData(mat.dataPrevEmb)}</td>
+            <td style="border:1px solid #ddd; padding:8px;">${mat.numRtEmb || '-'}</td>
+            <td style="border:1px solid #ddd; padding:8px;">${mat.descMatEmb}</td>
+            <td style="border:1px solid #ddd; padding:8px;">${mat.osEmb || '-'}</td>
+            <td style="border:1px solid #ddd; padding:8px;">
               <div style="display:flex; flex-direction:column; gap:4px;">
                 <button class="btn secondary small" onclick="InvMatModule.editarMaterial(${mat.id})">Editar dados material</button>
                 <button class="btn small" onclick="InvMatModule.confirmarEmbarque(${mat.id})">Confirmar Embarque</button>
@@ -289,12 +289,12 @@ function configurarAccordion() {
         result.data.forEach(mat => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>${mat.tipoBarco} ${mat.barcoMatEmb}</td>
-            <td>${mat.meioRecEmbMat || '-'}</td>
-            <td>${mat.numRtEmb || '-'}</td>
-            <td>${mat.osEmb || '-'}</td>
-            <td>${mat.descMatEmb}</td>
-            <td>
+            <td style="border:1px solid #ddd; padding:8px;">${mat.tipoBarco} ${mat.barcoMatEmb}</td>
+            <td style="border:1px solid #ddd; padding:8px;">${mat.meioRecEmbMat || '-'}</td>
+            <td style="border:1px solid #ddd; padding:8px;">${mat.numRtEmb || '-'}</td>
+            <td style="border:1px solid #ddd; padding:8px;">${mat.osEmb || '-'}</td>
+            <td style="border:1px solid #ddd; padding:8px;">${mat.descMatEmb}</td>
+            <td style="border:1px solid #ddd; padding:8px;">
               <div style="display:flex; flex-direction:column; gap:4px;">
                 <button class="btn secondary small" onclick="InvMatModule.verDetalhes(${mat.id})">Exibir detalhes</button>
                 <button class="btn small" onclick="InvMatModule.relacionarDesembarque(${mat.id})">Preparar desembarque</button>
@@ -351,15 +351,14 @@ function configurarAccordion() {
         const responsavel = mat.respEmbMat === 'OUTRO' ? mat.outRespEmbMat : mat.respEmbMat;
         
         tr.innerHTML = `
-          <td>${mat.tipoBarco} ${mat.barcoMatEmb}</td>
-          <td>${mat.descMatEmb}</td>
-          <td>${mat.osEmb || ''}</td>
-          <td>${responsavel}</td>
-          <td>
+          <td style="border:1px solid #ddd; padding:8px;">${mat.tipoBarco} ${mat.barcoMatEmb}</td>
+          <td style="border:1px solid #ddd; padding:8px;">${mat.descMatEmb}</td>
+          <td style="border:1px solid #ddd; padding:8px;">${mat.osEmb || ''}</td>
+          <td style="border:1px solid #ddd; padding:8px;">${responsavel}</td>
+          <td style="border:1px solid #ddd; padding:8px;">
             <div style="display:flex; flex-direction:column; gap:4px;">
               <button class="btn small" onclick="InvMatModule.removerSelecaoDesembarque(${mat.id})">Remover da Seleção para Desembarque</button>
               <button class="btn secondary small" onclick="InvMatModule.exibirDetalhesDesembarque(${mat.id})">Exibir Detalhes</button>
-              <button class="btn small" onclick="InvMatModule.solicitarDesembarqueIndividual(${mat.id})">Solicitar Desembarque</button>
             </div>
           </td>
         `;
@@ -447,6 +446,11 @@ function configurarAccordion() {
   }
 
   // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
+// NO ARQUIVO static/js/invmat.js
+// LOCALIZAR a função processarSolicitacaoDesembarque() completa
+// SUBSTITUIR toda a função POR:
+
+  // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
   async function processarSolicitacaoDesembarque(barcoId, materiaisIds) {
     try {
       // Obter usuário
@@ -479,7 +483,7 @@ function configurarAccordion() {
         const barco = resBarco.data.find(b => b.id == barcoId);
         const barcoNome = barco ? `${barco.tipoBarco} ${barco.nomeBarco}` : 'a embarcação';
         
-        alert(`Não há Passagem de Serviço em Rascunho para o Usuário atual em ${barcoNome}. Crie o rascunho da Passagem de serviço, e informe o porto, horário de atracação e período de porto para integração dos dados da data de desembarque.`);
+        alert(`Não há Passagem de Serviço em Rascunho para o Usuário atual no ${barcoNome}. Crie o rascunho da Passagem de serviço, e informe o porto, horário de atracação e período de porto para integração dos dados da data de desembarque.`);
         return;
       }
       
@@ -496,7 +500,10 @@ function configurarAccordion() {
       const barco = resBarco.data.find(b => b.id == barcoId);
       const barcoNome = barco ? `${barco.tipoBarco} ${barco.nomeBarco}` : 'a embarcação';
       
-      if (!confirm(`Confirma a solicitação de Desembarque dos materiais relacionados para entrada de porto do ${barcoNome} no dia ${psData.dataEmissao}?`)) {
+      // Formatar data para exibição
+      const dataFormatada = psData.dataEmissao.split('-').reverse().join('/');
+      
+      if (!confirm(`Confirma a solicitação de Desembarque dos materiais relacionados para entrada de porto do ${barcoNome} no dia ${dataFormatada}?`)) {
         return;
       }
       
@@ -511,23 +518,22 @@ function configurarAccordion() {
       
       const materiais = resultMat.data;
       
-      // Determinar modelo baseado nos responsáveis e contentores
-      const temCrd = materiais.some(m => m.respEmbMat === 'CRD');
-      const temNaoCrd = materiais.some(m => m.respEmbMat !== 'CRD');
+      // Separar materiais CRD e NÃO CRD
+      const materiaisCrd = materiais.filter(m => m.respEmbMat === 'CRD');
+      const materiaisNaoCrd = materiais.filter(m => m.respEmbMat !== 'CRD');
       
-      if (temCrd && temNaoCrd) {
-        // Processar CRD e Não-CRD separadamente
-        alert('Serão enviados e-mails separados para materiais CRD e Não-CRD');
-        // Primeiro processar não-CRD
-        await determinarModeloNaoCrd(barcoId, fiscalNome, psData, materiais.filter(m => m.respEmbMat !== 'CRD'));
+      // Verificar se há ambos os tipos
+      if (materiaisCrd.length > 0 && materiaisNaoCrd.length > 0) {
+        // Processar NÃO CRD primeiro
+        await determinarModeloNaoCrd(barcoId, fiscalNome, psData, materiaisNaoCrd);
         // Depois processar CRD
         await enviarSolicitacao('004', barcoId, fiscalNome, psData, {});
-      } else if (temCrd) {
+      } else if (materiaisCrd.length > 0) {
         // Apenas CRD
         await enviarSolicitacao('004', barcoId, fiscalNome, psData, {});
-      } else {
-        // Apenas Não-CRD
-        await determinarModeloNaoCrd(barcoId, fiscalNome, psData, materiais);
+      } else if (materiaisNaoCrd.length > 0) {
+        // Apenas NÃO CRD
+        await determinarModeloNaoCrd(barcoId, fiscalNome, psData, materiaisNaoCrd);
       }
       
     } catch (error) {
