@@ -445,8 +445,7 @@ function configurarAccordion() {
     await processarSolicitacaoDesembarque(barcoId, null);
   }
 
- 
-  // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
+   // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
   async function processarSolicitacaoDesembarque(barcoId, materiaisIds) {
     try {
       // Obter usuário
