@@ -462,7 +462,10 @@ function configurarAccordion() {
       const responsePS = await fetch('/api/verificar-ps-rascunho-material/', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({barcoId})
+        body: JSON.stringify({
+          barcoId,
+          fiscalNome
+        })
       });
       
       const resultPS = await responsePS.json();
