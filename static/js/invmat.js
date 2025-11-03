@@ -819,9 +819,29 @@ async function carregarTabelaMatBordo() {
     }
   }
 
+
+
   function fecharModal() {
     elementos.modal.style.display = 'none';
     limparModal();
+    
+    // Reabilitar todos os campos
+    Object.keys(elementos).forEach(key => {
+      if (key.startsWith('modal') && elementos[key].tagName) {
+        const elem = elementos[key];
+        if (elem.type !== 'button') {
+          elem.disabled = false;
+        }
+      }
+    });
+    
+    elementos.btnModalSalvar.style.display = 'inline-block';
+    elementos.btnModalExcluir.style.display = 'inline-block';
+    elementos.btnModalCancelar.textContent = 'Cancelar';
+    
+    modoEdicao = false;
+    materialEditandoId = null;
+    modoSomenteLeitura = false;
   }
 
   function limparModal() {
@@ -1310,9 +1330,14 @@ async function exibirDetalhesSolicDesemb(id) {
     preencherModal(mat);
     elementos.modal.style.display = 'flex';
     
-    // Desabilitar todos os campos
+    // Desabilitar todos os campos EXCETO os do modal de RT
     Object.keys(elementos).forEach(key => {
       if (key.startsWith('modal') && elementos[key].tagName) {
+        // NÃO desabilitar campos do modal de RT de desembarque
+        if (key.includes('RtDesemb')) {
+          return;
+        }
+        
         const elem = elementos[key];
         if (elem.type !== 'button') {
           elem.disabled = true;
@@ -1365,6 +1390,7 @@ function materialColetado(id) {
   rtDesembContext = {materialId: id, acao: 'coletado'};
   elementos.modalRtDesembTitle.textContent = 'Material Coletado - RT de Desembarque';
   elementos.modalRtDesembInput.value = '';
+  elementos.modalRtDesembInput.disabled = false; // GARANTIR QUE ESTÁ HABILITADO
   elementos.modalRtDesemb.style.display = 'flex';
 }
 
@@ -1377,9 +1403,9 @@ function materialNaoColetado(id) {
   rtDesembContext = {materialId: id, acao: 'nao_coletado'};
   elementos.modalRtDesembTitle.textContent = 'Material Não Coletado - RT de Desembarque';
   elementos.modalRtDesembInput.value = '';
+  elementos.modalRtDesembInput.disabled = false; // GARANTIR QUE ESTÁ HABILITADO
   elementos.modalRtDesemb.style.display = 'flex';
 }
-
 // ===== FECHAR MODAL RT DESEMBARQUE =====
 function fecharModalRtDesemb() {
   elementos.modalRtDesemb.style.display = 'none';
