@@ -312,86 +312,55 @@ class SubTabPortoMobD(models.Model):
 
 
 #=================================1.8 MODELO EMBARQUE MATERIAIS===============================================
-class PortoEmbMat(models.Model):
-    """Modelo para cadastro de Passagem de Serviço - Embarque de Materiais - porto"""
+class portoMatEmb(models.Model):
+    """Modelo para  registro de Embarque de Materiais - porto"""
 
  
-    idxPortoEM = models.ForeignKey(PassServ, on_delete=models.CASCADE)
-    prevEmbMat = models.BooleanField(default=False, verbose_name='Embarque de Materiais?')
-    ObservEmbMat = models.TextField(max_length=200, verbose_name='Observações', blank=True)
-   
-
+    idxPortoMatEmb = models.ForeignKey(PassServ, on_delete=models.CASCADE)
+    descMatEmbPs = models.CharField(max_length=40,blank=True,null=True, verbose_name='Descrição do Material')
+    numRtMatEmbPs = models.CharField(max_length=12,blank=True,null=True, verbose_name='Numero RT')
+    osMatEmbPs = models.CharField(max_length=15,blank=True,null=True, verbose_name='Ordem de Serviço')
+    respMatEmbPs = models.CharField(max_length=8,blank=True,null=True, verbose_name='Responsavel Material')
+    descContMatEmbPs = models.CharField(max_length=30,blank=True,null=True, verbose_name='Descrição do Contentor')
+    dataPrevEmbMatPs = models.DateField(blank=True,null=True, verbose_name='Data Embarque')
+    
     class Meta:
         verbose_name = 'Embarque Material - Porto'
-        verbose_name_plural = 'Embarque Materiais - Portos'
-        ordering = ['idxPortoEM__BarcoPS','-idxPortoEM__numPS']  
+        verbose_name_plural = 'Embarque Materiais - Porto'
+        ordering = ['idxPortoMatEmb__BarcoPS','-idxPortoMatEmb__numPS']  
 
     def __str__(self):
-        return f"{self.idxPortoEM} - {self.idxPortoEM.numPS}"
+        return f"{self.idxPortoMatEmb} - {self.idxPortoMatEmb.numPS}"
     
-#=================================SUB TABELA EMBARQUE MATERIAIS==============================================
-class subTabPortoEmbMat(models.Model):
-    """Modelo para cadastro de Passagem de Serviço - Embarque de Materiais - porto"""
-
-    PASTA_UPLOAD = 'EmbMaterial'
-
-    subTabPortoEmbMatChoices = [
-                            ('MATERIAIS OP CRD'     ,'MATERIAIS OP CRD'),
-                            ('MATERIAIS OP MIS'     ,'MATERIAIS OP MIS'),
-                            ('CONTENTORES'          ,'CONTENTORES'),
-                            ('FERRAMENTAS'          ,'FERRAMENTAS'),
-                            ('MATERIAIS EQSE'       ,'MATERIAIS EQSE'),
-                            ('OUTROS'               ,'OUTROS'),
-                             ]
-
-    idxSubTabPortoEM = models.ForeignKey(PortoEmbMat, on_delete=models.CASCADE)
-    tipoMatEmb = models.CharField(max_length=30, choices=subTabPortoEmbMatChoices,verbose_name='Tipo de Material')
-    numSerMatEmb = models.CharField(max_length=30, verbose_name='Identificador ou Num Serie do Material')
-    matEmbDesc = models.CharField(max_length=300, verbose_name='Descrição do Material')
-    dataValCertLing= models.DateField(verbose_name='Data Validade Certificado Lingada-Olhais')
-    OsEmbMat = models.CharField(max_length=12,verbose_name='OS de Destino')
-    RtEmbMat = models.CharField(max_length=14, verbose_name='Num RT')
-    Anexos = models.FileField(upload_to=caminho_PS,verbose_name='Anexo')
-
-    class Meta:
-        verbose_name = 'Lista Embarque Material - Porto'
-        verbose_name_plural = 'Lista Embarque Materiais - Portos'
-        ordering = ['idxSubTabPortoEM__idxPortoEM__BarcoPS','-idxSubTabPortoEM__idxPortoEM__numPS']  
-
-    def __str__(self):
-        return f"{self.tipoMatEmb} - {self.RtEmbMat}"
+  
 
 #=================================1.9 MODELO DESEMBARQUE MATERIAIS===============================================
-class PortoDesMat(models.Model):
-    """Modelo para cadastro de Passagem de Serviço - Desembarque de Materiais - porto"""
+class portoMatDesemb(models.Model):
+    """Modelo para  registro de Desemmbarque de Materiais - porto"""
 
-    PASTA_UPLOAD = 'DesembMaterial'
-
-    idxPortoDM = models.ForeignKey(PassServ, on_delete=models.CASCADE)
-
-    prevDesMat = models.BooleanField(default=False, verbose_name='Desembarque de Materiais?')
-
-    OsDesMat = models.CharField(max_length=12,verbose_name='OS de Origem')
-    RtDesMat = models.CharField(max_length=12, verbose_name='Num RT')
-    ObservDesMat = models.TextField(max_length=500, verbose_name='Observações', blank=True)
-    Anexos = models.FileField(upload_to=caminho_PS,verbose_name='Anexo')
-
+ 
+    idxPortoMatDesemb = models.ForeignKey(PassServ, on_delete=models.CASCADE)
+    descMatDesembPs = models.CharField(max_length=40,blank=True,null=True, verbose_name='Descrição do Material')
+    numRtMatDesembPs = models.CharField(max_length=12,blank=True,null=True, verbose_name='Numero RT')
+    osMatDesembPs = models.CharField(max_length=15,blank=True,null=True, verbose_name='Ordem de Serviço')
+    respMatDesembPs = models.CharField(max_length=8,blank=True,null=True, verbose_name='Responsavel Material')
+    descContMatDesembPs = models.CharField(max_length=30,blank=True,null=True, verbose_name='Descrição do Contentor')
+    statusProgMatEmbPs = models.CharField(max_length=30, blank=True,null=True, verbose_name='Status do Material')
+    dataPrevDesembMatPs = models.DateField(blank=True,null=True, verbose_name='Data Desembarque')
+    
     class Meta:
         verbose_name = 'Desembarque Material - Porto'
-        verbose_name_plural = 'Desembarque Materiais - Portos'
-        ordering = ['idxPortoDM__BarcoPS','-idxPortoDM__numPS']  
+        verbose_name_plural = 'Desembarque Materiais - Porto'
+        ordering = ['idxPortoMatDesemb__BarcoPS','-idxPortoMatDesemb__numPS']  
 
     def __str__(self):
-        return f"{self.idxPortoDM} - {self.RtDesMat}"
-
-
-
-
-
-
-
+        return f"{self.idxPortoMatDesemb} - {self.idxPortoMatDesemb.numPS}"
+    
 
 #=============================== 2  ROTINAS - SMS =========================================
+
+
+
 
 #================================2.1 MODELO ANOMALIAS DE SMS===========================================
 
