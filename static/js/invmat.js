@@ -210,10 +210,8 @@ function configurarAccordion() {
             select.appendChild(option);
           });
         });
-      }
 
-
-         if (elementos.filtroBarcoDesembarque) {
+        if (elementos.filtroBarcoDesembarque) {
           elementos.filtroBarcoDesembarque.innerHTML = '<option value="">— selecione —</option>';
           barcos.forEach(barco => {
             const option = document.createElement('option');
@@ -222,6 +220,10 @@ function configurarAccordion() {
             elementos.filtroBarcoDesembarque.appendChild(option);
           });
         }
+      }
+
+
+
     } catch (error) {
       alert('Erro ao carregar embarcações');
     }
@@ -317,8 +319,10 @@ function configurarAccordion() {
     try {
       const barcoId = elementos.filtroBarcoDesembarque.value;
       
+      const tbody = elementos.tblMatDesembarque.querySelector('tbody');
+      
       if (!barcoId) {
-        elementos.tblMatDesembarque.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">Selecione uma embarcação</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">Selecione uma embarcação</td></tr>';
         elementos.btnSolicitarDesembarque.style.display = 'none';
         return;
       }
@@ -334,13 +338,13 @@ function configurarAccordion() {
       const materiais = result.data;
       
       if (materiais.length === 0) {
-        elementos.tblMatDesembarque.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">Nenhum material relacionado para desembarque</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">Nenhum material relacionado para desembarque</td></tr>';
         elementos.btnSolicitarDesembarque.style.display = 'none';
         return;
       }
       
       elementos.btnSolicitarDesembarque.style.display = 'block';
-      elementos.tblMatDesembarque.innerHTML = '';
+      tbody.innerHTML = '';
       
       materiais.forEach(mat => {
         const tr = document.createElement('tr');
@@ -352,13 +356,15 @@ function configurarAccordion() {
           <td>${mat.osEmb || ''}</td>
           <td>${responsavel}</td>
           <td>
-            <button class="btn small" onclick="InvMatModule.removerSelecaoDesembarque(${mat.id})">Remover da Seleção</button>
-            <button class="btn small" onclick="InvMatModule.exibirDetalhesDesembarque(${mat.id})">Exibir Detalhes</button>
-            <button class="btn small" onclick="InvMatModule.solicitarDesembarqueIndividual(${mat.id})">Solicitar Desembarque</button>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <button class="btn small" onclick="InvMatModule.removerSelecaoDesembarque(${mat.id})">Remover da Seleção para Desembarque</button>
+              <button class="btn secondary small" onclick="InvMatModule.exibirDetalhesDesembarque(${mat.id})">Exibir Detalhes</button>
+              <button class="btn small" onclick="InvMatModule.solicitarDesembarqueIndividual(${mat.id})">Solicitar Desembarque</button>
+            </div>
           </td>
         `;
         
-        elementos.tblMatDesembarque.appendChild(tr);
+        tbody.appendChild(tr);
       });
       
     } catch (error) {
