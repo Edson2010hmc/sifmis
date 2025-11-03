@@ -448,13 +448,15 @@ function configurarAccordion() {
 // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
   async function processarSolicitacaoDesembarque(barcoId) {
     try {
-      // Buscar fiscal logado
-      const fiscalNome = sessionStorage.getItem('usuarioLogado');
-      
-      if (!fiscalNome) {
+// Buscar fiscal logado
+      const usuario = AuthModule.getUsuarioLogado();
+
+      if (!usuario || !usuario.chave) {
         alert('Fiscal não identificado');
         return;
       }
+
+      const fiscalNome = `${usuario.chave} - ${usuario.nome}`;
       
       // Verificar PS rascunho
       const responsePS = await fetch('/api/verificar-ps-rascunho-material/', {
