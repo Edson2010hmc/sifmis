@@ -127,7 +127,7 @@ urlpatterns = [
     path('api/materiais-desembarque/', views_invmat.materiais_desembarque_list, name='materiais_desembarque_list'),
     path('api/verificar-ps-rascunho-material/', views_invmat.verificar_ps_rascunho_material, name='verificar_ps_rascunho_material'),
     path('api/solicitar-desembarque/', views_invmat.solicitar_desembarque_materiais, name='solicitar_desembarque_materiais'),
-
+    path('api/solicitar-desembarque/', views_invmat.solicitar_desembarque_materiais, name='solicitar_desembarque_materiais'),
 
 
 

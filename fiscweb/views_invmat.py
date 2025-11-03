@@ -946,3 +946,185 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, data_emissa
     """
     
     return html_completo
+
+
+#========================================== SOLICITAÇÕES DE DESEMBARQUE - LISTAGEM ==========================================
+@csrf_exempt
+@require_http_methods(["GET"])
+def solicitacoes_desembarque_list(request):
+    """
+    GET: Lista materiais com status 'DESEMBARQUE SOLICITADO' filtrados por embarcação
+    """
+    
+    try:
+        barco_id = request.GET.get('barco_id')
+        
+        if not barco_id:
+            return JsonResponse({'success': False, 'error': 'ID da embarcação não fornecido'}, status=400)
+        
+        materiais = materialEmb.objects.filter(
+            barcoMatEmb_id=barco_id,
+            statusProgMatEmb='DESEMBARQUE SOLICITADO'
+        )
+        
+        data = []
+        for mat in materiais:
+            # Buscar primeiro embarque para pegar OS
+            primeiro_embarque = mat.embarques.first()
+            
+            # Buscar data de solicitação do desembarque (campo atualizado_em)
+            data_solicitacao = mat.atualizado_em.strftime('%d/%m/%Y %H:%M') if mat.atualizado_em else ''
+            
+            data.append({
+                'id': mat.id,
+                'barcoMatEmb': mat.barcoMatEmb.nomeBarco,
+                'tipoBarco': mat.barcoMatEmb.tipoBarco,
+                'descMatEmb': mat.descMatEmb,
+                'osEmb': primeiro_embarque.osEmbMat if primeiro_embarque else '',
+                'respEmbMat': mat.respEmbMat or '',
+                'outRespEmbMat': mat.outRespEmbMat or '',
+                'dataSolicitacao': data_solicitacao
+            })
+        
+        print(f"[API] GET /api/solicitacoes-desembarque/ - {len(data)} materiais retornados para barco {barco_id}")
+        
+        return JsonResponse({'success': True, 'data': data})
+        
+    except Exception as e:
+        print(f"[API ERROR] GET /api/solicitacoes-desembarque/ - {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+#========================================== REMOVER SOLICITAÇÃO DESEMBARQUE ==========================================
+@csrf_exempt
+@require_http_methods(["PUT"])
+def remover_solicitacao_desembarque(request, material_id):
+    """
+    PUT: Remove solicitação de desembarque, mudando status para 'MATERIAL A BORDO'
+    """
+    
+    try:
+        material = materialEmb.objects.get(id=material_id)
+    except materialEmb.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Material não encontrado'}, status=404)
+    
+    try:
+        print(f"[API] PUT /api/materiais-embarque/{material_id}/remover-solicitacao/ - Removendo solicitação")
+        
+        # Atualizar status
+        material.statusProgMatEmb = 'MATERIAL A BORDO'
+        material.save()
+        
+        # Replicar para subtabelas
+        material.embarques.update(statusRegEmb='MATERIAL A BORDO')
+        material.desembarques.update(statusRegDesemb='MATERIAL A BORDO')
+        
+        print(f"[API] Solicitação de desembarque removida - Material {material_id}")
+        
+        return JsonResponse({'success': True, 'message': 'Solicitação de desembarque removida'})
+        
+    except Exception as e:
+        print(f"[API ERROR] PUT /api/materiais-embarque/{material_id}/remover-solicitacao/ - {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+#========================================== MATERIAL COLETADO ==========================================
+@csrf_exempt
+@require_http_methods(["PUT"])
+def material_coletado(request, material_id):
+    """
+    PUT: Registra material como coletado (desembarcado)
+    """
+    
+    try:
+        material = materialEmb.objects.get(id=material_id)
+    except materialEmb.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Material não encontrado'}, status=404)
+    
+    try:
+        from datetime import datetime
+        data = json.loads(request.body)
+        num_rt = data.get('numRtDesemb', '').strip()
+        
+        if not num_rt:
+            return JsonResponse({'success': False, 'error': 'Número da RT é obrigatório'}, status=400)
+        
+        print(f"[API] PUT /api/materiais-embarque/{material_id}/material-coletado/ - RT: {num_rt}")
+        
+        # Atualizar status
+        material.statusProgMatEmb = 'MATERIAL DESEMBARCADO'
+        
+        # Adicionar observação
+        data_atual = datetime.now().strftime('%d/%m/%Y')
+        obs_adicional = f"\nRT {num_rt} atendida. Material desembarcado {data_atual}"
+        material.obsMatEmb = (material.obsMatEmb or '') + obs_adicional
+        
+        material.save()
+        
+        # Atualizar subtabela de desembarque com o número da RT
+        material.desembarques.update(
+            numRtMatDesemb=num_rt,
+            statusRegDesemb='MATERIAL DESEMBARCADO'
+        )
+        
+        # Replicar para subtabelas de embarque
+        material.embarques.update(statusRegEmb='MATERIAL DESEMBARCADO')
+        
+        print(f"[API] Material coletado registrado - Material {material_id}, RT {num_rt}")
+        
+        return JsonResponse({'success': True, 'message': 'Material coletado registrado'})
+        
+    except Exception as e:
+        print(f"[API ERROR] PUT /api/materiais-embarque/{material_id}/material-coletado/ - {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+#========================================== MATERIAL NÃO COLETADO ==========================================
+@csrf_exempt
+@require_http_methods(["PUT"])
+def material_nao_coletado(request, material_id):
+    """
+    PUT: Registra material como não coletado (permanece a bordo)
+    """
+    
+    try:
+        material = materialEmb.objects.get(id=material_id)
+    except materialEmb.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Material não encontrado'}, status=404)
+    
+    try:
+        from datetime import datetime
+        data = json.loads(request.body)
+        num_rt = data.get('numRtDesemb', '').strip()
+        
+        if not num_rt:
+            return JsonResponse({'success': False, 'error': 'Número da RT é obrigatório'}, status=400)
+        
+        print(f"[API] PUT /api/materiais-embarque/{material_id}/material-nao-coletado/ - RT: {num_rt}")
+        
+        # Atualizar status
+        material.statusProgMatEmb = 'RELACIONADO PARA DESEMBARQUE'
+        
+        # Adicionar observação
+        data_atual = datetime.now().strftime('%d/%m/%Y')
+        obs_adicional = f"\nRT {num_rt} não atendida. Material permanece a bordo {data_atual}"
+        material.obsMatEmb = (material.obsMatEmb or '') + obs_adicional
+        
+        material.save()
+        
+        # Atualizar subtabela de desembarque com o número da RT
+        material.desembarques.update(
+            numRtMatDesemb=num_rt,
+            statusRegDesemb='RELACIONADO PARA DESEMBARQUE'
+        )
+        
+        # Replicar para subtabelas de embarque
+        material.embarques.update(statusRegEmb='RELACIONADO PARA DESEMBARQUE')
+        
+        print(f"[API] Material não coletado registrado - Material {material_id}, RT {num_rt}")
+        
+        return JsonResponse({'success': True, 'message': 'Material não coletado registrado'})
+        
+    except Exception as e:
+        print(f"[API ERROR] PUT /api/materiais-embarque/{material_id}/material-nao-coletado/ - {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

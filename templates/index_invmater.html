@@ -167,6 +167,46 @@
         </div>
       </div>
 
+      <!-- ========== ACCORDION 4: SOLICITAÇÕES DE DESEMBARQUE DE MATERIAIS ========== -->
+      <div class="accordion-item">
+        <div class="accordion-header" data-target="solic-desembarque">
+          <h3>📋 Solicitações de Desembarque de Materiais</h3>
+          <span class="toggle">▼</span>
+        </div>
+        <div class="accordion-content" id="acc-solic-desembarque">
+          <div class="card fadein">
+            
+            <div style="display:flex; gap:15px; align-items:flex-end; margin-bottom:20px;">
+              <div class="col" style="flex:0 0 auto;">
+                <label>Filtrar por Embarcação <span style="color:red;">*</span></label>
+                <select id="filtro_barco_solic_desemb" style="width:400px;">
+                  <option value="">— selecione —</option>
+                </select>
+              </div>
+            </div>
+
+            <table id="tblSolicDesembarque" style="width:100%; text-align:center;">
+              <thead>
+                <tr>
+                  <th>Embarcação</th>
+                  <th>Descrição do Material</th>
+                  <th>Ordem de Serviço</th>
+                  <th>Responsável Pelo Material</th>
+                  <th>Data Solicitação Desembarque</th>
+                  <th style="width:500px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="6" style="text-align:center; color:#999;">Selecione uma embarcação</td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 </main>
@@ -451,6 +491,25 @@
   </div>
 </div>
 
+<!-- ========== MODAL RT DESEMBARQUE ========== -->
+<div id="modalRtDesembarque" class="modal hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:1001;">
+  <div class="modal-content" style="max-width:500px; background:#fff; border-radius:10px; padding:20px; position:relative;">
+    <span class="close" id="closeRtDesemb">&times;</span>
+    <h2 style="color:#0b7a66;" id="modalRtDesembTitle">RT de Desembarque</h2>
+    
+    <div class="modal-body">
+      <div class="col">
+        <label>Número da RT de Desembarque <span style="color:red;">*</span></label>
+        <input id="modal_rt_desemb" type="text" maxlength="12" style="width:100%;">
+      </div>
+    </div>
+    
+    <div class="modal-footer" style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+      <button id="btnCancelarRtDesemb" class="btn secondary">Cancelar</button>
+      <button id="btnConfirmarRtDesemb" class="btn">Confirmar</button>
+    </div>
+  </div>
+</div>
 
 <script src="/static/js/auth.js"></script>
 <script src="/static/js/invmat.js"></script>

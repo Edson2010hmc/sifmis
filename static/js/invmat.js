@@ -9,6 +9,7 @@
   let materialEditandoId = null;
   let modoSomenteLeitura = false;
   let emailsId = null;
+  let rtDesembContext = null; // Armazena {materialId, acao}
 
   // ===== ELEMENTOS DOM =====
   const elementos = {
@@ -17,6 +18,16 @@
     filtroBarcoBordo: document.getElementById('filtro_barco_bordo'),
     filtroRtBordo: document.getElementById('filtro_rt_bordo'),
     filtroOsBordo: document.getElementById('filtro_os_bordo'),
+    filtroBarcoSolicDesemb: document.getElementById('filtro_barco_solic_desemb'),
+    tblSolicDesembarque: document.getElementById('tblSolicDesembarque'),
+
+    // Modal RT Desembarque
+    modalRtDesemb: document.getElementById('modalRtDesembarque'),
+    modalRtDesembClose: document.getElementById('closeRtDesemb'),
+    modalRtDesembTitle: document.getElementById('modalRtDesembTitle'),
+    modalRtDesembInput: document.getElementById('modal_rt_desemb'),
+    btnCancelarRtDesemb: document.getElementById('btnCancelarRtDesemb'),
+    btnConfirmarRtDesemb: document.getElementById('btnConfirmarRtDesemb'),
     
     // Botões principais
     btnAddProgEmbarque: document.getElementById('btnAddProgEmbarque'),
@@ -189,6 +200,19 @@ function configurarAccordion() {
       elementos.btnSolicitarDesembarque.addEventListener('click', solicitarDesembarqueTodos);
     }
 
+  if (elementos.filtroBarcoSolicDesemb) {
+    elementos.filtroBarcoSolicDesemb.addEventListener('change', carregarTabelaSolicDesembarque);
+  }
+
+  // Modal RT Desembarque
+  elementos.modalRtDesembClose.addEventListener('click', fecharModalRtDesemb);
+  elementos.btnCancelarRtDesemb.addEventListener('click', fecharModalRtDesemb);
+  elementos.btnConfirmarRtDesemb.addEventListener('click', confirmarRtDesembarque);
+
+  window.addEventListener('click', (e) => {
+    if (e.target === elementos.modalRtDesemb) fecharModalRtDesemb();
+  });
+
   }
 
   // ===== CARREGAR EMBARCAÇÕES =====
@@ -224,6 +248,16 @@ function configurarAccordion() {
             elementos.filtroBarcoDesembarque.appendChild(option);
           });
         }
+
+        if (elementos.filtroBarcoSolicDesemb) {
+            elementos.filtroBarcoSolicDesemb.innerHTML = '<option value="">— selecione —</option>';
+            barcos.forEach(barco => {
+              const option = document.createElement('option');
+              option.value = barco.id;
+              option.textContent = `${barco.tipoBarco} ${barco.nomeBarco}`;
+              elementos.filtroBarcoSolicDesemb.appendChild(option);
+            });
+          }
       }
 
 
@@ -239,6 +273,7 @@ function configurarAccordion() {
     await popularFiltrosRtOs();
     await carregarTabelaMatBordo();
     await carregarTabelaMatDesembarque();
+    await carregarTabelaSolicDesembarque();
   }
 
   async function carregarTabelaProgEmbarque() {
@@ -1196,6 +1231,205 @@ async function salvarEmails() {
 function validarEmail(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
+}
+
+
+// ===== CARREGAR TABELA SOLICITAÇÕES DESEMBARQUE =====
+async function carregarTabelaSolicDesembarque() {
+  if (!elementos.tblSolicDesembarque) return;
+  
+  try {
+    const barcoId = elementos.filtroBarcoSolicDesemb.value;
+    const tbody = elementos.tblSolicDesembarque.querySelector('tbody');
+    
+    if (!barcoId) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Selecione uma embarcação</td></tr>';
+      return;
+    }
+    
+    const response = await fetch(`/api/solicitacoes-desembarque/?barco_id=${barcoId}`);
+    const result = await response.json();
+    
+    if (!result.success) {
+      alert('Erro ao carregar solicitações: ' + result.error);
+      return;
+    }
+    
+    const materiais = result.data;
+    
+    if (materiais.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Nenhuma solicitação de desembarque</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = '';
+    
+    materiais.forEach(mat => {
+      const tr = document.createElement('tr');
+      const responsavel = mat.respEmbMat === 'OUTRO' ? mat.outRespEmbMat : mat.respEmbMat;
+      
+      tr.innerHTML = `
+        <td style="border:1px solid #ddd; padding:8px;">${mat.tipoBarco} ${mat.barcoMatEmb}</td>
+        <td style="border:1px solid #ddd; padding:8px;">${mat.descMatEmb}</td>
+        <td style="border:1px solid #ddd; padding:8px;">${mat.osEmb || '-'}</td>
+        <td style="border:1px solid #ddd; padding:8px;">${responsavel}</td>
+        <td style="border:1px solid #ddd; padding:8px;">${mat.dataSolicitacao}</td>
+        <td style="border:1px solid #ddd; padding:8px;">
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <button class="btn secondary small" onclick="InvMatModule.exibirDetalhesSolicDesemb(${mat.id})">Exibir Detalhes do Material</button>
+            <button class="btn ghost small" onclick="InvMatModule.removerSolicitacaoDesemb(${mat.id})">Remover Solicitação de Desembarque</button>
+            <button class="btn small" onclick="InvMatModule.materialColetado(${mat.id})">Material Coletado</button>
+            <button class="btn small" onclick="InvMatModule.materialNaoColetado(${mat.id})">Material Não Coletado</button>
+          </div>
+        </td>
+      `;
+      
+      tbody.appendChild(tr);
+    });
+    
+  } catch (error) {
+    alert('Erro ao carregar solicitações: ' + error.message);
+  }
+}
+
+// ===== EXIBIR DETALHES DO MATERIAL (SOMENTE LEITURA) =====
+async function exibirDetalhesSolicDesemb(id) {
+  try {
+    const response = await fetch(`${API_BASE}${id}/`);
+    const result = await response.json();
+    
+    if (!result.success) {
+      alert('Erro: ' + result.error);
+      return;
+    }
+    
+    const mat = result.data;
+    modoSomenteLeitura = true;
+    
+    elementos.modalTitle.textContent = 'DETALHES DO MATERIAL - SOMENTE LEITURA';
+    preencherModal(mat);
+    elementos.modal.style.display = 'flex';
+    
+    // Desabilitar todos os campos
+    Object.keys(elementos).forEach(key => {
+      if (key.startsWith('modal') && elementos[key].tagName) {
+        const elem = elementos[key];
+        if (elem.type !== 'button') {
+          elem.disabled = true;
+        }
+      }
+    });
+    
+    elementos.btnModalSalvar.style.display = 'none';
+    elementos.btnModalExcluir.style.display = 'none';
+    elementos.btnModalCancelar.textContent = 'Fechar';
+    
+  } catch (error) {
+    alert('Erro: ' + error.message);
+  }
+}
+
+// ===== REMOVER SOLICITAÇÃO DE DESEMBARQUE =====
+async function removerSolicitacaoDesemb(id) {
+  if (!confirm('Confirma a remoção da solicitação de desembarque? O material voltará ao status MATERIAL A BORDO.')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE}${id}/remover-solicitacao/`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'}
+    });
+    
+    const result = await response.json();
+    
+    if (!result.success) {
+      alert('Erro: ' + result.error);
+      return;
+    }
+    
+    alert('Solicitação de desembarque removida com sucesso');
+    await carregarTabelas();
+    
+  } catch (error) {
+    alert('Erro: ' + error.message);
+  }
+}
+
+// ===== MATERIAL COLETADO =====
+function materialColetado(id) {
+  if (!confirm('Confirma o desembarque do material?')) {
+    return;
+  }
+  
+  rtDesembContext = {materialId: id, acao: 'coletado'};
+  elementos.modalRtDesembTitle.textContent = 'Material Coletado - RT de Desembarque';
+  elementos.modalRtDesembInput.value = '';
+  elementos.modalRtDesemb.style.display = 'flex';
+}
+
+// ===== MATERIAL NÃO COLETADO =====
+function materialNaoColetado(id) {
+  if (!confirm('Confirma que o material não foi coletado e permanece a bordo?')) {
+    return;
+  }
+  
+  rtDesembContext = {materialId: id, acao: 'nao_coletado'};
+  elementos.modalRtDesembTitle.textContent = 'Material Não Coletado - RT de Desembarque';
+  elementos.modalRtDesembInput.value = '';
+  elementos.modalRtDesemb.style.display = 'flex';
+}
+
+// ===== FECHAR MODAL RT DESEMBARQUE =====
+function fecharModalRtDesemb() {
+  elementos.modalRtDesemb.style.display = 'none';
+  elementos.modalRtDesembInput.value = '';
+  rtDesembContext = null;
+}
+
+// ===== CONFIRMAR RT DESEMBARQUE =====
+async function confirmarRtDesembarque() {
+  const numRt = elementos.modalRtDesembInput.value.trim();
+  
+  if (!numRt) {
+    alert('Por favor, informe o número da RT de desembarque');
+    return;
+  }
+  
+  if (!rtDesembContext) {
+    alert('Erro: contexto não definido');
+    return;
+  }
+  
+  try {
+    const endpoint = rtDesembContext.acao === 'coletado' 
+      ? `${API_BASE}${rtDesembContext.materialId}/material-coletado/`
+      : `${API_BASE}${rtDesembContext.materialId}/material-nao-coletado/`;
+    
+    const response = await fetch(endpoint, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({numRtDesemb: numRt})
+    });
+    
+    const result = await response.json();
+    
+    if (!result.success) {
+      alert('Erro: ' + result.error);
+      return;
+    }
+    
+    const mensagem = rtDesembContext.acao === 'coletado'
+      ? 'Material registrado como coletado (desembarcado)'
+      : 'Material registrado como não coletado (permanece a bordo)';
+    
+    alert(mensagem);
+    fecharModalRtDesemb();
+    await carregarTabelas();
+    
+  } catch (error) {
+    alert('Erro: ' + error.message);
+  }
 }
 
 // ===== UTILITÁRIOS =====
