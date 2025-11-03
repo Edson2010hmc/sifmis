@@ -127,10 +127,12 @@ urlpatterns = [
     path('api/materiais-desembarque/', views_invmat.materiais_desembarque_list, name='materiais_desembarque_list'),
     path('api/verificar-ps-rascunho-material/', views_invmat.verificar_ps_rascunho_material, name='verificar_ps_rascunho_material'),
     path('api/solicitar-desembarque/', views_invmat.solicitar_desembarque_materiais, name='solicitar_desembarque_materiais'),
-    path('api/solicitar-desembarque/', views_invmat.solicitar_desembarque_materiais, name='solicitar_desembarque_materiais'),
-
-
-
+    
+    # API Solicitações de Desembarque
+    path('api/solicitacoes-desembarque/', views_invmat.solicitacoes_desembarque_list, name='solicitacoes_desembarque_list'),
+    path('api/materiais-embarque/<int:material_id>/remover-solicitacao/', views_invmat.remover_solicitacao_desembarque, name='remover_solicitacao_desembarque'),
+    path('api/materiais-embarque/<int:material_id>/material-coletado/', views_invmat.material_coletado, name='material_coletado'),
+    path('api/materiais-embarque/<int:material_id>/material-nao-coletado/', views_invmat.material_nao_coletado, name='material_nao_coletado'),
 
 
 
