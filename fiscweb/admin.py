@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models_cad import FiscaisCad,BarcosCad,ModalBarco,contatoUep,subTabcontatosUeps,materiaisOperacao 
 
-from .models_ps import PassServ, PortoTrocaTurma,PortoManutPrev,PortoAbast,PortoInspNorm,subTabPortoInspNorm,PortoInspPetr,subTabPortoInspPetr,PortoEmbEquip,subTabPortoEmbEquip,PortoEmbMat,subTabPortoEmbMat,PortoDesMat,PortoMobD # Seção 1
+from .models_ps import PassServ, PortoTrocaTurma,PortoManutPrev,PortoAbast,PortoInspNorm,subTabPortoInspNorm,PortoInspPetr,subTabPortoInspPetr,PortoEmbEquip,subTabPortoEmbEquip,portoMatEmb,portoMatDesemb,PortoMobD # Seção 1
 from .models_ps import anomSMS,desvSMS 
 from .models_ps import inoPendContr 
 from .models_ps import iapo, smsLvMang,smsLvSeg
@@ -28,13 +28,13 @@ admin.site.register(PortoAbast)
 admin.site.register(PortoInspNorm)
 admin.site.register(PortoInspPetr)
 admin.site.register(PortoEmbEquip)
-admin.site.register(PortoEmbMat)
-admin.site.register(PortoDesMat)
+admin.site.register(portoMatEmb)
+admin.site.register(portoMatDesemb)
 admin.site.register(PortoMobD)
 admin.site.register(subTabPortoInspNorm)
 admin.site.register(subTabPortoInspPetr)
 admin.site.register(subTabPortoEmbEquip)
-admin.site.register(subTabPortoEmbMat)
+
 
 admin.site.register(anomSMS)
 admin.site.register(desvSMS)

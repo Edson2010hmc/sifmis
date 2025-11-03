@@ -15,6 +15,8 @@
     // Filtros
     filtroBarcoProgEmb: document.getElementById('filtro_barco_prog'),
     filtroBarcoBordo: document.getElementById('filtro_barco_bordo'),
+    filtroRtBordo: document.getElementById('filtro_rt_bordo'),
+    filtroOsBordo: document.getElementById('filtro_os_bordo'),
     
     // Botões principais
     btnAddProgEmbarque: document.getElementById('btnAddProgEmbarque'),
@@ -151,6 +153,8 @@ function configurarAccordion() {
     
     elementos.filtroBarcoProgEmb.addEventListener('change', () => carregarTabelas());
     elementos.filtroBarcoBordo.addEventListener('change', () => carregarTabelas());
+    elementos.filtroRtBordo.addEventListener('change', () => carregarTabelaMatBordo());
+    elementos.filtroOsBordo.addEventListener('change', () => carregarTabelaMatBordo());
     
     elementos.modalResp.addEventListener('change', toggleOutroResponsavel);
     elementos.modalContBordo.addEventListener('change', toggleCamposContentor);
@@ -229,9 +233,10 @@ function configurarAccordion() {
     }
   }
 
-  // ===== CARREGAR TABELAS =====
+  // ===== CARREGAR TABELAS ===========
   async function carregarTabelas() {
     await carregarTabelaProgEmbarque();
+    await popularFiltrosRtOs();
     await carregarTabelaMatBordo();
     await carregarTabelaMatDesembarque();
   }
@@ -273,44 +278,114 @@ function configurarAccordion() {
       alert('Erro ao carregar programação de embarque');
     }
   }
-
-  async function carregarTabelaMatBordo() {
-    try {
-      const barcoId = elementos.filtroBarcoBordo.value;
-      const url = barcoId ? `${API_BASE}?status=MATERIAL A BORDO&barco_id=${barcoId}` : `${API_BASE}?status=MATERIAL A BORDO`;
-      
-      const response = await fetch(url);
-      const result = await response.json();
-      
-      const tbody = elementos.tblMatBordo.querySelector('tbody');
-      tbody.innerHTML = '';
-      
-      if (result.success && result.data.length > 0) {
-        result.data.forEach(mat => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td style="border:1px solid #ddd; padding:8px;">${mat.tipoBarco} ${mat.barcoMatEmb}</td>
-            <td style="border:1px solid #ddd; padding:8px;">${mat.meioRecEmbMat || '-'}</td>
-            <td style="border:1px solid #ddd; padding:8px;">${mat.numRtEmb || '-'}</td>
-            <td style="border:1px solid #ddd; padding:8px;">${mat.osEmb || '-'}</td>
-            <td style="border:1px solid #ddd; padding:8px;">${mat.descMatEmb}</td>
-            <td style="border:1px solid #ddd; padding:8px;">
-              <div style="display:flex; flex-direction:column; gap:4px;">
-                <button class="btn secondary small" onclick="InvMatModule.verDetalhes(${mat.id})">Exibir detalhes</button>
-                <button class="btn small" onclick="InvMatModule.relacionarDesembarque(${mat.id})">Preparar desembarque</button>
-                <button class="btn ghost small" onclick="InvMatModule.aplicarOperacao(${mat.id})">Aplicar à operação</button>
-              </div>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      } else {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Nenhum material a bordo</td></tr>';
-      }
-    } catch (error) {
-      alert('Erro ao carregar materiais a bordo');
+//==========POPULAR FILTROS=================
+async function popularFiltrosRtOs() {
+  try {
+    const response = await fetch(`${API_BASE}?status=MATERIAL A BORDO`);
+    const result = await response.json();
+    
+    if (!result.success || !result.data.length) {
+      elementos.filtroRtBordo.innerHTML = '<option value="">— todos os RTs —</option>';
+      elementos.filtroOsBordo.innerHTML = '<option value="">— todas as OS —</option>';
+      return;
     }
+    
+    const materiais = result.data;
+    
+    // Extrair valores únicos de RT
+    const rtsUnicos = [...new Set(materiais.map(m => m.numRtEmb).filter(rt => rt))];
+    rtsUnicos.sort();
+    
+    // Extrair valores únicos de OS
+    const osUnicos = [...new Set(materiais.map(m => m.osEmb).filter(os => os))];
+    osUnicos.sort();
+    
+    // Popular select RT
+    elementos.filtroRtBordo.innerHTML = '<option value="">— todos os RTs —</option>';
+    rtsUnicos.forEach(rt => {
+      const option = document.createElement('option');
+      option.value = rt;
+      option.textContent = rt;
+      elementos.filtroRtBordo.appendChild(option);
+    });
+    
+    // Popular select OS
+    elementos.filtroOsBordo.innerHTML = '<option value="">— todas as OS —</option>';
+    osUnicos.forEach(os => {
+      const option = document.createElement('option');
+      option.value = os;
+      option.textContent = os;
+      elementos.filtroOsBordo.appendChild(option);
+    });
+    
+  } catch (error) {
+    console.error('Erro ao popular filtros RT/OS:', error);
   }
+}
+
+//=============CARREGAR TABELA MATERIAL A BORDO===========
+async function carregarTabelaMatBordo() {
+  try {
+    // Buscar todos os materiais a bordo
+    const response = await fetch(`${API_BASE}?status=MATERIAL A BORDO`);
+    const result = await response.json();
+    
+    const tbody = elementos.tblMatBordo.querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    if (!result.success || result.data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Nenhum material a bordo</td></tr>';
+      return;
+    }
+    
+    // Obter valores dos filtros
+    const barcoId = elementos.filtroBarcoBordo.value;
+    const rtFiltro = elementos.filtroRtBordo.value;
+    const osFiltro = elementos.filtroOsBordo.value;
+    
+    // Aplicar filtros combinados
+    let materiaisFiltrados = result.data;
+    
+    if (barcoId) {
+      materiaisFiltrados = materiaisFiltrados.filter(m => m.barcoId == barcoId);
+    }
+    
+    if (rtFiltro) {
+      materiaisFiltrados = materiaisFiltrados.filter(m => m.numRtEmb === rtFiltro);
+    }
+    
+    if (osFiltro) {
+      materiaisFiltrados = materiaisFiltrados.filter(m => m.osEmb === osFiltro);
+    }
+    
+    // Exibir resultados filtrados
+    if (materiaisFiltrados.length > 0) {
+      materiaisFiltrados.forEach(mat => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="border:1px solid #ddd; padding:8px;">${mat.tipoBarco} ${mat.barcoMatEmb}</td>
+          <td style="border:1px solid #ddd; padding:8px;">${mat.meioRecEmbMat || '-'}</td>
+          <td style="border:1px solid #ddd; padding:8px;">${mat.numRtEmb || '-'}</td>
+          <td style="border:1px solid #ddd; padding:8px;">${mat.osEmb || '-'}</td>
+          <td style="border:1px solid #ddd; padding:8px;">${mat.descMatEmb}</td>
+          <td style="border:1px solid #ddd; padding:8px;">
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <button class="btn secondary small" onclick="InvMatModule.verDetalhes(${mat.id})">Exibir detalhes</button>
+              <button class="btn small" onclick="InvMatModule.relacionarDesembarque(${mat.id})">Preparar desembarque</button>
+              <button class="btn ghost small" onclick="InvMatModule.aplicarOperacao(${mat.id})">Aplicar à operação</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } else {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Nenhum material a bordo</td></tr>';
+    }
+    
+  } catch (error) {
+    alert('Erro ao carregar materiais a bordo');
+  }
+}
 
   // ===== CARREGAR TABELA MATERIAIS DESEMBARQUE =====
   async function carregarTabelaMatDesembarque() {
