@@ -932,11 +932,11 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, data_emissa
 
     <div style="background-color:#f8f9fa; padding:20px; border:1px solid #ddd; border-top:none; border-radius:0 0 8px 8px;">
         <p style="margin:0; font-size:14px; line-height:1.8; text-align:left;">
-            <strong>Atenciosamente,</strong><br>
+            <strong>at.te,</strong><br>
             {nome_fiscal}<br>
-            <span style="color:#0b7a66; font-weight:bold;">Fiscal Offshore – Petróleo Brasileiro S/A</span><br>
+            <span style="color:#0b7a66; font-weight:bold;">Fiscal Offshore – {barco.tipoBarco} {barco.nomeBarco}</span><br>
+            Petroleo Brasileiro S/A<br>
             SSUB/OPSUB/MIS<br>
-            {barco.tipoBarco} {barco.nomeBarco}<br>
             <a href="mailto:{from_addr}" style="color:#0b7a66; text-decoration:none;">{from_addr}</a>
         </p>
     </div>
