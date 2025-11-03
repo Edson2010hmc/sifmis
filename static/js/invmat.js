@@ -445,44 +445,33 @@ function configurarAccordion() {
     await processarSolicitacaoDesembarque(barcoId, null);
   }
 
-   // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
-  async function processarSolicitacaoDesembarque(barcoId, materiaisIds) {
+// ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
+  async function processarSolicitacaoDesembarque(barcoId) {
     try {
-      // Obter usuário
-      const usuario = AuthModule.getUsuarioLogado();
-      if (!usuario) {
-        alert('Usuário não identificado');
+      // Buscar fiscal logado
+      const fiscalNome = sessionStorage.getItem('usuarioLogado');
+      
+      if (!fiscalNome) {
+        alert('Fiscal não identificado');
         return;
       }
       
-      const fiscalNome = `${usuario.chave} - ${usuario.nome}`;
-      
-      // Verificar PS em rascunho
+      // Verificar PS rascunho
       const responsePS = await fetch('/api/verificar-ps-rascunho-material/', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({barcoId, fiscalNome})
+        body: JSON.stringify({barcoId})
       });
       
       const resultPS = await responsePS.json();
       
       if (!resultPS.success) {
-        alert('Erro: ' + resultPS.error);
+        alert('Erro ao verificar PS: ' + resultPS.error);
         return;
       }
       
-      if (!resultPS.existeRascunho) {
-        const respBarco = await fetch(`/api/barcos/`);
-        const resBarco = await respBarco.json();
-        const barco = resBarco.data.find(b => b.id == barcoId);
-        const barcoNome = barco ? `${barco.tipoBarco} ${barco.nomeBarco}` : 'a embarcação';
-        
-        alert(`Não há Passagem de Serviço em Rascunho para o Usuário atual no ${barcoNome}. Crie o rascunho da Passagem de serviço, e informe o porto, horário de atracação e período de porto para integração dos dados da data de desembarque.`);
-        return;
-      }
-      
-      if (!resultPS.dadosCompletos) {
-        alert('A Passagem de Serviço em rascunho não possui os dados de porto completos (Porto, Horário de Atracação e Duração). Complete esses dados antes de solicitar o desembarque.');
+      if (!resultPS.existeRascunho || !resultPS.dadosCompletos) {
+        alert('Não existe PS em rascunho com dados de porto completos. Complete esses dados antes de solicitar o desembarque.');
         return;
       }
       
@@ -516,93 +505,114 @@ function configurarAccordion() {
       const materiaisCrd = materiais.filter(m => m.respEmbMat === 'CRD');
       const materiaisNaoCrd = materiais.filter(m => m.respEmbMat !== 'CRD');
       
-      // PROCESSAR CRD (se existir)
-      if (materiaisCrd.length > 0) {
-        await enviarSolicitacao('004', barcoId, fiscalNome, psData, {}, 'CRD');
-      }
+      // COLETAR DADOS DO MODAL SE NECESSÁRIO (antes de enviar emails)
+      let dadosModal = {};
       
-      // PROCESSAR NÃO CRD (se existir)
       if (materiaisNaoCrd.length > 0) {
         const comContentor = materiaisNaoCrd.filter(m => m.contBordoEmbMat === 'SIM');
         const semContentor = materiaisNaoCrd.filter(m => m.contBordoEmbMat !== 'SIM');
         
-        if (comContentor.length > 0 && semContentor.length === 0) {
-          // TODOS TÊM CONTENTOR - MODELO 001
-          await enviarSolicitacao('001', barcoId, fiscalNome, psData, {}, 'NAO_CRD');
+        if (semContentor.length > 0 && comContentor.length === 0) {
+          // MODELO 002 - Precisa modal
+          dadosModal = await abrirModalContentoresPromise('002', barcoId, fiscalNome, psData);
+          if (!dadosModal) return; // Usuário cancelou
           
-        } else if (semContentor.length > 0 && comContentor.length === 0) {
-          // NENHUM TEM CONTENTOR - MODELO 002 (com modal)
-          await abrirModalContentores('002', barcoId, fiscalNome, psData, 'NAO_CRD');
-          
-        } else {
-          // ALGUNS COM E OUTROS SEM CONTENTOR - PERGUNTAR
+        } else if (semContentor.length > 0 && comContentor.length > 0) {
+          // MODELO 003 - Perguntar se pode agrupar
           const resposta = confirm('Os materiais sem contentor associado podem ser acondicionados juntamente com os materiais que já estão em contentores?');
           
-          if (resposta) {
-            // SIM - MODELO 001 (todos juntos)
-            await enviarSolicitacao('001', barcoId, fiscalNome, psData, {}, 'NAO_CRD');
-          } else {
-            // NÃO - MODELO 003 (com modal)
-            await abrirModalContentores('003', barcoId, fiscalNome, psData, 'NAO_CRD');
+          if (!resposta) {
+            // MODELO 003 - Precisa modal
+            dadosModal = await abrirModalContentoresPromise('003', barcoId, fiscalNome, psData);
+            if (!dadosModal) return; // Usuário cancelou
           }
         }
       }
+      
+      // AGORA ENVIAR OS E-MAILS EM SEQUÊNCIA
+      
+      // 1) PROCESSAR CRD (se existir)
+      if (materiaisCrd.length > 0) {
+        await enviarSolicitacao('004', barcoId, fiscalNome, psData, {}, 'CRD');
+      }
+      
+      // 2) PROCESSAR NÃO CRD (se existir)
+      if (materiaisNaoCrd.length > 0) {
+        const comContentor = materiaisNaoCrd.filter(m => m.contBordoEmbMat === 'SIM');
+        const semContentor = materiaisNaoCrd.filter(m => m.contBordoEmbMat !== 'SIM');
+        
+        let modelo = '001'; // Default: todos com contentor
+        
+        if (semContentor.length > 0 && comContentor.length === 0) {
+          modelo = '002';
+        } else if (semContentor.length > 0 && comContentor.length > 0) {
+          const resposta = confirm('Os materiais sem contentor associado podem ser acondicionados juntamente com os materiais que já estão em contentores?');
+          modelo = resposta ? '001' : '003';
+        }
+        
+        await enviarSolicitacao(modelo, barcoId, fiscalNome, psData, dadosModal, 'NAO_CRD');
+      }
+      
+      alert('Processo concluído! E-mails enviados com sucesso.');
+      await carregarTabelas();
       
     } catch (error) {
       alert('Erro: ' + error.message);
     }
   }
 
-  // ===== ABRIR MODAL CONTENTORES =====
-  function abrirModalContentores(modelo, barcoId, fiscalNome, psData, tipoMaterial) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:2000;';
-    
-    modal.innerHTML = `
-      <div class="modal-content" style="background:#fff; border-radius:10px; padding:30px; max-width:600px; width:90%;">
-        <h2 style="color:#0b7a66; margin-bottom:20px;">Contentores para desembarque</h2>
-        
-        <div style="margin-bottom:20px;">
-          <label style="display:block; margin-bottom:5px;">Quantidade de Contentores <span style="color:red;">*</span></label>
-          <input type="text" id="qtdeContentores" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-        </div>
-        
-        <div style="margin-bottom:20px;">
-          <label style="display:block; margin-bottom:5px;">Descrição dos Contentores <span style="color:red;">*</span></label>
-          <textarea id="descContentores" rows="3" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; resize:vertical;"></textarea>
-        </div>
-        
-        <p style="color:#666; font-size:14px; margin-bottom:20px;">Indique a quantidade e descreva o contentor necessário com as respectivas dimensões para acondicionamento dos materiais</p>
-        
-        <div style="display:flex; gap:10px; justify-content:flex-end;">
-          <button id="btnCancelarCont" class="btn secondary">Cancelar</button>
-          <button id="btnSalvarCont" class="btn">Salvar e solicitar desembarque</button>
-        </div>
-      </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    document.getElementById('btnCancelarCont').addEventListener('click', () => {
-      document.body.removeChild(modal);
-    });
-    
-    document.getElementById('btnSalvarCont').addEventListener('click', async () => {
-      const qtde = document.getElementById('qtdeContentores').value.trim();
-      const desc = document.getElementById('descContentores').value.trim();
+  // ===== ABRIR MODAL CONTENTORES COM PROMISE =====
+  function abrirModalContentoresPromise(modelo, barcoId, fiscalNome, psData) {
+    return new Promise((resolve, reject) => {
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:2000;';
       
-      if (!qtde || !desc) {
-        alert('Preencha todos os campos obrigatórios');
-        return;
-      }
+      modal.innerHTML = `
+        <div class="modal-content" style="background:#fff; border-radius:10px; padding:30px; max-width:600px; width:90%;">
+          <h2 style="color:#0b7a66; margin-bottom:20px;">Contentores para desembarque</h2>
+          
+          <div style="margin-bottom:20px;">
+            <label style="display:block; margin-bottom:5px;">Quantidade de Contentores <span style="color:red;">*</span></label>
+            <input type="text" id="qtdeContentores" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+          </div>
+          
+          <div style="margin-bottom:20px;">
+            <label style="display:block; margin-bottom:5px;">Descrição dos Contentores <span style="color:red;">*</span></label>
+            <textarea id="descContentores" rows="3" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; resize:vertical;"></textarea>
+          </div>
+          
+          <p style="color:#666; font-size:14px; margin-bottom:20px;">Indique a quantidade e descreva o contentor necessário com as respectivas dimensões para acondicionamento dos materiais</p>
+          
+          <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <button id="btnCancelarCont" class="btn secondary">Cancelar</button>
+            <button id="btnSalvarCont" class="btn">Confirmar</button>
+          </div>
+        </div>
+      `;
       
-      document.body.removeChild(modal);
+      document.body.appendChild(modal);
       
-      await enviarSolicitacao(modelo, barcoId, fiscalNome, psData, {
-        qtdeContentores: qtde,
-        descContentores: desc
-      }, tipoMaterial);
+      document.getElementById('btnCancelarCont').addEventListener('click', () => {
+        document.body.removeChild(modal);
+        resolve(null); // Retorna null quando cancela
+      });
+      
+      document.getElementById('btnSalvarCont').addEventListener('click', () => {
+        const qtde = document.getElementById('qtdeContentores').value.trim();
+        const desc = document.getElementById('descContentores').value.trim();
+        
+        if (!qtde || !desc) {
+          alert('Preencha todos os campos obrigatórios');
+          return;
+        }
+        
+        document.body.removeChild(modal);
+        resolve({
+          qtdeContentores: qtde,
+          descContentores: desc
+        });
+      });
     });
   }
 
@@ -625,49 +635,18 @@ function configurarAccordion() {
       const result = await response.json();
       
       if (!result.success) {
-        alert('Erro ao solicitar desembarque: ' + result.error);
-        return;
+        throw new Error(result.error);
       }
       
-      alert('E-mail enviado com sucesso!');
-      await carregarTabelas();
+      console.log(`E-mail ${tipoMaterial} enviado com sucesso (Modelo ${modelo})`);
       
     } catch (error) {
-      alert('Erro ao enviar solicitação: ' + error.message);
+      alert('Erro ao enviar solicitação ' + tipoMaterial + ': ' + error.message);
+      throw error;
     }
   }
 
-  // ===== ENVIAR SOLICITAÇÃO =====
-  async function enviarSolicitacao(modelo, barcoId, fiscalNome, psData, dadosModal) {
-    try {
-      const response = await fetch('/api/solicitar-desembarque/', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          barcoId,
-          fiscalNome,
-          psData,
-          modelo,
-          dadosModal
-        })
-      });
-      
-      const result = await response.json();
-      
-      if (!result.success) {
-        alert('Erro ao solicitar desembarque: ' + result.error);
-        return;
-      }
-      
-      alert('Desembarque solicitado com sucesso! E-mail enviado.');
-      await carregarTabelas();
-      
-    } catch (error) {
-      alert('Erro ao enviar solicitação: ' + error.message);
-    }
-  }
-
-  // ===== MODAL - ABRIR/FECHAR =====
+   // ===== MODAL - ABRIR/FECHAR =====
   function abrirModalNovo() {
     limparModal();
     modoEdicao = false;
