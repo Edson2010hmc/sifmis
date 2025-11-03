@@ -1436,17 +1436,21 @@ async function confirmarRtDesembarque() {
 
 
   // ===== EXPORTAR MÓDULO =====
-  window.InvMatModule = {
-    editarMaterial,
-    verDetalhes,
-    confirmarEmbarque,
-    embarqueNaoConcluido,
-    relacionarDesembarque,
-    aplicarOperacao,
-    removerSelecaoDesembarque,
-    exibirDetalhesDesembarque,
-    solicitarDesembarqueIndividual
-  };
+window.InvMatModule = {
+  editarMaterial,
+  verDetalhes,
+  confirmarEmbarque,
+  embarqueNaoConcluido,
+  relacionarDesembarque,
+  aplicarOperacao,
+  removerSelecaoDesembarque,
+  exibirDetalhesDesembarque,
+  solicitarDesembarqueIndividual,
+  exibirDetalhesSolicDesemb,
+  removerSolicitacaoDesemb,
+  materialColetado,
+  materialNaoColetado
+};
 
   // ===== INICIAR =====
   if (document.readyState === 'loading') {
