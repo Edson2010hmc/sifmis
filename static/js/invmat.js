@@ -177,6 +177,13 @@ function configurarAccordion() {
     window.addEventListener('click', (e) => {
       if (e.target === elementos.modalEmails) fecharModalEmails();
     });
+    // Eventos Desembarque
+      if (elementos.filtroBarcoDesembarque) {
+      elementos.filtroBarcoDesembarque.addEventListener('change', carregarTabelaMatDesembarque);
+    }
+      if (elementos.btnSolicitarDesembarque) {
+      elementos.btnSolicitarDesembarque.addEventListener('click', solicitarDesembarqueTodos);
+    }
 
   }
 
@@ -204,6 +211,17 @@ function configurarAccordion() {
           });
         });
       }
+
+
+         if (elementos.filtroBarcoDesembarque) {
+          elementos.filtroBarcoDesembarque.innerHTML = '<option value="">— selecione —</option>';
+          barcos.forEach(barco => {
+            const option = document.createElement('option');
+            option.value = barco.id;
+            option.textContent = `${barco.tipoBarco} ${barco.nomeBarco}`;
+            elementos.filtroBarcoDesembarque.appendChild(option);
+          });
+        }
     } catch (error) {
       alert('Erro ao carregar embarcações');
     }
@@ -213,6 +231,7 @@ function configurarAccordion() {
   async function carregarTabelas() {
     await carregarTabelaProgEmbarque();
     await carregarTabelaMatBordo();
+    await carregarTabelaMatDesembarque();
   }
 
   async function carregarTabelaProgEmbarque() {
@@ -288,6 +307,332 @@ function configurarAccordion() {
       }
     } catch (error) {
       alert('Erro ao carregar materiais a bordo');
+    }
+  }
+
+  // ===== CARREGAR TABELA MATERIAIS DESEMBARQUE =====
+  async function carregarTabelaMatDesembarque() {
+    if (!elementos.tblMatDesembarque) return;
+    
+    try {
+      const barcoId = elementos.filtroBarcoDesembarque.value;
+      
+      if (!barcoId) {
+        elementos.tblMatDesembarque.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">Selecione uma embarcação</td></tr>';
+        elementos.btnSolicitarDesembarque.style.display = 'none';
+        return;
+      }
+      
+      const response = await fetch(`/api/materiais-desembarque/?barco_id=${barcoId}`);
+      const result = await response.json();
+      
+      if (!result.success) {
+        alert('Erro ao carregar materiais: ' + result.error);
+        return;
+      }
+      
+      const materiais = result.data;
+      
+      if (materiais.length === 0) {
+        elementos.tblMatDesembarque.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">Nenhum material relacionado para desembarque</td></tr>';
+        elementos.btnSolicitarDesembarque.style.display = 'none';
+        return;
+      }
+      
+      elementos.btnSolicitarDesembarque.style.display = 'block';
+      elementos.tblMatDesembarque.innerHTML = '';
+      
+      materiais.forEach(mat => {
+        const tr = document.createElement('tr');
+        const responsavel = mat.respEmbMat === 'OUTRO' ? mat.outRespEmbMat : mat.respEmbMat;
+        
+        tr.innerHTML = `
+          <td>${mat.tipoBarco} ${mat.barcoMatEmb}</td>
+          <td>${mat.descMatEmb}</td>
+          <td>${mat.osEmb || ''}</td>
+          <td>${responsavel}</td>
+          <td>
+            <button class="btn small" onclick="InvMatModule.removerSelecaoDesembarque(${mat.id})">Remover da Seleção</button>
+            <button class="btn small" onclick="InvMatModule.exibirDetalhesDesembarque(${mat.id})">Exibir Detalhes</button>
+            <button class="btn small" onclick="InvMatModule.solicitarDesembarqueIndividual(${mat.id})">Solicitar Desembarque</button>
+          </td>
+        `;
+        
+        elementos.tblMatDesembarque.appendChild(tr);
+      });
+      
+    } catch (error) {
+      alert('Erro ao carregar materiais: ' + error.message);
+    }
+  }
+
+  // ===== REMOVER DA SELEÇÃO PARA DESEMBARQUE =====
+  async function removerSelecaoDesembarque(id) {
+    if (!confirm('Remover este material da seleção para desembarque?')) return;
+    
+    try {
+      const response = await fetch(`${API_BASE}${id}/status/`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({status: 'MATERIAL A BORDO'})
+      });
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        alert('Erro: ' + result.error);
+        return;
+      }
+      
+      alert('Material removido da seleção para desembarque');
+      await carregarTabelas();
+      
+    } catch (error) {
+      alert('Erro: ' + error.message);
+    }
+  }
+
+  // ===== EXIBIR DETALHES DO MATERIAL =====
+  async function exibirDetalhesDesembarque(id) {
+    try {
+      const response = await fetch(`${API_BASE}${id}/`);
+      const result = await response.json();
+      
+      if (!result.success) {
+        alert('Erro: ' + result.error);
+        return;
+      }
+      
+      const mat = result.data;
+      modoSomenteLeitura = true;
+      
+      elementos.modalTitle.textContent = 'DETALHES DO MATERIAL';
+      preencherModal(mat);
+      elementos.modal.style.display = 'flex';
+      
+      // Desabilitar todos os campos
+      Object.keys(elementos).forEach(key => {
+        if (key.startsWith('modal') && elementos[key].tagName) {
+          elementos[key].disabled = true;
+        }
+      });
+      
+      elementos.btnModalSalvar.style.display = 'none';
+      elementos.btnModalExcluir.style.display = 'none';
+      elementos.btnModalCancelar.textContent = 'Fechar';
+      
+    } catch (error) {
+      alert('Erro: ' + error.message);
+    }
+  }
+
+  // ===== SOLICITAR DESEMBARQUE INDIVIDUAL =====
+  async function solicitarDesembarqueIndividual(id) {
+    const barcoId = elementos.filtroBarcoDesembarque.value;
+    await processarSolicitacaoDesembarque(barcoId, [id]);
+  }
+
+  // ===== SOLICITAR DESEMBARQUE TODOS =====
+  async function solicitarDesembarqueTodos() {
+    if (!confirm('Confirma a solicitação de DESEMBARQUE de todos os materiais relacionados?')) return;
+    
+    const barcoId = elementos.filtroBarcoDesembarque.value;
+    await processarSolicitacaoDesembarque(barcoId, null);
+  }
+
+  // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
+  async function processarSolicitacaoDesembarque(barcoId, materiaisIds) {
+    try {
+      // Obter usuário
+      const usuario = AuthModule.getUsuarioLogado();
+      if (!usuario) {
+        alert('Usuário não identificado');
+        return;
+      }
+      
+      const fiscalNome = `${usuario.chave} - ${usuario.nome}`;
+      
+      // Verificar PS em rascunho
+      const responsePS = await fetch('/api/verificar-ps-rascunho-material/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({barcoId, fiscalNome})
+      });
+      
+      const resultPS = await responsePS.json();
+      
+      if (!resultPS.success) {
+        alert('Erro: ' + resultPS.error);
+        return;
+      }
+      
+      if (!resultPS.existeRascunho) {
+        // Buscar nome do barco para mensagem
+        const respBarco = await fetch(`/api/barcos/`);
+        const resBarco = await respBarco.json();
+        const barco = resBarco.data.find(b => b.id == barcoId);
+        const barcoNome = barco ? `${barco.tipoBarco} ${barco.nomeBarco}` : 'a embarcação';
+        
+        alert(`Não há Passagem de Serviço em Rascunho para o Usuário atual em ${barcoNome}. Crie o rascunho da Passagem de serviço, e informe o porto, horário de atracação e período de porto para integração dos dados da data de desembarque.`);
+        return;
+      }
+      
+      if (!resultPS.dadosCompletos) {
+        alert('A Passagem de Serviço em rascunho não possui os dados de porto completos (Porto, Horário de Atracação e Duração). Complete esses dados antes de solicitar o desembarque.');
+        return;
+      }
+      
+      const psData = resultPS.psData;
+      
+      // Buscar nome do barco para confirmação
+      const respBarco = await fetch(`/api/barcos/`);
+      const resBarco = await respBarco.json();
+      const barco = resBarco.data.find(b => b.id == barcoId);
+      const barcoNome = barco ? `${barco.tipoBarco} ${barco.nomeBarco}` : 'a embarcação';
+      
+      if (!confirm(`Confirma a solicitação de Desembarque dos materiais relacionados para entrada de porto do ${barcoNome} no dia ${psData.dataEmissao}?`)) {
+        return;
+      }
+      
+      // Buscar materiais para determinar modelo
+      const responseMat = await fetch(`/api/materiais-desembarque/?barco_id=${barcoId}`);
+      const resultMat = await responseMat.json();
+      
+      if (!resultMat.success || resultMat.data.length === 0) {
+        alert('Nenhum material encontrado');
+        return;
+      }
+      
+      const materiais = resultMat.data;
+      
+      // Determinar modelo baseado nos responsáveis e contentores
+      const temCrd = materiais.some(m => m.respEmbMat === 'CRD');
+      const temNaoCrd = materiais.some(m => m.respEmbMat !== 'CRD');
+      
+      if (temCrd && temNaoCrd) {
+        // Processar CRD e Não-CRD separadamente
+        alert('Serão enviados e-mails separados para materiais CRD e Não-CRD');
+        // Primeiro processar não-CRD
+        await determinarModeloNaoCrd(barcoId, fiscalNome, psData, materiais.filter(m => m.respEmbMat !== 'CRD'));
+        // Depois processar CRD
+        await enviarSolicitacao('004', barcoId, fiscalNome, psData, {});
+      } else if (temCrd) {
+        // Apenas CRD
+        await enviarSolicitacao('004', barcoId, fiscalNome, psData, {});
+      } else {
+        // Apenas Não-CRD
+        await determinarModeloNaoCrd(barcoId, fiscalNome, psData, materiais);
+      }
+      
+    } catch (error) {
+      alert('Erro: ' + error.message);
+    }
+  }
+
+  // ===== DETERMINAR MODELO NÃO CRD =====
+  async function determinarModeloNaoCrd(barcoId, fiscalNome, psData, materiais) {
+    const comContentor = materiais.filter(m => m.contBordoEmbMat === 'SIM');
+    const semContentor = materiais.filter(m => m.contBordoEmbMat !== 'SIM');
+    
+    if (comContentor.length > 0 && semContentor.length === 0) {
+      // Modelo 001 - Todos com contentor
+      await enviarSolicitacao('001', barcoId, fiscalNome, psData, {});
+    } else if (semContentor.length > 0 && comContentor.length === 0) {
+      // Modelo 002 - Todos sem contentor
+      await abrirModalContentores('002', barcoId, fiscalNome, psData);
+    } else {
+      // Modelo 003 - Misto
+      const resposta = confirm('Os materiais sem contentor associado podem ser acondicionados juntamente com os materiais que já estão em contentores?');
+      if (resposta) {
+        // Modelo 001
+        await enviarSolicitacao('001', barcoId, fiscalNome, psData, {});
+      } else {
+        // Modelo 003
+        await abrirModalContentores('003', barcoId, fiscalNome, psData);
+      }
+    }
+  }
+
+  // ===== ABRIR MODAL CONTENTORES =====
+  function abrirModalContentores(modelo, barcoId, fiscalNome, psData) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:2000;';
+    
+    modal.innerHTML = `
+      <div class="modal-content" style="background:#fff; border-radius:10px; padding:30px; max-width:600px; width:90%;">
+        <h2 style="color:#0b7a66; margin-bottom:20px;">Contentores para desembarque</h2>
+        
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:5px;">Quantidade de Contentores <span style="color:red;">*</span></label>
+          <input type="text" id="qtdeContentores" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+        </div>
+        
+        <div style="margin-bottom:20px;">
+          <label style="display:block; margin-bottom:5px;">Descrição dos Contentores <span style="color:red;">*</span></label>
+          <textarea id="descContentores" rows="3" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; resize:vertical;"></textarea>
+        </div>
+        
+        <p style="color:#666; font-size:14px; margin-bottom:20px;">Indique a quantidade e descreva o contentor necessário com as respectivas dimensões para acondicionamento dos materiais</p>
+        
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button id="btnCancelarCont" class="btn secondary">Cancelar</button>
+          <button id="btnSalvarCont" class="btn">Salvar e solicitar desembarque</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    document.getElementById('btnCancelarCont').addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+    
+    document.getElementById('btnSalvarCont').addEventListener('click', async () => {
+      const qtde = document.getElementById('qtdeContentores').value.trim();
+      const desc = document.getElementById('descContentores').value.trim();
+      
+      if (!qtde || !desc) {
+        alert('Preencha todos os campos obrigatórios');
+        return;
+      }
+      
+      document.body.removeChild(modal);
+      
+      await enviarSolicitacao(modelo, barcoId, fiscalNome, psData, {
+        qtdeContentores: qtde,
+        descContentores: desc
+      });
+    });
+  }
+
+  // ===== ENVIAR SOLICITAÇÃO =====
+  async function enviarSolicitacao(modelo, barcoId, fiscalNome, psData, dadosModal) {
+    try {
+      const response = await fetch('/api/solicitar-desembarque/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          barcoId,
+          fiscalNome,
+          psData,
+          modelo,
+          dadosModal
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        alert('Erro ao solicitar desembarque: ' + result.error);
+        return;
+      }
+      
+      alert('Desembarque solicitado com sucesso! E-mail enviado.');
+      await carregarTabelas();
+      
+    } catch (error) {
+      alert('Erro ao enviar solicitação: ' + error.message);
     }
   }
 
@@ -773,7 +1118,10 @@ function validarEmail(email) {
     confirmarEmbarque,
     embarqueNaoConcluido,
     relacionarDesembarque,
-    aplicarOperacao
+    aplicarOperacao,
+    removerSelecaoDesembarque,
+    exibirDetalhesDesembarque,
+    solicitarDesembarqueIndividual
   };
 
   // ===== INICIAR =====
