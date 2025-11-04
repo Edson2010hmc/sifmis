@@ -95,6 +95,11 @@ urlpatterns = [
     path('api/mob-desm/<int:mob_desm_id>/subtab/', views_ps.subtab_mob_desm_list, name='subtab_mob_desm_list'),
     path('api/mob-desm-item/<int:item_id>/', views_ps.subtab_mob_desm_detail, name='subtab_mob_desm_detail'),
 
+    # API Embarque de materiais
+    path('api/ps/<int:ps_id>/materiais-embarque/', views_ps.listar_materiais_embarque_ps, name='listar_materiais_embarque_ps'),
+    path('api/ps/<int:ps_id>/sincronizar-materiais-embarque/', views_ps.sincronizar_materiais_embarque_ps, name='sincronizar_materiais_embarque_ps'),
+
+
     # API Finalizar Passagem de Serviço
     path('api/passagens/<int:ps_id>/finalizar/', views_ps.finalizar_passagem, name='finalizar_passagem'),   
 
@@ -133,8 +138,7 @@ urlpatterns = [
     path('api/materiais-embarque/<int:material_id>/remover-solicitacao/', views_invmat.remover_solicitacao_desembarque, name='remover_solicitacao_desembarque'),
     path('api/materiais-embarque/<int:material_id>/material-coletado/', views_invmat.material_coletado, name='material_coletado'),
     path('api/materiais-embarque/<int:material_id>/material-nao-coletado/', views_invmat.material_nao_coletado, name='material_nao_coletado'),
-
-
+    
 
 
 ]
