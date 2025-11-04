@@ -5,6 +5,105 @@ const DesMatPsModule = (() => {
   'use strict';
 
   let psAtualId = null;
+  let sincronizandoEmAndamento = false;
+
+  const elementos = {
+    tabela: document.getElementById('tblDesMatPs'),
+    btnAtualizar: null,
+    modal: document.getElementById('modalDetalhesMaterial'),
+    closeModal: document.getElementById('closeDetalhesMaterial'),
+    btnFechar: document.getElementById('btnFecharDetalhes')
+  };
+
+  //============INICIALIZAR==========
+  function init() {
+    criarBotaoAtualizar();
+    configurarModal();
+  }
+
+  //============CRIAR BOTÃO ATUALIZAR==========
+  function criarBotaoAtualizar() {
+    const accordion = document.getElementById('acc-desmateriais');
+    if (!accordion || document.getElementById('btnAtualizarDesMat')) return;
+    
+    const container = document.createElement('div');
+    container.style.cssText = 'margin-bottom: 10px; display: flex; justify-content: flex-end;';
+    
+    const btn = document.createElement('button');
+    btn.id = 'btnAtualizarDesMat';
+    btn.className = 'btn secondary small';
+    btn.textContent = 'Atualizar';
+    btn.style.cssText = 'padding: 6px 16px;';
+    btn.addEventListener('click', () => {
+      if (psAtualId) atualizarTabela(psAtualId);
+    });
+    
+    container.appendChild(btn);
+    const tabelaParent = elementos.tabela.parentElement;
+    tabelaParent.insertBefore(container, elementos.tabela);
+    elementos.btnAtualizar = btn;
+  }
+
+  //============CONFIGURAR MODAL==========
+  function configurarModal() {
+    if (elementos.closeModal) {
+      elementos.closeModal.addEventListener('click', fecharModal);
+    }
+    if (elementos.btnFechar) {
+      elementos.btnFechar.addEventListener('click', fecharModal);
+    }
+    window.addEventListener('click', (e) => {
+      if (e.target === elementos.modal) fecharModal();
+    });
+  }
+
+  //============FECHAR MODAL==========
+  function fecharModal() {
+    if (elementos.modal) {
+      elementos.modal.style.display = 'none';
+    }
+  }
+
+  //============SINCRONIZAR MATERIAIS==========
+  async function sincronizarMateriais(psId) {
+    if (!psId) return;
+    
+    if (sincronizandoEmAndamento) {
+      console.log('[DES-MAT-PS] Sincronização já em andamento, aguardando...');
+      return;
+    }
+    
+    sincronizandoEmAndamento = true;
+    
+    try {
+      const response = await fetch(`/api/ps/${psId}/sincronizar-materiais-desembarque/`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+      });
+      
+      const result = await response.json();
+      console.log('[DES-MAT-PS] Sincronização concluída:', result.message);
+      
+    } catch (error) {
+      console.error('[DES-MAT-PS] Erro na sincronização:', error);
+    } finally {
+      sincronizandoEmAndamento = false;
+    }
+  }
+
+  //============CARREGAR DADOS==========
+  async function carregarDados(psId) {
+    if (!psId) return;
+    psAtualId = psId;
+    
+    try {
+      await sincronizarMateriais(psId);
+      await new Promise(resolve => setTimeout(resolve, 300));
+      await atualizarTabela(psId);
+    } catch (error) {
+      console.error('[DES-MAT-PS] Erro ao carregar dados:', error);
+    }
+  }
 
   //============ATUALIZAR TABELA==========
   async function atualizarTabela(psId) {
@@ -41,7 +140,7 @@ const DesMatPsModule = (() => {
         tbody.appendChild(tr);
       });
     } catch (error) {
-      // Silencioso
+      console.error('[DES-MAT-PS] Erro ao atualizar tabela:', error);
     }
   }
 
@@ -51,6 +150,7 @@ const DesMatPsModule = (() => {
     
     try {
       await sincronizarMateriais(psAtualId);
+      await new Promise(resolve => setTimeout(resolve, 300));
       await atualizarTabela(psAtualId);
     } catch (error) {
       throw error;
@@ -60,6 +160,7 @@ const DesMatPsModule = (() => {
   //============LIMPAR==========
   function limpar() {
     psAtualId = null;
+    sincronizandoEmAndamento = false;
     if (elementos.tabela) {
       const tbody = elementos.tabela.querySelector('tbody');
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">Nenhum material solicitado para desembarque</td></tr>';
@@ -84,7 +185,6 @@ const DesMatPsModule = (() => {
       
       const mat = result.data;
       
-      // Preencher campos do modal
       document.getElementById('det_barco').value = `${mat.tipoBarco} ${mat.barcoMatEmb}`;
       document.getElementById('det_desc').value = mat.descMatEmb || '';
       document.getElementById('det_ident').value = mat.identMatEmb || '';
@@ -103,7 +203,6 @@ const DesMatPsModule = (() => {
       document.getElementById('det_status').value = mat.statusProgMatEmb || '';
       document.getElementById('det_obs').value = mat.obsMatEmb || '';
       
-      // Desabilitar todos os campos (SOMENTE LEITURA)
       const campos = [
         'det_barco', 'det_desc', 'det_ident', 'det_peso', 
         'det_altura', 'det_largura', 'det_compr', 'det_resp',
@@ -116,16 +215,10 @@ const DesMatPsModule = (() => {
         if (campo) campo.disabled = true;
       });
       
-      // Carregar e desabilitar subtabelas de embarque
       await carregarSubtabelaEmbarque(materialId);
-      
-      // Carregar e desabilitar subtabelas de desembarque
       await carregarSubtabelaDesembarque(materialId);
-      
-      // Desabilitar botões de adicionar/remover
       desabilitarBotoesSubtabelas();
       
-      // Exibir modal
       elementos.modal.style.display = 'block';
       
     } catch (error) {
@@ -150,8 +243,8 @@ const DesMatPsModule = (() => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><input type="date" value="${emb.dataPrevEmbMat || ''}" disabled></td>
-          <td><input type="text" value="${emb.meioEmbMat || ''}" disabled></td>
-          <td><input type="text" value="${emb.uepEmbMatEmb || ''}" disabled></td>
+          <td><input type="text" value="${emb.meioRecEmbMat || ''}" disabled></td>
+          <td><input type="text" value="${emb.uepRecMatEmb || ''}" disabled></td>
           <td><input type="text" value="${emb.misBarcoRecMatEmb || ''}" disabled></td>
           <td><input type="text" value="${emb.barcoRecMatEmb || ''}" disabled></td>
           <td><input type="text" value="${emb.osEmbMat || ''}" disabled></td>
@@ -199,7 +292,6 @@ const DesMatPsModule = (() => {
 
   //============DESABILITAR BOTÕES SUBTABELAS==========
   function desabilitarBotoesSubtabelas() {
-    // Desabilitar botões de adicionar linhas
     const btnAddEmb = document.getElementById('btnAddSubEmb');
     const btnAddDesemb = document.getElementById('btnAddSubDesemb');
     

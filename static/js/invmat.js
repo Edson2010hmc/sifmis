@@ -556,11 +556,23 @@ async function carregarTabelaMatBordo() {
 // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
   async function processarSolicitacaoDesembarque(barcoId) {
     try {
-// Buscar fiscal logado
+      // Verificar se AuthModule existe
+      if (typeof AuthModule === 'undefined') {
+        alert('Sistema de autenticação não carregado. Recarregue a página.');
+        return;
+      }
+
+      // Buscar fiscal logado
       const usuario = AuthModule.getUsuarioLogado();
-      let resp;
-      if (!usuario || !usuario.chave) {
-        alert('Fiscal não identificado');
+      
+      // Validação robusta do usuário
+      if (!usuario) {
+        alert('Usuário não autenticado. Recarregue a página e faça login novamente.');
+        return;
+      }
+
+      if (!usuario.chave || !usuario.nome) {
+        alert('Dados do usuário incompletos. Entre em contato com o administrador.');
         return;
       }
 
@@ -594,85 +606,16 @@ async function carregarTabelaMatBordo() {
       const respBarco = await fetch(`/api/barcos/`);
       const resBarco = await respBarco.json();
       const barco = resBarco.data.find(b => b.id == barcoId);
-      const barcoNome = barco ? `${barco.tipoBarco} ${barco.nomeBarco}` : 'a embarcação';
+      const barcoNome = barco ? `${barco.tipoBarco} ${barco.nomeBarco}` : '';
       
-      // Formatar data
-      const dataFormatada = psData.dataEmissao.split('-').reverse().join('/');
-      
-      if (!confirm(`Confirma a solicitação de Desembarque dos materiais relacionados para entrada de porto do ${barcoNome} no dia ${dataFormatada}?`)) {
-        return;
-      }
-      
-      // Buscar materiais
-      const responseMat = await fetch(`/api/materiais-desembarque/?barco_id=${barcoId}`);
-      const resultMat = await responseMat.json();
-      
-      if (!resultMat.success || resultMat.data.length === 0) {
-        alert('Nenhum material encontrado');
-        return;
-      }
-      
-      const materiais = resultMat.data;
-      
-      // SEPARAR MATERIAIS POR TIPO
-      const materiaisCrd = materiais.filter(m => m.respEmbMat === 'CRD');
-      const materiaisNaoCrd = materiais.filter(m => m.respEmbMat !== 'CRD');
-      
-      // COLETAR DADOS DO MODAL SE NECESSÁRIO (antes de enviar emails)
-      let dadosModal = {};
-      
-      if (materiaisNaoCrd.length > 0) {
-        const comContentor = materiaisNaoCrd.filter(m => m.contBordoEmbMat === 'SIM');
-        const semContentor = materiaisNaoCrd.filter(m => m.contBordoEmbMat !== 'SIM');
-        
-        if (semContentor.length > 0 && comContentor.length === 0) {
-          // MODELO 002 - Precisa modal
-          dadosModal = await abrirModalContentoresPromise('002', barcoId, fiscalNome, psData);
-          if (!dadosModal) return; // Usuário cancelou
-          
-        } else if (semContentor.length > 0 && comContentor.length > 0) {
-          // MODELO 003 - Perguntar se pode agrupar
-          const resposta = confirm('Os materiais sem contentor associado podem ser acondicionados juntamente com os materiais que já estão em contentores?');
-          resp = resposta;
-          if (!resposta) {
-            // MODELO 003 - Precisa modal
-            dadosModal = await abrirModalContentoresPromise('003', barcoId, fiscalNome, psData);
-            if (!dadosModal) return; // Usuário cancelou
-          }
-        }
-      }
-      
-      // AGORA ENVIAR OS E-MAILS EM SEQUÊNCIA
-      
-      // 1) PROCESSAR CRD (se existir)
-      if (materiaisCrd.length > 0) {
-        await enviarSolicitacao('004', barcoId, fiscalNome, psData, {}, 'CRD');
-      }
-      
-      // 2) PROCESSAR NÃO CRD (se existir)
-      if (materiaisNaoCrd.length > 0) {
-        const comContentor = materiaisNaoCrd.filter(m => m.contBordoEmbMat === 'SIM');
-        const semContentor = materiaisNaoCrd.filter(m => m.contBordoEmbMat !== 'SIM');
-        
-        let modelo = '001'; // Default: todos com contentor
-        
-        if (semContentor.length > 0 && comContentor.length === 0) {
-          modelo = '002';
-        } else if (semContentor.length > 0 && comContentor.length > 0) {
-          //const resposta = confirm('Os materiais sem contentor associado podem ser acondicionados juntamente com os materiais que já estão em contentores?');
-          modelo = resp ? '001' : '003';
-        }
-        
-        await enviarSolicitacao(modelo, barcoId, fiscalNome, psData, dadosModal, 'NAO_CRD');
-      }
-      
-      alert('Processo concluído! E-mails enviados com sucesso.');
-      await carregarTabelas();
+      // Abrir modal de seleção de modelo
+      abrirModalSelecaoModelo(barcoId, barcoNome, fiscalNome, psData);
       
     } catch (error) {
-      alert('Erro: ' + error.message);
+      alert('Erro ao processar solicitação: ' + error.message);
     }
   }
+
 
   // ===== ABRIR MODAL CONTENTORES COM PROMISE =====
   function abrirModalContentoresPromise(modelo, barcoId, fiscalNome, psData) {
