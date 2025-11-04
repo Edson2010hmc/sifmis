@@ -432,23 +432,31 @@
         </div>
 
         <!-- 1.9 Desembarque de Materiais -->
-        <div class="accordion-item">
+<        <div class="accordion-item">
           <div class="accordion-header" data-target="desmateriais">
             <span>1.9 Desembarque de Materiais</span>
             <span class="toggle">▼</span>
           </div>
           <div class="accordion-content" id="acc-desmateriais">
             <div class="col">
-              <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
-                <input id="dmNaoPrevisto" type="checkbox"> Não previsto para esse porto
-              </label>
-            </div>
-            <table id="tblDM">
-              <thead><tr><th>OS</th><th>Origem</th><th>Destino</th><th>RT</th><th>Observações</th><th>Anexo</th><th></th></tr></thead>
-              <tbody></tbody>
-            </table>
-            <div class="row">
-              <div class="col"><button id="btnAddDM" class="btn secondary">Adicionar linha</button></div>
+              
+              <table id="tblDesMatPs" style="width:100%; text-align:center;">
+                <thead>
+                  <tr>
+                    <th>Descrição do Material</th>
+                    <th>Responsável</th>
+                    <th>Descrição do contentor</th>
+                    <th>Status</th>
+                    <th style="width:150px;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colspan="5" style="text-align:center; color:#999;">Nenhum material solicitado para desembarque</td>
+                  </tr>
+                </tbody>
+              </table>
+
             </div>
           </div>
         </div>
@@ -668,6 +676,7 @@
 <script src="/static/js/emb-equip.js"></script>
 <script src="/static/js/mob-desm.js"></script>
 <script src="/static/js/emb-mat-ps.js"></script>
+<script src="/static/js/des-mat-ps.js"></script>
 <script src="/static/js/invmat.js"></script> 
 <script src="/static/js/app.js"></script>
 </body>

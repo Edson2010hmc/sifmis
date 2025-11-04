@@ -501,6 +501,10 @@ async function salvarRascunho(psId, silencioso = false) {
       await EmbMatPsModule.salvar();
     }
 
+    // Salvar Desembarque de Materiais
+    if (typeof DesMatPsModule !== 'undefined' && DesMatPsModule.salvar) {
+      await DesMatPsModule.salvar();
+    }
     const response = await fetch(`/api/passagens/${psId}/`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

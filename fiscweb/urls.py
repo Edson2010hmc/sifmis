@@ -98,13 +98,25 @@ urlpatterns = [
     # API Embarque de materiais
     path('api/ps/<int:ps_id>/materiais-embarque/', views_ps.listar_materiais_embarque_ps, name='listar_materiais_embarque_ps'),
     path('api/ps/<int:ps_id>/sincronizar-materiais-embarque/', views_ps.sincronizar_materiais_embarque_ps, name='sincronizar_materiais_embarque_ps'),
+    
+    # API Desembarque de materiais
+    path('api/ps/<int:ps_id>/materiais-desembarque/', views_ps.listar_materiais_desembarque_ps, name='listar_materiais_desembarque_ps'),
+    path('api/ps/<int:ps_id>/sincronizar-materiais-desembarque/', views_ps.sincronizar_materiais_desembarque_ps, name='sincronizar_materiais_desembarque_ps'),
+
+
+
 
 
     # API Finalizar Passagem de Serviço
     path('api/passagens/<int:ps_id>/finalizar/', views_ps.finalizar_passagem, name='finalizar_passagem'),   
-
     # API Gerar PDF da Passagem de Serviço
     path('api/passagens/<int:ps_id>/gerar-pdf/', views_ps.gerar_pdf_passagem, name='gerar_pdf_passagem'),
+
+
+
+
+
+
 
     #API Informes de anomalias da Quinzena
     path('api/ps/<int:ps_id>/anom-sms/', views_ps.anom_sms_list, name='anom_sms_list'),
