@@ -5,71 +5,32 @@ const DesMatPsModule = (() => {
   'use strict';
 
   let psAtualId = null;
-
-  const elementos = {
-    tabela: document.getElementById('tblDesMatPs'),
-    btnAtualizar: null,
-    modal: document.getElementById('modalDetalhesMaterial'),
-    closeModal: document.getElementById('closeDetalhesMaterial'),
-    btnFechar: document.getElementById('btnFecharDetalhes')
-  };
-
-  function init() {
-    criarBotaoAtualizar();
-    configurarModal();
-  }
-
-  function criarBotaoAtualizar() {
-    const accordion = document.getElementById('acc-desmateriais');
-    if (!accordion || document.getElementById('btnAtualizarDesMat')) return;
-    
-    const container = document.createElement('div');
-    container.style.cssText = 'margin-bottom: 10px; display: flex; justify-content: flex-end;';
-    
-    const btn = document.createElement('button');
-    btn.id = 'btnAtualizarDesMat';
-    btn.className = 'btn secondary small';
-    btn.textContent = 'Atualizar';
-    btn.style.cssText = 'padding: 6px 16px;';
-    btn.addEventListener('click', () => {
-      if (psAtualId) atualizarTabela(psAtualId);
-    });
-    
-    container.appendChild(btn);
-    const tabelaParent = elementos.tabela.parentElement;
-    tabelaParent.insertBefore(container, elementos.tabela);
-    elementos.btnAtualizar = btn;
-  }
-
-  function configurarModal() {
-    if (elementos.closeModal) {
-      elementos.closeModal.addEventListener('click', fecharModal);
-    }
-    if (elementos.btnFechar) {
-      elementos.btnFechar.addEventListener('click', fecharModal);
-    }
-    window.addEventListener('click', (e) => {
-      if (e.target === elementos.modal) fecharModal();
-    });
-  }
-
-  function fecharModal() {
-    if (elementos.modal) {
-      elementos.modal.style.display = 'none';
-    }
-  }
+  let sincronizandoEmAndamento = false; // Adicionar no início, após psAtualId
 
   //============SINCRONIZAR MATERIAIS==========
   async function sincronizarMateriais(psId) {
     if (!psId) return;
     
+    if (sincronizandoEmAndamento) {
+      console.log('[DES-MAT-PS] Sincronização já em andamento, aguardando...');
+      return;
+    }
+    
+    sincronizandoEmAndamento = true;
+    
     try {
-      await fetch(`/api/ps/${psId}/sincronizar-materiais-desembarque/`, {
+      const response = await fetch(`/api/ps/${psId}/sincronizar-materiais-desembarque/`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'}
       });
+      
+      const result = await response.json();
+      console.log('[DES-MAT-PS] Sincronização concluída:', result.message);
+      
     } catch (error) {
-      // Silencioso
+      console.error('[DES-MAT-PS] Erro na sincronização:', error);
+    } finally {
+      sincronizandoEmAndamento = false;
     }
   }
 
@@ -80,12 +41,12 @@ const DesMatPsModule = (() => {
     
     try {
       await sincronizarMateriais(psId);
+      await new Promise(resolve => setTimeout(resolve, 300));
       await atualizarTabela(psId);
     } catch (error) {
-      // Silencioso
+      console.error('[DES-MAT-PS] Erro ao carregar dados:', error);
     }
   }
-
   //============ATUALIZAR TABELA==========
   async function atualizarTabela(psId) {
     if (!elementos.tabela) return;
@@ -131,6 +92,7 @@ const DesMatPsModule = (() => {
     
     try {
       await sincronizarMateriais(psAtualId);
+      await new Promise(resolve => setTimeout(resolve, 300));
       await atualizarTabela(psAtualId);
     } catch (error) {
       throw error;
@@ -140,6 +102,7 @@ const DesMatPsModule = (() => {
   //============LIMPAR==========
   function limpar() {
     psAtualId = null;
+    sincronizandoEmAndamento = false;
     if (elementos.tabela) {
       const tbody = elementos.tabela.querySelector('tbody');
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">Nenhum material solicitado para desembarque</td></tr>';
