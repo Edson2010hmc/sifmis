@@ -112,19 +112,28 @@
   };
 
   // ===== INICIALIZAÇÃO =====
-function init() {
-  const isInventarioPage = window.location.pathname.includes('/inventario/');
-  
-  if (isInventarioPage) {
-    configurarAccordion();
-    configurarEventos();
-    carregarEmbarcacoes();
-    carregarTabelas();
-  } else {
-    // Na página de passagens, só configurar eventos
-    configurarEventos();
+// ===== INICIALIZAÇÃO =====
+  async function init() {
+    // VALIDAR USUÁRIO ANTES DE INICIALIZAR
+    if (typeof AuthModule !== 'undefined' && AuthModule.validarUsuario) {
+      const autorizado = await AuthModule.validarUsuario();
+      if (!autorizado) {
+        return;
+      }
+    }
+    
+    const isInventarioPage = window.location.pathname.includes('/inventario/');
+    
+    if (isInventarioPage) {
+      configurarAccordion();
+      configurarEventos();
+      carregarEmbarcacoes();
+      carregarTabelas();
+    } else {
+      // Na página de passagens, só configurar eventos
+      configurarEventos();
+    }
   }
-}
 
   // ===== CONFIGURAR ACCORDION =====
 function configurarAccordion() {
