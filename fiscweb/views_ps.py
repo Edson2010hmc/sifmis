@@ -2476,10 +2476,6 @@ def sincronizar_materiais_embarque_ps(request, ps_id):
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
-
-# Localizar em fiscweb/views_ps.py a função listar_materiais_embarque_ps
-# Substituir COMPLETAMENTE por este código:
-
 @csrf_exempt
 @require_http_methods(["GET"])
 def listar_materiais_embarque_ps(request, ps_id):
@@ -2560,6 +2556,205 @@ def listar_materiais_embarque_ps(request, ps_id):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
+#========================================== DESEMBARQUE MATERIAIS PS - SINCRONIZAR ==========================================
+@csrf_exempt
+@require_http_methods(["POST"])
+def sincronizar_materiais_desembarque_ps(request, ps_id):
+    """
+    POST: Sincroniza materiais com status DESEMBARQUE SOLICITADO para a tabela portoMatDesemb
+    """
+    try:
+        from .models_invmat import materialEmb
+        from .models_ps import portoMatDesemb
+        from .models_cad import BarcosCad
+        
+        # Buscar PS
+        ps = PassServ.objects.get(id=ps_id)
+        print(f"[SYNC-DESEMB] Iniciando sincronização para PS {ps_id}")
+        print(f"[SYNC-DESEMB] BarcoPS: '{ps.BarcoPS}'")
+        print(f"[SYNC-DESEMB] Status PS: '{ps.statusPS}'")
+        
+        # Verificar se está em rascunho
+        if ps.statusPS != 'RASCUNHO':
+            print(f"[SYNC-DESEMB] PS não está em RASCUNHO - ignorando")
+            return JsonResponse({
+                'success': True,
+                'message': 'PS finalizada, sincronização ignorada'
+            })
+        
+        # Extrair tipo e nome do barco
+        if ' - ' not in ps.BarcoPS:
+            print(f"[SYNC-DESEMB] Formato inválido de BarcoPS")
+            return JsonResponse({
+                'success': False,
+                'error': 'Formato de embarcação inválido'
+            }, status=400)
+        
+        partes = ps.BarcoPS.split(' - ', 1)
+        tipo_barco = partes[0].strip()
+        nome_barco = partes[1].strip()
+        
+        print(f"[SYNC-DESEMB] Buscando barco: tipo='{tipo_barco}', nome='{nome_barco}'")
+        
+        # Buscar barco no cadastro
+        barco = BarcosCad.objects.filter(
+            tipoBarco=tipo_barco,
+            nomeBarco=nome_barco
+        ).first()
+        
+        if not barco:
+            print(f"[SYNC-DESEMB] ERRO: Barco não encontrado no cadastro")
+            return JsonResponse({
+                'success': True,
+                'message': 'Embarcação não encontrada no cadastro'
+            })
+        
+        print(f"[SYNC-DESEMB] Barco encontrado: ID={barco.id}")
+        
+        # Buscar materiais com status DESEMBARQUE SOLICITADO
+        materiais_solic = materialEmb.objects.filter(
+            barcoMatEmb=barco,
+            statusProgMatEmb='DESEMBARQUE SOLICITADO'
+        )
+        
+        print(f"[SYNC-DESEMB] Materiais encontrados: {materiais_solic.count()}")
+        
+        # Limpar registros antigos
+        registros_antigos = portoMatDesemb.objects.filter(idxPortoMatDesemb=ps).count()
+        portoMatDesemb.objects.filter(idxPortoMatDesemb=ps).delete()
+        print(f"[SYNC-DESEMB] Removidos {registros_antigos} registros antigos")
+        
+        # Criar novos registros
+        criados = 0
+        for mat in materiais_solic:
+            primeiro_desemb = mat.desembarques.first()
+            
+            novo_registro = portoMatDesemb.objects.create(
+                idxPortoMatDesemb=ps,
+                descMatDesembPs=mat.descMatEmb,
+                numRtMatDesembPs=primeiro_desemb.numRtMatDesemb if primeiro_desemb else None,
+                osMatDesembPs=primeiro_desemb.osRecDesembMat if primeiro_desemb else None,
+                respMatDesembPs=mat.respEmbMat if mat.respEmbMat != 'OUTRO' else mat.outRespEmbMat,
+                descContMatDesembPs=mat.descContMatEmb,
+                statusProgMatEmbPs=mat.statusProgMatEmb,
+                dataPrevDesembMatPs=primeiro_desemb.dataPrevDesmbMat if primeiro_desemb else None
+            )
+            criados += 1
+            print(f"[SYNC-DESEMB] Criado registro: {novo_registro.descMatDesembPs}")
+        
+        print(f"[SYNC-DESEMB] Sincronização concluída - {criados} registros criados")
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'{criados} materiais sincronizados'
+        })
+        
+    except PassServ.DoesNotExist:
+        print(f"[SYNC-DESEMB] ERRO: PS {ps_id} não encontrada")
+        return JsonResponse({'success': False, 'error': 'PS não encontrada'}, status=404)
+    except Exception as e:
+        print(f"[SYNC-DESEMB] ERRO CRÍTICO: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def listar_materiais_desembarque_ps(request, ps_id):
+    """
+    GET: Lista materiais de desembarque da PS
+    """
+    try:
+        from .models_ps import portoMatDesemb, PassServ
+        from .models_invmat import materialEmb
+        from .models_cad import BarcosCad
+        
+        print(f"[LIST-DESEMB] Listando materiais para PS {ps_id}")
+        
+        # Buscar PS para pegar o barco
+        ps = PassServ.objects.get(id=ps_id)
+        
+        # Extrair tipo e nome do barco
+        partes = ps.BarcoPS.split(' - ', 1)
+        tipo_barco = partes[0].strip()
+        nome_barco = partes[1].strip()
+        
+        print(f"[LIST-DESEMB] Barco da PS: tipo='{tipo_barco}', nome='{nome_barco}'")
+        
+        # Buscar barco
+        barco = BarcosCad.objects.filter(
+            tipoBarco=tipo_barco,
+            nomeBarco=nome_barco
+        ).first()
+        
+        if not barco:
+            print(f"[LIST-DESEMB] ERRO: Barco não encontrado")
+        else:
+            print(f"[LIST-DESEMB] Barco encontrado: ID={barco.id}")
+        
+        materiais = portoMatDesemb.objects.filter(idxPortoMatDesemb_id=ps_id)
+        
+        print(f"[LIST-DESEMB] Total de materiais em portoMatDesemb: {materiais.count()}")
+        
+        data = []
+        for mat in materiais:
+            # Buscar material original para obter o ID
+            material_id = None
+            if barco:
+                mat_original = materialEmb.objects.filter(
+                    barcoMatEmb=barco,
+                    descMatEmb=mat.descMatDesembPs
+                ).first()
+                
+                if mat_original:
+                    material_id = mat_original.id
+                    print(f"[LIST-DESEMB] Material '{mat.descMatDesembPs}' encontrado com ID {material_id}")
+                else:
+                    print(f"[LIST-DESEMB] Material '{mat.descMatDesembPs}' NÃO encontrado no cadastro")
+            
+            data.append({
+                'id': mat.id,
+                'materialId': material_id,
+                'descMatDesembPs': mat.descMatDesembPs,
+                'numRtMatDesembPs': mat.numRtMatDesembPs or '',
+                'osMatDesembPs': mat.osMatDesembPs or '',
+                'respMatDesembPs': mat.respMatDesembPs or '',
+                'descContMatDesembPs': mat.descContMatDesembPs or '',
+                'statusProgMatEmbPs': mat.statusProgMatEmbPs or ''
+            })
+        
+        return JsonResponse({'success': True, 'data': data})
+        
+    except PassServ.DoesNotExist:
+        print(f"[LIST-DESEMB] ERRO: PS {ps_id} não encontrada")
+        return JsonResponse({'success': False, 'error': 'PS não encontrada'}, status=404)
+    except Exception as e:
+        print(f"[LIST-DESEMB] ERRO: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #===========================================BUSCAR INFORMES DE ANOMALIAS EMITIDOS NA QUINZENA=====================
 #================================================ANOMALIAS SMS - API REST=================================================
 @csrf_exempt
