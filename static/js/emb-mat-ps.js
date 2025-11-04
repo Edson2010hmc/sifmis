@@ -14,7 +14,7 @@ const EmbMatPsModule = (function() {
 
   // ===== INICIALIZAÇÃO =====
   function init() {
-    console.log('[EmbMatPs] Módulo inicializado');
+    //console.log('[EmbMatPs] Módulo inicializado');
   }
 
   // ===== SINCRONIZAR MATERIAIS =====
