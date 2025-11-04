@@ -117,11 +117,13 @@ function init() {
   
   if (isInventarioPage) {
     configurarAccordion();
+    configurarEventos();
+    carregarEmbarcacoes();
+    carregarTabelas();
+  } else {
+    // Na página de passagens, só configurar eventos
+    configurarEventos();
   }
-  
-  configurarEventos();
-  carregarFiltros();
-  carregarTabelas();
 }
 
   // ===== CONFIGURAR ACCORDION =====
