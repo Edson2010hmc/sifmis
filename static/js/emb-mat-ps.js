@@ -5,14 +5,48 @@ const EmbMatPsModule = (() => {
   'use strict';
 
   let psAtualId = null;
-  let intervaloAtualizacao = null;
 
   const elementos = {
-    tabela: document.getElementById('tblEmbMatPs')
+    tabela: document.getElementById('tblEmbMatPs'),
+    btnAtualizar: null // Será criado dinamicamente
   };
 
   function init() {
     console.log('[EmbMatPs] Módulo inicializado');
+    criarBotaoAtualizar();
+  }
+
+  // ===== CRIAR BOTÃO ATUALIZAR =====
+  function criarBotaoAtualizar() {
+    const accordion = document.getElementById('acc-embmateriais');
+    if (!accordion) return;
+    
+    // Verificar se botão já existe
+    if (document.getElementById('btnAtualizarEmbMat')) return;
+    
+    // Criar container do botão
+    const container = document.createElement('div');
+    container.style.cssText = 'margin-bottom: 10px; display: flex; justify-content: flex-end;';
+    
+    // Criar botão
+    const btn = document.createElement('button');
+    btn.id = 'btnAtualizarEmbMat';
+    btn.className = 'btn secondary small';
+    btn.textContent = 'Atualizar';
+    btn.style.cssText = 'padding: 6px 16px;';
+    btn.addEventListener('click', () => {
+      if (psAtualId) {
+        atualizarTabela(psAtualId);
+      }
+    });
+    
+    container.appendChild(btn);
+    
+    // Inserir antes da tabela
+    const tabelaParent = elementos.tabela.parentElement;
+    tabelaParent.insertBefore(container, elementos.tabela);
+    
+    elementos.btnAtualizar = btn;
   }
 
   async function sincronizarMateriais(psId) {
@@ -26,7 +60,7 @@ const EmbMatPsModule = (() => {
       
       await response.json();
     } catch (error) {
-      // Silencioso
+      console.error('[EmbMatPs] Erro ao sincronizar:', error);
     }
   }
 
@@ -38,9 +72,8 @@ const EmbMatPsModule = (() => {
     try {
       await sincronizarMateriais(psId);
       await atualizarTabela(psId);
-      iniciarAtualizacaoTempoReal(psId);
     } catch (error) {
-      // Silencioso
+      console.error('[EmbMatPs] Erro ao carregar:', error);
     }
   }
 
@@ -67,10 +100,10 @@ const EmbMatPsModule = (() => {
       result.data.forEach(mat => {
         const tr = document.createElement('tr');
         
-        // Criar botão que chama a função correta
+        // Criar botão com materialId correto
         const materialId = mat.materialId;
         const btnDetalhes = materialId 
-          ? `<button class="btn secondary small" onclick="EmbMatPsModule.exibirDetalhes(${materialId})">Exibir Detalhes</button>`
+          ? `<button class="btn secondary small" onclick="EmbMatPsModule.abrirModal(${materialId})">Exibir Detalhes</button>`
           : '<span style="color:#999;">-</span>';
         
         tr.innerHTML = `
@@ -86,25 +119,10 @@ const EmbMatPsModule = (() => {
         tbody.appendChild(tr);
       });
       
+      console.log(`[EmbMatPs] Tabela atualizada: ${result.data.length} materiais`);
+      
     } catch (error) {
       console.error('[EmbMatPs] Erro ao atualizar tabela:', error);
-    }
-  }
-
-  function iniciarAtualizacaoTempoReal(psId) {
-    if (intervaloAtualizacao) {
-      clearInterval(intervaloAtualizacao);
-    }
-    
-    intervaloAtualizacao = setInterval(() => {
-      atualizarTabela(psId);
-    }, 5000);
-  }
-
-  function pararAtualizacaoTempoReal() {
-    if (intervaloAtualizacao) {
-      clearInterval(intervaloAtualizacao);
-      intervaloAtualizacao = null;
     }
   }
 
@@ -121,7 +139,6 @@ const EmbMatPsModule = (() => {
 
   function limpar() {
     psAtualId = null;
-    pararAtualizacaoTempoReal();
     
     if (elementos.tabela) {
       const tbody = elementos.tabela.querySelector('tbody');
@@ -129,21 +146,28 @@ const EmbMatPsModule = (() => {
     }
   }
 
-  // ===== EXIBIR DETALHES - CHAMA INVMATMODULE =====
-  function exibirDetalhes(materialId) {
+  // ===== ABRIR MODAL DE DETALHES =====
+  function abrirModal(materialId) {
     if (!materialId) {
       alert('ID do material não disponível');
       return;
     }
     
+    console.log('[EmbMatPs] Tentando abrir modal para material ID:', materialId);
+    
     // Verificar se InvMatModule está disponível
-    if (typeof InvMatModule === 'undefined' || typeof InvMatModule.verDetalhes !== 'function') {
-      alert('Erro: Módulo de Inventário não disponível');
+    if (typeof window.InvMatModule === 'undefined') {
+      alert('Erro: Módulo de Inventário não está carregado. Recarregue a página.');
       return;
     }
     
-    // Chamar diretamente a função verDetalhes do InvMatModule
-    InvMatModule.verDetalhes(materialId);
+    if (typeof window.InvMatModule.verDetalhes !== 'function') {
+      alert('Erro: Função verDetalhes não disponível no módulo de Inventário');
+      return;
+    }
+    
+    // Chamar a função verDetalhes
+    window.InvMatModule.verDetalhes(materialId);
   }
 
   return {
@@ -151,7 +175,7 @@ const EmbMatPsModule = (() => {
     carregarDados,
     salvar,
     limpar,
-    exibirDetalhes
+    abrirModal
   };
 
 })();

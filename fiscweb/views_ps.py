@@ -2477,6 +2477,9 @@ def sincronizar_materiais_embarque_ps(request, ps_id):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
+# Localizar em fiscweb/views_ps.py a função listar_materiais_embarque_ps
+# Substituir COMPLETAMENTE por este código:
+
 @csrf_exempt
 @require_http_methods(["GET"])
 def listar_materiais_embarque_ps(request, ps_id):
@@ -2557,12 +2560,6 @@ def listar_materiais_embarque_ps(request, ps_id):
             'success': False,
             'error': str(e)
         }, status=500)
-
-
-
-
-
-
 #===========================================BUSCAR INFORMES DE ANOMALIAS EMITIDOS NA QUINZENA=====================
 #================================================ANOMALIAS SMS - API REST=================================================
 @csrf_exempt

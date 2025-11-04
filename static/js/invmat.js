@@ -112,17 +112,17 @@
   };
 
   // ===== INICIALIZAÇÃO =====
-  async function init() {
-    if (typeof AuthModule !== 'undefined' && AuthModule.validarUsuario) {
-      const autorizado = await AuthModule.validarUsuario();
-      if (!autorizado) return;
-    }
-
+function init() {
+  const isInventarioPage = window.location.pathname.includes('/inventario/');
+  
+  if (isInventarioPage) {
     configurarAccordion();
-    configurarEventos();
-    await carregarEmbarcacoes();
-    await carregarTabelas();
   }
+  
+  configurarEventos();
+  carregarFiltros();
+  carregarTabelas();
+}
 
   // ===== CONFIGURAR ACCORDION =====
 function configurarAccordion() {
@@ -818,8 +818,6 @@ async function carregarTabelaMatBordo() {
       alert('Erro ao carregar detalhes');
     }
   }
-
-
 
   function fecharModal() {
     elementos.modal.style.display = 'none';
