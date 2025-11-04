@@ -215,7 +215,7 @@ def materiais_embarque_detail(request, material_id):
             
             print(f"[API] PUT /api/materiais-embarque/{material_id}/ - Atualizando material")
             
-            # Atualizar material
+            # Atualizar tabela principal - materialEmb
             material.barcoMatEmb_id = data['barcoMatEmb']
             material.descMatEmb = data['descMatEmb']
             material.identMatEmb = data.get('identMatEmb')
@@ -235,26 +235,48 @@ def materiais_embarque_detail(request, material_id):
             material.statusProgMatEmb = data.get('statusProgMatEmb', material.statusProgMatEmb)
             material.save()
             
+            # CORREÇÃO DO BUG: Atualizar ou criar registro na subtabela de embarque
+            primeiro_embarque = material.embarques.first()
+            
+            if primeiro_embarque:
+                # Atualizar embarque existente
+                primeiro_embarque.dataPrevEmbMat = parse_date(data['dataPrevEmbMat'])
+                primeiro_embarque.numRtMatEmb = data.get('numRtMatEmb')
+                primeiro_embarque.numNotaFiscMatEmb = data.get('numNotaFiscMatEmb')
+                primeiro_embarque.meioRecEmbMat = data.get('meioRecEmbMat')
+                primeiro_embarque.uepRecMatEmb = data.get('uepRecMatEmb')
+                primeiro_embarque.misBarcoFlag = data.get('misBarcoFlag', True)
+                primeiro_embarque.misBarcoRecMatEmb = data.get('misBarcoRecMatEmb')
+                primeiro_embarque.barcoRecMatEmb = data.get('barcoRecMatEmb')
+                primeiro_embarque.osEmbMat = data.get('osEmbMat')
+                primeiro_embarque.statusRegEmb = material.statusProgMatEmb
+                primeiro_embarque.save()
+                print(f"[API] Subtabela de embarque atualizada - ID: {primeiro_embarque.id}")
+            else:
+                # Criar novo registro de embarque se não existir
+                novo_embarque = subMatEmb.objects.create(
+                    idxMatEmb=material,
+                    dataPrevEmbMat=parse_date(data['dataPrevEmbMat']),
+                    numRtMatEmb=data.get('numRtMatEmb'),
+                    numNotaFiscMatEmb=data.get('numNotaFiscMatEmb'),
+                    meioRecEmbMat=data.get('meioRecEmbMat'),
+                    uepRecMatEmb=data.get('uepRecMatEmb'),
+                    misBarcoFlag=data.get('misBarcoFlag', True),
+                    misBarcoRecMatEmb=data.get('misBarcoRecMatEmb'),
+                    barcoRecMatEmb=data.get('barcoRecMatEmb'),
+                    osEmbMat=data.get('osEmbMat'),
+                    statusRegEmb=material.statusProgMatEmb
+                )
+                print(f"[API] Nova subtabela de embarque criada - ID: {novo_embarque.id}")
+            
             print(f"[API] Material {material_id} atualizado com sucesso")
             
             return JsonResponse({'success': True, 'message': 'Material atualizado com sucesso'})
             
         except Exception as e:
             print(f"[API ERROR] PUT /api/materiais-embarque/{material_id}/ - {str(e)}")
-            return JsonResponse({'success': False, 'error': str(e)}, status=500)
-    
-    elif request.method == 'DELETE':
-        try:
-            print(f"[API] DELETE /api/materiais-embarque/{material_id}/ - Excluindo material")
-            
-            material.delete()
-            
-            print(f"[API] Material {material_id} excluído com sucesso")
-            
-            return JsonResponse({'success': True, 'message': 'Material excluído com sucesso'})
-            
-        except Exception as e:
-            print(f"[API ERROR] DELETE /api/materiais-embarque/{material_id}/ - {str(e)}")
+            import traceback
+            traceback.print_exc()
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
