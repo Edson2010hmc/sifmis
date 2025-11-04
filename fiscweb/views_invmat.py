@@ -513,9 +513,15 @@ def verificar_ps_rascunho_material(request):
     """
     
     try:
+        from .models_ps import PassServ, PortoTrocaTurma
+        
         data = json.loads(request.body)
         barco_id = data.get('barcoId')
         fiscal_nome = data.get('fiscalNome', '').strip()
+        
+        print(f"[VERIF-PS] ========== INICIANDO VERIFICAÇÃO ==========")
+        print(f"[VERIF-PS] Barco ID recebido: {barco_id}")
+        print(f"[VERIF-PS] Fiscal recebido: '{fiscal_nome}'")
         
         if not barco_id:
             return JsonResponse({'success': False, 'error': 'ID da embarcação não fornecido'}, status=400)
@@ -526,13 +532,31 @@ def verificar_ps_rascunho_material(request):
         # Buscar embarcação
         try:
             barco = BarcosCad.objects.get(id=barco_id)
+            barco_nome = f"{barco.tipoBarco} - {barco.nomeBarco}"
+            print(f"[VERIF-PS] Embarcação encontrada: '{barco_nome}'")
         except BarcosCad.DoesNotExist:
+            print(f"[VERIF-PS] ERRO: Embarcação com ID {barco_id} não encontrada")
             return JsonResponse({'success': False, 'error': 'Embarcação não encontrada'}, status=404)
         
-        # Buscar PS em rascunho
-        from .models_ps import PassServ, PortoTrocaTurma
+        # Listar TODAS as PS em rascunho para debug
+        print(f"[VERIF-PS] ========== LISTANDO TODAS PS EM RASCUNHO ==========")
+        todas_ps_rascunho = PassServ.objects.filter(statusPS='RASCUNHO')
+        print(f"[VERIF-PS] Total de PS em rascunho no sistema: {todas_ps_rascunho.count()}")
         
-        barco_nome = f"{barco.tipoBarco} - {barco.nomeBarco}"
+        for ps in todas_ps_rascunho:
+            print(f"[VERIF-PS]   PS ID: {ps.id}")
+            print(f"[VERIF-PS]     - BarcoPS: '{ps.BarcoPS}'")
+            print(f"[VERIF-PS]     - fiscalDes: '{ps.fiscalDes}'")
+            print(f"[VERIF-PS]     - Match Barco? {ps.BarcoPS == barco_nome}")
+            print(f"[VERIF-PS]     - Match Fiscal? {ps.fiscalDes == fiscal_nome}")
+        
+        print(f"[VERIF-PS] ========== BUSCANDO PS ESPECÍFICA ==========")
+        print(f"[VERIF-PS] Critérios de busca:")
+        print(f"[VERIF-PS]   - BarcoPS = '{barco_nome}'")
+        print(f"[VERIF-PS]   - fiscalDes = '{fiscal_nome}'")
+        print(f"[VERIF-PS]   - statusPS = 'RASCUNHO'")
+        
+        # Buscar PS em rascunho
         ps_rascunho = PassServ.objects.filter(
             BarcoPS=barco_nome,
             fiscalDes=fiscal_nome,
@@ -540,20 +564,50 @@ def verificar_ps_rascunho_material(request):
         ).first()
         
         if not ps_rascunho:
+            print(f"[VERIF-PS] ========== NENHUMA PS ENCONTRADA ==========")
             return JsonResponse({
                 'success': True,
                 'existeRascunho': False
             })
         
-        # Buscar dados de porto da PS
+        print(f"[VERIF-PS] ========== PS ENCONTRADA! ID: {ps_rascunho.id} ==========")
+        
+        # Buscar dados de porto
         troca_turma = PortoTrocaTurma.objects.filter(idxPortoTT=ps_rascunho).first()
         
-        if not troca_turma or not troca_turma.Porto or not troca_turma.AtracPorto or not troca_turma.DuracPorto:
+        if not troca_turma:
+            print(f"[VERIF-PS] AVISO: Registro de troca de turma não existe")
             return JsonResponse({
                 'success': True,
                 'existeRascunho': True,
                 'dadosCompletos': False
             })
+        
+        print(f"[VERIF-PS] Dados de Porto:")
+        print(f"[VERIF-PS]   - Porto: '{troca_turma.Porto}'")
+        print(f"[VERIF-PS]   - Atracação: '{troca_turma.AtracPorto}'")
+        print(f"[VERIF-PS]   - Duração: '{troca_turma.DuracPorto}'")
+        
+        # Verificar completude dos dados
+        dados_completos = bool(
+            troca_turma.Porto and 
+            troca_turma.Porto.strip() and
+            troca_turma.AtracPorto and 
+            troca_turma.DuracPorto and 
+            troca_turma.DuracPorto.strip()
+        )
+        
+        print(f"[VERIF-PS] Dados completos? {dados_completos}")
+        
+        if not dados_completos:
+            print(f"[VERIF-PS] ========== DADOS DE PORTO INCOMPLETOS ==========")
+            return JsonResponse({
+                'success': True,
+                'existeRascunho': True,
+                'dadosCompletos': False
+            })
+        
+        print(f"[VERIF-PS] ========== PS VÁLIDA COM DADOS COMPLETOS ==========")
         
         return JsonResponse({
             'success': True,
@@ -569,9 +623,11 @@ def verificar_ps_rascunho_material(request):
         })
         
     except Exception as e:
-        print(f"[API ERROR] POST /api/verificar-ps-rascunho-material/ - {str(e)}")
+        print(f"[VERIF-PS] ========== ERRO CRÍTICO ==========")
+        print(f"[API ERROR] {str(e)}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
 
 #========================================== SOLICITAR DESEMBARQUE ==========================================
 @csrf_exempt
