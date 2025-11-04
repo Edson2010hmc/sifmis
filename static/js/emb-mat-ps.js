@@ -12,7 +12,7 @@ const EmbMatPsModule = (() => {
   };
 
   function init() {
-    console.log('[EmbMatPs] Módulo inicializado');
+    
     criarBotaoAtualizar();
   }
 
@@ -60,7 +60,7 @@ const EmbMatPsModule = (() => {
       
       await response.json();
     } catch (error) {
-      console.error('[EmbMatPs] Erro ao sincronizar:', error);
+      //console.error('[EmbMatPs] Erro ao sincronizar:', error);
     }
   }
 
@@ -73,7 +73,7 @@ const EmbMatPsModule = (() => {
       await sincronizarMateriais(psId);
       await atualizarTabela(psId);
     } catch (error) {
-      console.error('[EmbMatPs] Erro ao carregar:', error);
+      //console.error('[EmbMatPs] Erro ao carregar:', error);
     }
   }
 
@@ -85,7 +85,7 @@ const EmbMatPsModule = (() => {
       const result = await response.json();
       
       if (!result.success) {
-        console.error('[EmbMatPs] Erro ao carregar materiais:', result.error);
+        //console.error('[EmbMatPs] Erro ao carregar materiais:', result.error);
         return;
       }
       
@@ -119,10 +119,10 @@ const EmbMatPsModule = (() => {
         tbody.appendChild(tr);
       });
       
-      console.log(`[EmbMatPs] Tabela atualizada: ${result.data.length} materiais`);
+      //console.log(`[EmbMatPs] Tabela atualizada: ${result.data.length} materiais`);
       
     } catch (error) {
-      console.error('[EmbMatPs] Erro ao atualizar tabela:', error);
+      //console.error('[EmbMatPs] Erro ao atualizar tabela:', error);
     }
   }
 
@@ -153,7 +153,7 @@ const EmbMatPsModule = (() => {
       return;
     }
     
-    console.log('[EmbMatPs] Tentando abrir modal para material ID:', materialId);
+    
     
     // Verificar se InvMatModule está disponível
     if (typeof window.InvMatModule === 'undefined') {

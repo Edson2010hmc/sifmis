@@ -259,12 +259,12 @@ if (typeof MobDesmModule !== 'undefined' && MobDesmModule.carregarDados) {
   MobDesmModule.carregarDados(psData.id);
 }
 
-console.log('[DEBUG] Verificando AnomSMSModule:', typeof AnomSMSModule);
+//console.log('[DEBUG] Verificando AnomSMSModule:', typeof AnomSMSModule);
 if (typeof AnomSMSModule !== 'undefined' && AnomSMSModule.carregarDados) {
-  console.log('[DEBUG] Chamando AnomSMSModule.carregarDados com psId:', psData.id);
+  //console.log('[DEBUG] Chamando AnomSMSModule.carregarDados com psId:', psData.id);
   AnomSMSModule.carregarDados(psData.id);
 } else {
-  console.log('[DEBUG] AnomSMSModule não disponível');
+  //console.log('[DEBUG] AnomSMSModule não disponível');
 }
 
 
@@ -565,7 +565,7 @@ async function carregarPassagensUsuario() {
     });
 
   } catch (error) {
-    console.error('Erro ao carregar passagens:', error);
+    //console.error('Erro ao carregar passagens:', error);
   }
 }
 
@@ -653,7 +653,7 @@ function habilitarInterface() {
 
 // ===== EXIBIR LINK DO PDF =====
 function exibirLinkPDF(pdfPath) {
-  console.log('[FINALIZAR] Exibindo link do PDF:', pdfPath);
+  //console.log('[FINALIZAR] Exibindo link do PDF:', pdfPath);
   
   const btnFinalizar = document.getElementById('btnFinalizar');
   const btnsContainer = btnFinalizar.parentElement;
@@ -677,7 +677,7 @@ function exibirLinkPDF(pdfPath) {
   
   btnsContainer.appendChild(linkPDF);
   
-  console.log('[FINALIZAR] Link do PDF exibido com sucesso');
+  //console.log('[FINALIZAR] Link do PDF exibido com sucesso');
 }
 
 // ===== FINALIZAR PASSAGEM DE SERVIÇO =====
