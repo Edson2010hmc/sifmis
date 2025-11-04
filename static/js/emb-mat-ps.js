@@ -1,9 +1,7 @@
 // static/js/emb-mat-ps.js
-// Módulo para Embarque de Materiais na Passagem de Serviço
+// Módulo para Embarque de Materiais na Passagem de Serviço (1.8)
 
-const EmbMatPsModule = (function() {
-  'use strict';
-
+const EmbMatPsModule = (() => {
   let psAtualId = null;
   let intervaloAtualizacao = null;
 
@@ -14,7 +12,7 @@ const EmbMatPsModule = (function() {
 
   // ===== INICIALIZAÇÃO =====
   function init() {
-    //console.log('[EmbMatPs] Módulo inicializado');
+    // Inicialização silenciosa
   }
 
   // ===== SINCRONIZAR MATERIAIS =====
@@ -22,8 +20,6 @@ const EmbMatPsModule = (function() {
     if (!psId) return;
     
     try {
-      console.log(`[EmbMatPs] Sincronizando materiais para PS ${psId}`);
-      
       const response = await fetch(`/api/ps/${psId}/sincronizar-materiais-embarque/`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'}
@@ -32,14 +28,11 @@ const EmbMatPsModule = (function() {
       const result = await response.json();
       
       if (!result.success) {
-        //console.error('[EmbMatPs] Erro ao sincronizar:', result.error);
         return;
       }
       
-      //console.log(`[EmbMatPs] ${result.message}`);
-      
     } catch (error) {
-      //console.error('[EmbMatPs] Erro ao sincronizar materiais:', error);
+      // Silencioso
     }
   }
 
@@ -50,17 +43,12 @@ const EmbMatPsModule = (function() {
     psAtualId = psId;
     
     try {
-      // Sincronizar materiais antes de carregar
       await sincronizarMateriais(psId);
-      
-      // Carregar dados
       await atualizarTabela(psId);
-      
-      // Iniciar atualização em tempo real
       iniciarAtualizacaoTempoReal(psId);
       
     } catch (error) {
-      //console.error('[EmbMatPs] Erro ao carregar dados:', error);
+      alert('Erro ao carregar Embarque de Materiais: ' + error.message);
     }
   }
 
@@ -73,8 +61,7 @@ const EmbMatPsModule = (function() {
       const result = await response.json();
       
       if (!result.success) {
-        console.error('[EmbMatPs] Erro ao carregar materiais:', result.error);
-        return;
+        throw new Error(result.error);
       }
       
       const tbody = elementos.tabela.querySelector('tbody');
@@ -101,18 +88,16 @@ const EmbMatPsModule = (function() {
       });
       
     } catch (error) {
-      //console.error('[EmbMatPs] Erro ao atualizar tabela:', error);
+      alert('Erro ao atualizar tabela de materiais: ' + error.message);
     }
   }
 
   // ===== INICIAR ATUALIZAÇÃO EM TEMPO REAL =====
   function iniciarAtualizacaoTempoReal(psId) {
-    // Limpar intervalo anterior se existir
     if (intervaloAtualizacao) {
       clearInterval(intervaloAtualizacao);
     }
     
-    // Atualizar a cada 5 segundos
     intervaloAtualizacao = setInterval(() => {
       atualizarTabela(psId);
     }, 5000);
@@ -126,21 +111,15 @@ const EmbMatPsModule = (function() {
     }
   }
 
-  // ===== SALVAR (SINCRONIZAR) =====
+  // ===== SALVAR (chamado pelo PassagensModule) =====
   async function salvar() {
     if (!psAtualId) return;
     
     try {
-      // Sincronizar materiais
       await sincronizarMateriais(psAtualId);
-      
-      // Atualizar tabela
       await atualizarTabela(psAtualId);
       
-      //console.log('[EmbMatPs] Dados salvos e sincronizados');
-      
     } catch (error) {
-      //console.error('[EmbMatPs] Erro ao salvar:', error);
       throw error;
     }
   }
@@ -156,7 +135,7 @@ const EmbMatPsModule = (function() {
     }
   }
 
-  // ===== EXIBIR DETALHES (MODAL DO MÓDULO INVMAT) =====
+  // ===== EXIBIR DETALHES =====
   async function exibirDetalhes(descMaterial) {
     alert(`Detalhes do material: ${descMaterial}\n\nEsta funcionalidade abrirá o modal de detalhes do módulo de Inventário de Materiais em modo somente leitura.`);
   }
