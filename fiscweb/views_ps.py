@@ -2376,70 +2376,53 @@ def sincronizar_materiais_embarque_ps(request, ps_id):
         # Buscar PS
         ps = PassServ.objects.get(id=ps_id)
         
+        # Extrair nome do barco (formato: "TIPO - NOME")
+        barco_ps = ps.BarcoPS
+        
         # Importar modelos necessários
         from .models_invmat import materialEmb
         from .models_ps import portoMatEmb
         from .models_cad import BarcosCad
-        from django.db.models import Q
         
-        # Extrair nome do barco da PS (formato pode ser "TIPO - NOME" ou "TIPO NOME")
-        barco_ps = ps.BarcoPS
-        tipo_barco = ps.TipoBarco
-        
-        print(f"[PS] Sincronizando materiais para PS {ps_id}")
-        print(f"[PS] Barco PS: {barco_ps}")
-        print(f"[PS] Tipo Barco: {tipo_barco}")
-        
-        # Tentar diferentes estratégias de busca
-        barco = None
-        
-        # Estratégia 1: Buscar por nome completo no BarcoPS
-        if ' - ' in barco_ps:
-            partes = barco_ps.split(' - ')
-            if len(partes) == 2:
-                tipo_parte = partes[0].strip()
-                nome_parte = partes[1].strip()
-                barco = BarcosCad.objects.filter(
-                    tipoBarco__iexact=tipo_parte,
-                    nomeBarco__iexact=nome_parte
-                ).first()
-                print(f"[PS] Estratégia 1: Tipo={tipo_parte}, Nome={nome_parte}, Encontrado={barco is not None}")
-        
-        # Estratégia 2: Buscar usando TipoBarco e extrair nome do BarcoPS
-        if not barco and tipo_barco:
-            # Remover o tipo do início do BarcoPS para extrair o nome
-            nome_sem_tipo = barco_ps.replace(tipo_barco, '').strip(' -')
-            barco = BarcosCad.objects.filter(
-                tipoBarco__iexact=tipo_barco,
-                nomeBarco__iexact=nome_sem_tipo
-            ).first()
-            print(f"[PS] Estratégia 2: Tipo={tipo_barco}, Nome={nome_sem_tipo}, Encontrado={barco is not None}")
-        
-        # Estratégia 3: Buscar apenas por nome (última tentativa)
-        if not barco:
-            # Tentar pegar a última parte do BarcoPS
-            partes = barco_ps.split()
-            if len(partes) > 1:
-                possivel_nome = ' '.join(partes[1:])  # Pegar tudo exceto primeira palavra
-                barco = BarcosCad.objects.filter(nomeBarco__iexact=possivel_nome).first()
-                print(f"[PS] Estratégia 3: Nome={possivel_nome}, Encontrado={barco is not None}")
-        
-        if not barco:
-            print(f"[PS] AVISO: Embarcação não encontrada para: {barco_ps}")
+        # CORREÇÃO: Extrair tipo e nome corretamente
+        partes = barco_ps.split(' - ', 1)
+        if len(partes) != 2:
+            print(f"[PS] Formato de BarcoPS inválido: {barco_ps}")
             return JsonResponse({
-                'success': True,
-                'message': 'Embarcação não encontrada, sincronização não realizada',
-                'debug': {
-                    'barco_ps': barco_ps,
-                    'tipo_barco': tipo_barco
-                }
-            })
+                'success': False,
+                'error': f'Formato de embarcação inválido: {barco_ps}'
+            }, status=400)
         
-        print(f"[PS] Embarcação encontrada: ID={barco.id}, Tipo={barco.tipoBarco}, Nome={barco.nomeBarco}")
+        tipo_barco = partes[0].strip()
+        nome_barco = partes[1].strip()
+        
+        print(f"[PS] Buscando barco: tipo='{tipo_barco}', nome='{nome_barco}'")
+        
+        # Buscar embarcação correspondente
+        try:
+            barco = BarcosCad.objects.filter(
+                tipoBarco=tipo_barco,
+                nomeBarco=nome_barco
+            ).first()
+            
+            if not barco:
+                print(f"[PS] Embarcação não encontrada para: tipo='{tipo_barco}', nome='{nome_barco}'")
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Embarcação não encontrada no cadastro, sincronização não realizada'
+                })
+                
+            print(f"[PS] Embarcação encontrada: ID={barco.id}, {barco.tipoBarco} {barco.nomeBarco}")
+            
+        except Exception as e:
+            print(f"[PS ERROR] Erro ao buscar embarcação: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
         
         # Apenas sincronizar se PS estiver em RASCUNHO
         if ps.statusPS != 'RASCUNHO':
-            print(f"[PS] PS {ps_id} não está em rascunho, sincronização ignorada")
+            print(f"[PS] PS {ps_id} não está em rascunho (status={ps.statusPS}), sincronização ignorada")
             return JsonResponse({
                 'success': True,
                 'message': 'PS finalizada, dados não sincronizados'
@@ -2454,11 +2437,12 @@ def sincronizar_materiais_embarque_ps(request, ps_id):
         print(f"[PS] Encontrados {materiais_prog.count()} materiais com status EMBARQUE PROGRAMADO")
         
         # Limpar registros antigos desta PS
-        registros_deletados = portoMatEmb.objects.filter(idxPortoMatEmb=ps).delete()
-        print(f"[PS] Deletados {registros_deletados[0]} registros antigos")
+        registros_antigos = portoMatEmb.objects.filter(idxPortoMatEmb=ps).count()
+        portoMatEmb.objects.filter(idxPortoMatEmb=ps).delete()
+        print(f"[PS] Removidos {registros_antigos} registros antigos da PS")
         
         # Criar novos registros
-        contador = 0
+        criados = 0
         for mat in materiais_prog:
             # Buscar primeiro embarque para pegar RT, OS e data
             primeiro_emb = mat.embarques.first()
@@ -2472,15 +2456,14 @@ def sincronizar_materiais_embarque_ps(request, ps_id):
                 descContMatEmbPs=mat.descContMatEmb,
                 dataPrevEmbMatPs=primeiro_emb.dataPrevEmbMat if primeiro_emb else None
             )
-            contador += 1
+            criados += 1
             print(f"[PS] Material sincronizado: {mat.descMatEmb}")
         
-        print(f"[PS] Sincronização concluída - {contador} registros criados")
+        print(f"[PS] Sincronização concluída - {criados} materiais criados")
         
         return JsonResponse({
             'success': True,
-            'message': f'{contador} materiais sincronizados',
-            'count': contador
+            'message': f'{criados} materiais sincronizados'
         })
         
     except PassServ.DoesNotExist:
@@ -2491,6 +2474,7 @@ def sincronizar_materiais_embarque_ps(request, ps_id):
         import traceback
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
 #========================================== EMBARQUE MATERIAIS PS - LISTAR ==========================================
 @csrf_exempt
 @require_http_methods(["GET"])
