@@ -168,6 +168,14 @@ async function criarNovaPS(barcoId, barcoData) {
       MobDesmModule.limpar();
     }
 
+    if (typeof EmbMatPsModule !== 'undefined' && EmbMatPsModule.limpar) {
+      EmbMatPsModule.limpar();
+    }
+
+    if (typeof DesMatPsModule !== 'undefined' && DesMatPsModule.limpar) {
+      DesMatPsModule.limpar();
+    }
+
    
     // 5. Fechar modal e guardar ID
     psAtualId = createResult.data.id;
@@ -257,6 +265,16 @@ if (typeof EmbEquipModule !== 'undefined' && EmbEquipModule.carregarDados) {
 // Carregar módulo Mobilização/Desmobilização
 if (typeof MobDesmModule !== 'undefined' && MobDesmModule.carregarDados) {
   MobDesmModule.carregarDados(psData.id);
+}
+
+// Carregar Embarque de Materiais
+if (typeof EmbMatPsModule !== 'undefined' && EmbMatPsModule.carregarDados) {
+  EmbMatPsModule.carregarDados(psData.id);
+}
+
+// Carregar Desembarque de Materiais
+if (typeof DesMatPsModule !== 'undefined' && DesMatPsModule.carregarDados) {
+  DesMatPsModule.carregarDados(psData.id);
 }
 
 //console.log('[DEBUG] Verificando AnomSMSModule:', typeof AnomSMSModule);
@@ -367,9 +385,14 @@ async function abrirPS(psId) {
       EmbEquipModule.carregarDados(psId);
     }
 
-        // Carregar Embarque de Materiais
+    // Carregar Embarque de Materiais
     if (typeof EmbMatPsModule !== 'undefined' && EmbMatPsModule.carregarDados) {
       EmbMatPsModule.carregarDados(psId);
+    }
+
+    // Carregar Desembarque de Materiais
+    if (typeof DesMatPsModule !== 'undefined' && DesMatPsModule.carregarDados) {
+      DesMatPsModule.carregarDados(psId);
     }
 
     
@@ -429,6 +452,12 @@ async function excluirRascunho(psId) {
     if (typeof EmbMatPsModule !== 'undefined' && EmbMatPsModule.limpar) {
       EmbMatPsModule.limpar();
     }
+    // Limpar Desembarque de Materiais
+    if (typeof DesMatPsModule !== 'undefined' && DesMatPsModule.limpar) {
+      DesMatPsModule.limpar();
+    }
+
+
     psAtualId = null;
 
     // Voltar para tela inicial
