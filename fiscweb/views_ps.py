@@ -2370,84 +2370,85 @@ def subtab_mob_desm_detail(request, item_id):
 def sincronizar_materiais_embarque_ps(request, ps_id):
     """
     POST: Sincroniza materiais com status EMBARQUE PROGRAMADO para a tabela portoMatEmb
-    Chamado ao salvar rascunho ou carregar PS
     """
     try:
-        # Buscar PS
-        ps = PassServ.objects.get(id=ps_id)
-        
-        # Extrair nome do barco (formato: "TIPO - NOME")
-        barco_ps = ps.BarcoPS
-        
-        # Importar modelos necessários
         from .models_invmat import materialEmb
         from .models_ps import portoMatEmb
         from .models_cad import BarcosCad
         
-        # CORREÇÃO: Extrair tipo e nome corretamente
-        partes = barco_ps.split(' - ', 1)
-        if len(partes) != 2:
-            print(f"[PS] Formato de BarcoPS inválido: {barco_ps}")
+        # Buscar PS
+        ps = PassServ.objects.get(id=ps_id)
+        print(f"[SYNC] Iniciando sincronização para PS {ps_id}")
+        print(f"[SYNC] BarcoPS: '{ps.BarcoPS}'")
+        print(f"[SYNC] Status PS: '{ps.statusPS}'")
+        
+        # Verificar se está em rascunho
+        if ps.statusPS != 'RASCUNHO':
+            print(f"[SYNC] PS não está em RASCUNHO - ignorando")
+            return JsonResponse({
+                'success': True,
+                'message': 'PS finalizada, sincronização ignorada'
+            })
+        
+        # Extrair tipo e nome do barco
+        if ' - ' not in ps.BarcoPS:
+            print(f"[SYNC] Formato inválido de BarcoPS")
             return JsonResponse({
                 'success': False,
-                'error': f'Formato de embarcação inválido: {barco_ps}'
+                'error': 'Formato de embarcação inválido'
             }, status=400)
         
+        partes = ps.BarcoPS.split(' - ', 1)
         tipo_barco = partes[0].strip()
         nome_barco = partes[1].strip()
         
-        print(f"[PS] Buscando barco: tipo='{tipo_barco}', nome='{nome_barco}'")
+        print(f"[SYNC] Buscando barco: tipo='{tipo_barco}', nome='{nome_barco}'")
         
-        # Buscar embarcação correspondente
-        try:
-            barco = BarcosCad.objects.filter(
-                tipoBarco=tipo_barco,
-                nomeBarco=nome_barco
-            ).first()
-            
-            if not barco:
-                print(f"[PS] Embarcação não encontrada para: tipo='{tipo_barco}', nome='{nome_barco}'")
-                return JsonResponse({
-                    'success': True,
-                    'message': 'Embarcação não encontrada no cadastro, sincronização não realizada'
-                })
-                
-            print(f"[PS] Embarcação encontrada: ID={barco.id}, {barco.tipoBarco} {barco.nomeBarco}")
-            
-        except Exception as e:
-            print(f"[PS ERROR] Erro ao buscar embarcação: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        # Buscar barco no cadastro
+        barco = BarcosCad.objects.filter(
+            tipoBarco=tipo_barco,
+            nomeBarco=nome_barco
+        ).first()
         
-        # Apenas sincronizar se PS estiver em RASCUNHO
-        if ps.statusPS != 'RASCUNHO':
-            print(f"[PS] PS {ps_id} não está em rascunho (status={ps.statusPS}), sincronização ignorada")
+        if not barco:
+            print(f"[SYNC] ERRO: Barco não encontrado no cadastro")
+            print(f"[SYNC] Barcos disponíveis:")
+            for b in BarcosCad.objects.all():
+                print(f"[SYNC]   - tipo='{b.tipoBarco}', nome='{b.nomeBarco}'")
+            
             return JsonResponse({
                 'success': True,
-                'message': 'PS finalizada, dados não sincronizados'
+                'message': 'Embarcação não encontrada no cadastro'
             })
         
-        # Buscar materiais com status EMBARQUE PROGRAMADO da embarcação
+        print(f"[SYNC] Barco encontrado: ID={barco.id}")
+        
+        # Buscar materiais com status EMBARQUE PROGRAMADO
         materiais_prog = materialEmb.objects.filter(
             barcoMatEmb=barco,
             statusProgMatEmb='EMBARQUE PROGRAMADO'
         )
         
-        print(f"[PS] Encontrados {materiais_prog.count()} materiais com status EMBARQUE PROGRAMADO")
+        print(f"[SYNC] Materiais encontrados: {materiais_prog.count()}")
         
-        # Limpar registros antigos desta PS
+        if materiais_prog.count() == 0:
+            print(f"[SYNC] Verificando todos os materiais deste barco:")
+            todos_materiais = materialEmb.objects.filter(barcoMatEmb=barco)
+            print(f"[SYNC] Total de materiais do barco: {todos_materiais.count()}")
+            for mat in todos_materiais:
+                print(f"[SYNC]   - {mat.descMatEmb} | Status: '{mat.statusProgMatEmb}'")
+        
+        # Limpar registros antigos
         registros_antigos = portoMatEmb.objects.filter(idxPortoMatEmb=ps).count()
         portoMatEmb.objects.filter(idxPortoMatEmb=ps).delete()
-        print(f"[PS] Removidos {registros_antigos} registros antigos da PS")
+        print(f"[SYNC] Removidos {registros_antigos} registros antigos")
         
         # Criar novos registros
         criados = 0
         for mat in materiais_prog:
-            # Buscar primeiro embarque para pegar RT, OS e data
             primeiro_emb = mat.embarques.first()
             
-            portoMatEmb.objects.create(
+            novo_registro = portoMatEmb.objects.create(
                 idxPortoMatEmb=ps,
                 descMatEmbPs=mat.descMatEmb,
                 numRtMatEmbPs=primeiro_emb.numRtMatEmb if primeiro_emb else None,
@@ -2457,9 +2458,9 @@ def sincronizar_materiais_embarque_ps(request, ps_id):
                 dataPrevEmbMatPs=primeiro_emb.dataPrevEmbMat if primeiro_emb else None
             )
             criados += 1
-            print(f"[PS] Material sincronizado: {mat.descMatEmb}")
+            print(f"[SYNC] Criado registro: {novo_registro.descMatEmbPs}")
         
-        print(f"[PS] Sincronização concluída - {criados} materiais criados")
+        print(f"[SYNC] Sincronização concluída - {criados} registros criados")
         
         return JsonResponse({
             'success': True,
@@ -2467,15 +2468,15 @@ def sincronizar_materiais_embarque_ps(request, ps_id):
         })
         
     except PassServ.DoesNotExist:
-        print(f"[PS ERROR] PS {ps_id} não encontrada")
+        print(f"[SYNC] ERRO: PS {ps_id} não encontrada")
         return JsonResponse({'success': False, 'error': 'PS não encontrada'}, status=404)
     except Exception as e:
-        print(f"[PS ERROR] Erro ao sincronizar materiais embarque: {str(e)}")
+        print(f"[SYNC] ERRO CRÍTICO: {str(e)}")
         import traceback
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-    
-#========================================== EMBARQUE MATERIAIS PS - LISTAR ==========================================
+
+
 @csrf_exempt
 @require_http_methods(["GET"])
 def listar_materiais_embarque_ps(request, ps_id):
@@ -2485,7 +2486,11 @@ def listar_materiais_embarque_ps(request, ps_id):
     try:
         from .models_ps import portoMatEmb
         
+        print(f"[LIST] Listando materiais para PS {ps_id}")
+        
         materiais = portoMatEmb.objects.filter(idxPortoMatEmb_id=ps_id)
+        
+        print(f"[LIST] Total de materiais encontrados: {materiais.count()}")
         
         data = []
         for mat in materiais:
@@ -2498,14 +2503,26 @@ def listar_materiais_embarque_ps(request, ps_id):
                 'descContMatEmbPs': mat.descContMatEmbPs or '',
                 'dataPrevEmbMatPs': str(mat.dataPrevEmbMatPs) if mat.dataPrevEmbMatPs else ''
             })
+            print(f"[LIST] Material: {mat.descMatEmbPs}")
         
-        print(f"[PS] GET /api/ps/{ps_id}/materiais-embarque/ - {len(data)} materiais retornados")
+        print(f"[LIST] Retornando {len(data)} materiais")
         
-        return JsonResponse({'success': True, 'data': data})
+        return JsonResponse({
+            'success': True,
+            'data': data
+        })
         
     except Exception as e:
-        print(f"[PS ERROR] GET /api/ps/{ps_id}/materiais-embarque/ - {str(e)}")
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        print(f"[LIST] ERRO: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+
 
 
 

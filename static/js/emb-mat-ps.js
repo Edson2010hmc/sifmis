@@ -138,6 +138,7 @@ const EmbMatPsModule = (() => {
   // ===== EXIBIR DETALHES =====
   async function exibirDetalhes(descMaterial) {
     alert(`Detalhes do material: ${descMaterial}\n\nEsta funcionalidade abrirá o modal de detalhes do módulo de Inventário de Materiais em modo somente leitura.`);
+      
   }
 
   // ===== EXPORTAR FUNÇÕES =====
@@ -146,7 +147,8 @@ const EmbMatPsModule = (() => {
     carregarDados,
     salvar,
     limpar,
-    exibirDetalhes
+    exibirDetalhes,
+    
   };
 
 })();
