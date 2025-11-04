@@ -459,9 +459,7 @@
       <div class="subtab" id="sub-rotinas"><div class="card"><h3>2. ROTINAS – campos prontos</h3></div></div>
 
 
-
-
-
+      <!--subtab SMS -->
       <div class="subtab" id="sub-sms"><div class="card"><h2>3. SMS</h2></div>
         <!-- 2.1 Anomalias de SMS -->
         <div class="accordion-item">
@@ -493,8 +491,14 @@
           </div>
         </div>
       </div>
-          
-    </div><!--Fim da subtab SMS-->
+      </div><!--Fim da subtab SMS-->
+
+      <div class="subtab" id="sub-os"><div class="card"><h3>4. ORDENS DE SERVIÇO – campos prontos</h3></div></div>
+      <div class="subtab" id="sub-gerais"><div class="card"><h3>5. INFORMAÇÕES GERAIS – campos prontos</h3></div></div>
+
+
+
+
           <!-- MODAL DE VISUALIZAÇÃO DE INFORME -->
       <div id="modalVisualizarInforme" class="modal-overlay">
         <div class="modal-content">
@@ -507,28 +511,130 @@
           </div>
         </div>
       </div>  
+
+      
+      <!-- ========== MODAL DETALHES MATERIAL ========== -->
+      <div id="modalDetalhesMaterial" class="modal hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:1000;">
+        <div class="modal-content" style="max-width:900px; background:#fff; border-radius:10px; padding:20px; max-height:90vh; overflow-y:auto; position:relative;">
+          <span class="close" id="closeDetalhesMaterial">&times;</span>
+          <h2 style="color:#0b7a66;">DETALHES DO MATERIAL</h2>
+          
+          <div class="modal-body">
             
+            <div class="col">
+              <label>Embarcação</label>
+              <input id="det_barco" type="text" readonly style="width:400px; background:#f5f5f5;">
+            </div>
+
+            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+              <div class="col" style="flex:1 1 300px;">
+                <label>Descrição do Material</label>
+                <input id="det_desc" type="text" readonly style="width:100%; background:#f5f5f5;">
+              </div>
+              <div class="col" style="flex:1 1 200px;">
+                <label>Identificação/N.Série</label>
+                <input id="det_ident" type="text" readonly style="width:100%; background:#f5f5f5;">
+              </div>
+            </div>
+
+            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+              <div class="col" style="flex:0 0 150px;">
+                <label>Peso (kg)</label>
+                <input id="det_peso" type="text" readonly style="width:100%; background:#f5f5f5;">
+              </div>
+              <div class="col" style="flex:0 0 150px;">
+                <label>Altura (m)</label>
+                <input id="det_altura" type="text" readonly style="width:100%; background:#f5f5f5;">
+              </div>
+              <div class="col" style="flex:0 0 150px;">
+                <label>Largura (m)</label>
+                <input id="det_largura" type="text" readonly style="width:100%; background:#f5f5f5;">
+              </div>
+              <div class="col" style="flex:0 0 150px;">
+                <label>Comprimento (m)</label>
+                <input id="det_compr" type="text" readonly style="width:100%; background:#f5f5f5;">
+              </div>
+            </div>
+
+            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+              <div class="col" style="flex:1 1 200px;">
+                <label>Responsável pelo Material</label>
+                <input id="det_resp" type="text" readonly style="width:100%; background:#f5f5f5;">
+              </div>
+              <div class="col" style="flex:1 1 200px;">
+                <label>Data Prevista Embarque</label>
+                <input id="det_data_prev" type="text" readonly style="width:100%; background:#f5f5f5;">
+              </div>
+            </div>
+
+            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+              <div class="col" style="flex:1 1 200px;">
+                <label>Nº RT</label>
+                <input id="det_rt" type="text" readonly style="width:100%; background:#f5f5f5;">
+              </div>
+              <div class="col" style="flex:1 1 200px;">
+                <label>Ordem de Serviço</label>
+                <input id="det_os" type="text" readonly style="width:100%; background:#f5f5f5;">
+              </div>
+              <div class="col" style="flex:1 1 200px;">
+                <label>Meio de Recebimento</label>
+                <input id="det_meio_rec" type="text" readonly style="width:100%; background:#f5f5f5;">
+              </div>
+            </div>
+
+            <div class="col" id="det_campos_contentor" style="display:none;">
+              <h3 style="color:#0b7a66; margin-top:20px; margin-bottom:10px;">Informações do Contentor</h3>
+              
+              <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                <div class="col" style="flex:1 1 200px;">
+                  <label>Descrição do Contentor</label>
+                  <input id="det_desc_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
+                </div>
+                <div class="col" style="flex:1 1 200px;">
+                  <label>Identificação do Contentor</label>
+                  <input id="det_id_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
+                </div>
+              </div>
+
+              <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                <div class="col" style="flex:1 1 200px;">
+                  <label>Responsável pelo Contentor</label>
+                  <input id="det_resp_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
+                </div>
+                <div class="col" style="flex:1 1 200px;">
+                  <label>Nº Certificado</label>
+                  <input id="det_cert_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
+                </div>
+                <div class="col" style="flex:1 1 200px;">
+                  <label>Validade Certificado</label>
+                  <input id="det_val_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
+                </div>
+              </div>
+            </div>
+
+            <div class="col" style="margin-top:15px;">
+              <label>Observações</label>
+              <textarea id="det_obs" readonly rows="3" style="width:100%; resize:vertical; background:#f5f5f5;"></textarea>
+            </div>
+
+            <div class="col" style="margin-top:15px;">
+              <label>Status do Material</label>
+              <input id="det_status" type="text" readonly style="width:100%; max-width:400px; background:#f5f5f5;">
+            </div>
+
+          </div>
+
+          <div class="modal-footer" style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+            <button id="btnFecharDetalhes" class="btn ghost">Fechar</button>
+          </div>
+
+        </div>
+      </div>
+      
+     
       
       
       
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <div class="subtab" id="sub-os"><div class="card"><h3>4. ORDENS DE SERVIÇO – campos prontos</h3></div></div>
-      <div class="subtab" id="sub-gerais"><div class="card"><h3>5. INFORMAÇÕES GERAIS – campos prontos</h3></div></div>
       
     </div>
   </section>
