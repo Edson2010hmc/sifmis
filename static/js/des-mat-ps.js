@@ -5,48 +5,7 @@ const DesMatPsModule = (() => {
   'use strict';
 
   let psAtualId = null;
-  let sincronizandoEmAndamento = false; // Adicionar no início, após psAtualId
 
-  //============SINCRONIZAR MATERIAIS==========
-  async function sincronizarMateriais(psId) {
-    if (!psId) return;
-    
-    if (sincronizandoEmAndamento) {
-      console.log('[DES-MAT-PS] Sincronização já em andamento, aguardando...');
-      return;
-    }
-    
-    sincronizandoEmAndamento = true;
-    
-    try {
-      const response = await fetch(`/api/ps/${psId}/sincronizar-materiais-desembarque/`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'}
-      });
-      
-      const result = await response.json();
-      console.log('[DES-MAT-PS] Sincronização concluída:', result.message);
-      
-    } catch (error) {
-      console.error('[DES-MAT-PS] Erro na sincronização:', error);
-    } finally {
-      sincronizandoEmAndamento = false;
-    }
-  }
-
-  //============CARREGAR DADOS==========
-  async function carregarDados(psId) {
-    if (!psId) return;
-    psAtualId = psId;
-    
-    try {
-      await sincronizarMateriais(psId);
-      await new Promise(resolve => setTimeout(resolve, 300));
-      await atualizarTabela(psId);
-    } catch (error) {
-      console.error('[DES-MAT-PS] Erro ao carregar dados:', error);
-    }
-  }
   //============ATUALIZAR TABELA==========
   async function atualizarTabela(psId) {
     if (!elementos.tabela) return;
@@ -92,7 +51,6 @@ const DesMatPsModule = (() => {
     
     try {
       await sincronizarMateriais(psAtualId);
-      await new Promise(resolve => setTimeout(resolve, 300));
       await atualizarTabela(psAtualId);
     } catch (error) {
       throw error;
@@ -102,7 +60,6 @@ const DesMatPsModule = (() => {
   //============LIMPAR==========
   function limpar() {
     psAtualId = null;
-    sincronizandoEmAndamento = false;
     if (elementos.tabela) {
       const tbody = elementos.tabela.querySelector('tbody');
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">Nenhum material solicitado para desembarque</td></tr>';
