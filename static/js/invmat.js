@@ -153,67 +153,63 @@ function configurarAccordion() {
 }
 
   // ===== CONFIGURAR EVENTOS =====
-  function configurarEventos() {
-    
+function configurarEventos() {
     const btnNav = document.getElementById('btnAddMaterialNav');
     if (btnNav) btnNav.addEventListener('click', abrirModalNovo);
-    elementos.modalClose.addEventListener('click', fecharModal);
-    elementos.btnModalSalvar.addEventListener('click', salvarMaterial);
-    elementos.btnModalCancelar.addEventListener('click', fecharModal);
-    elementos.btnModalExcluir.addEventListener('click', excluirMaterial);
     
-    elementos.filtroBarcoProgEmb.addEventListener('change', () => carregarTabelas());
-    elementos.filtroBarcoBordo.addEventListener('change', () => carregarTabelas());
-    elementos.filtroRtBordo.addEventListener('change', () => carregarTabelaMatBordo());
-    elementos.filtroOsBordo.addEventListener('change', () => carregarTabelaMatBordo());
+    if (elementos.modalClose) elementos.modalClose.addEventListener('click', fecharModal);
+    if (elementos.btnModalSalvar) elementos.btnModalSalvar.addEventListener('click', salvarMaterial);
+    if (elementos.btnModalCancelar) elementos.btnModalCancelar.addEventListener('click', fecharModal);
+    if (elementos.btnModalExcluir) elementos.btnModalExcluir.addEventListener('click', excluirMaterial);
     
-    elementos.modalResp.addEventListener('change', toggleOutroResponsavel);
-    elementos.modalContBordo.addEventListener('change', toggleCamposContentor);
-    elementos.modalMeioRec.addEventListener('change', toggleCamposMeioRecebimento);
-    elementos.modalMisFlag.addEventListener('change', toggleBarcoMis);
+    if (elementos.filtroBarcoProgEmb) elementos.filtroBarcoProgEmb.addEventListener('change', () => carregarTabelas());
+    if (elementos.filtroBarcoBordo) elementos.filtroBarcoBordo.addEventListener('change', () => carregarTabelas());
+    if (elementos.filtroRtBordo) elementos.filtroRtBordo.addEventListener('change', () => carregarTabelaMatBordo());
+    if (elementos.filtroOsBordo) elementos.filtroOsBordo.addEventListener('change', () => carregarTabelaMatBordo());
     
-    window.addEventListener('click', (e) => {
-      if (e.target === elementos.modal) fecharModal();
-    });
-
+    if (elementos.modalResp) elementos.modalResp.addEventListener('change', toggleOutroResponsavel);
+    if (elementos.modalContBordo) elementos.modalContBordo.addEventListener('change', toggleCamposContentor);
+    if (elementos.modalMeioRec) elementos.modalMeioRec.addEventListener('change', toggleCamposMeioRecebimento);
+    if (elementos.modalMisFlag) elementos.modalMisFlag.addEventListener('change', toggleBarcoMis);
+    
+    if (elementos.modal) {
+        window.addEventListener('click', (e) => {
+            if (e.target === elementos.modal) fecharModal();
+        });
+    }
 
     const btnEmail = document.getElementById('btnEmailsEquipes');
     if (btnEmail) btnEmail.addEventListener('click', abrirModalEmails);
-    elementos.closeEmailsModal.addEventListener('click', fecharModalEmails);
-    elementos.btnCancelarEmails.addEventListener('click', fecharModalEmails);
-    elementos.btnSalvarEmails.addEventListener('click', salvarEmails);
-    elementos.btnIncluirCrd.addEventListener('click', () => incluirEmail('crd'));
-    elementos.btnIncluirMis.addEventListener('click', () => incluirEmail('mis'));
-    elementos.btnIncluirCc.addEventListener('click', () => incluirEmail('cc'));
-    elementos.btnLimparCrd.addEventListener('click', () => limparCampoEmail('crd'));
-    elementos.btnLimparMis.addEventListener('click', () => limparCampoEmail('mis'));
-    elementos.btnLimparCc.addEventListener('click', () => limparCampoEmail('cc'));
+    
+    if (elementos.closeEmailsModal) elementos.closeEmailsModal.addEventListener('click', fecharModalEmails);
+    if (elementos.btnCancelarEmails) elementos.btnCancelarEmails.addEventListener('click', fecharModalEmails);
+    if (elementos.btnSalvarEmails) elementos.btnSalvarEmails.addEventListener('click', salvarEmails);
+    if (elementos.btnIncluirCrd) elementos.btnIncluirCrd.addEventListener('click', () => incluirEmail('crd'));
+    if (elementos.btnIncluirMis) elementos.btnIncluirMis.addEventListener('click', () => incluirEmail('mis'));
+    if (elementos.btnIncluirCc) elementos.btnIncluirCc.addEventListener('click', () => incluirEmail('cc'));
+    if (elementos.btnLimparCrd) elementos.btnLimparCrd.addEventListener('click', () => limparCampoEmail('crd'));
+    if (elementos.btnLimparMis) elementos.btnLimparMis.addEventListener('click', () => limparCampoEmail('mis'));
+    if (elementos.btnLimparCc) elementos.btnLimparCc.addEventListener('click', () => limparCampoEmail('cc'));
 
-    window.addEventListener('click', (e) => {
-      if (e.target === elementos.modalEmails) fecharModalEmails();
-    });
-    // Eventos Desembarque
-      if (elementos.filtroBarcoDesembarque) {
-      elementos.filtroBarcoDesembarque.addEventListener('change', carregarTabelaMatDesembarque);
-    }
-      if (elementos.btnSolicitarDesembarque) {
-      elementos.btnSolicitarDesembarque.addEventListener('click', solicitarDesembarqueTodos);
+    if (elementos.modalEmails) {
+        window.addEventListener('click', (e) => {
+            if (e.target === elementos.modalEmails) fecharModalEmails();
+        });
     }
 
-  if (elementos.filtroBarcoSolicDesemb) {
-    elementos.filtroBarcoSolicDesemb.addEventListener('change', carregarTabelaSolicDesembarque);
-  }
+    if (elementos.filtroBarcoDesembarque) elementos.filtroBarcoDesembarque.addEventListener('change', carregarTabelaMatDesembarque);
+    if (elementos.btnSolicitarDesembarque) elementos.btnSolicitarDesembarque.addEventListener('click', solicitarDesembarqueTodos);
+    if (elementos.filtroBarcoSolicDesemb) elementos.filtroBarcoSolicDesemb.addEventListener('change', carregarTabelaSolicDesembarque);
+    if (elementos.modalRtDesembClose) elementos.modalRtDesembClose.addEventListener('click', fecharModalRtDesemb);
+    if (elementos.btnCancelarRtDesemb) elementos.btnCancelarRtDesemb.addEventListener('click', fecharModalRtDesemb);
+    if (elementos.btnConfirmarRtDesemb) elementos.btnConfirmarRtDesemb.addEventListener('click', confirmarRtDesembarque);
 
-  // Modal RT Desembarque
-  elementos.modalRtDesembClose.addEventListener('click', fecharModalRtDesemb);
-  elementos.btnCancelarRtDesemb.addEventListener('click', fecharModalRtDesemb);
-  elementos.btnConfirmarRtDesemb.addEventListener('click', confirmarRtDesembarque);
-
-  window.addEventListener('click', (e) => {
-    if (e.target === elementos.modalRtDesemb) fecharModalRtDesemb();
-  });
-
-  }
+    if (elementos.modalRtDesemb) {
+        window.addEventListener('click', (e) => {
+            if (e.target === elementos.modalRtDesemb) fecharModalRtDesemb();
+        });
+    }
+}
 
   // ===== CARREGAR EMBARCAÇÕES =====
   async function carregarEmbarcacoes() {
