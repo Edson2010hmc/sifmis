@@ -16,6 +16,7 @@ db.sqlite3
 .vscode/
 .idea/
 flow/
+sios models/
 run_admin.bat
 run_admin.py
 run_server.bat

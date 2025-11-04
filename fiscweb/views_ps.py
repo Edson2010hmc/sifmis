@@ -14,7 +14,7 @@ from django.views.decorators.http import require_http_methods
 import json
 from django.http.multipartparser import MultiPartParser
 from django.core.files.uploadhandler import MemoryFileUploadHandler
-
+from django.db import models
 from .models_cad import FiscaisCad,BarcosCad,ModalBarco
 
 from .models_anom import InformeAnomalia
@@ -2362,6 +2362,136 @@ def subtab_mob_desm_detail(request, item_id):
                 'success': False,
                 'error': str(e)
             }, status=400)
+
+
+#========================================== EMBARQUE MATERIAIS PS - SINCRONIZAR ==========================================
+@csrf_exempt
+@require_http_methods(["POST"])
+def sincronizar_materiais_embarque_ps(request, ps_id):
+    """
+    POST: Sincroniza materiais com status EMBARQUE PROGRAMADO para a tabela portoMatEmb
+    Chamado ao salvar rascunho ou carregar PS
+    """
+    try:
+        # Buscar PS
+        ps = PassServ.objects.get(id=ps_id)
+        
+        # Extrair nome do barco (formato: "TIPO - NOME")
+        barco_ps = ps.BarcoPS
+        
+        # Importar modelos necessários
+        from .models_invmat import materialEmb
+        from .models_ps import portoMatEmb
+        from .models_cad import BarcosCad
+        
+        # Buscar embarcação correspondente
+        try:
+            # Tentar encontrar barco pelo nome completo
+            barco = BarcosCad.objects.filter(
+                models.Q(nomeBarco__icontains=barco_ps) | 
+                models.Q(tipoBarco__icontains=barco_ps.split()[0] if ' ' in barco_ps else barco_ps)
+            ).first()
+            
+            if not barco:
+                print(f"[PS] Embarcação não encontrada para: {barco_ps}")
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Embarcação não encontrada, sincronização não realizada'
+                })
+        except Exception as e:
+            print(f"[PS ERROR] Erro ao buscar embarcação: {str(e)}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        
+        # Apenas sincronizar se PS estiver em RASCUNHO
+        if ps.statusPS != 'RASCUNHO':
+            print(f"[PS] PS {ps_id} não está em rascunho, sincronização ignorada")
+            return JsonResponse({
+                'success': True,
+                'message': 'PS finalizada, dados não sincronizados'
+            })
+        
+        # Buscar materiais com status EMBARQUE PROGRAMADO da embarcação
+        materiais_prog = materialEmb.objects.filter(
+            barcoMatEmb=barco,
+            statusProgMatEmb='EMBARQUE PROGRAMADO'
+        )
+        
+        print(f"[PS] Sincronizando {materiais_prog.count()} materiais para PS {ps_id}")
+        
+        # Limpar registros antigos desta PS
+        portoMatEmb.objects.filter(idxPortoMatEmb=ps).delete()
+        
+        # Criar novos registros
+        for mat in materiais_prog:
+            # Buscar primeiro embarque para pegar RT, OS e data
+            primeiro_emb = mat.embarques.first()
+            
+            portoMatEmb.objects.create(
+                idxPortoMatEmb=ps,
+                descMatEmbPs=mat.descMatEmb,
+                numRtMatEmbPs=primeiro_emb.numRtMatEmb if primeiro_emb else None,
+                osMatEmbPs=primeiro_emb.osEmbMat if primeiro_emb else None,
+                respMatEmbPs=mat.respEmbMat if mat.respEmbMat != 'OUTRO' else mat.outRespEmbMat,
+                descContMatEmbPs=mat.descContMatEmb,
+                dataPrevEmbMatPs=primeiro_emb.dataPrevEmbMat if primeiro_emb else None
+            )
+        
+        print(f"[PS] Sincronização concluída - {materiais_prog.count()} registros criados")
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'{materiais_prog.count()} materiais sincronizados'
+        })
+        
+    except PassServ.DoesNotExist:
+        print(f"[PS ERROR] PS {ps_id} não encontrada")
+        return JsonResponse({'success': False, 'error': 'PS não encontrada'}, status=404)
+    except Exception as e:
+        print(f"[PS ERROR] Erro ao sincronizar materiais embarque: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+#========================================== EMBARQUE MATERIAIS PS - LISTAR ==========================================
+@csrf_exempt
+@require_http_methods(["GET"])
+def listar_materiais_embarque_ps(request, ps_id):
+    """
+    GET: Lista materiais de embarque da PS
+    """
+    try:
+        from .models_ps import portoMatEmb
+        
+        materiais = portoMatEmb.objects.filter(idxPortoMatEmb_id=ps_id)
+        
+        data = []
+        for mat in materiais:
+            data.append({
+                'id': mat.id,
+                'descMatEmbPs': mat.descMatEmbPs,
+                'numRtMatEmbPs': mat.numRtMatEmbPs or '',
+                'osMatEmbPs': mat.osMatEmbPs or '',
+                'respMatEmbPs': mat.respMatEmbPs or '',
+                'descContMatEmbPs': mat.descContMatEmbPs or '',
+                'dataPrevEmbMatPs': str(mat.dataPrevEmbMatPs) if mat.dataPrevEmbMatPs else ''
+            })
+        
+        print(f"[PS] GET /api/ps/{ps_id}/materiais-embarque/ - {len(data)} materiais retornados")
+        
+        return JsonResponse({'success': True, 'data': data})
+        
+    except Exception as e:
+        print(f"[PS ERROR] GET /api/ps/{ps_id}/materiais-embarque/ - {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+
+
+
+
+
+
 
 #===========================================BUSCAR INFORMES DE ANOMALIAS EMITIDOS NA QUINZENA=====================
 #================================================ANOMALIAS SMS - API REST=================================================

@@ -367,6 +367,11 @@ async function abrirPS(psId) {
       EmbEquipModule.carregarDados(psId);
     }
 
+        // Carregar Embarque de Materiais
+    if (typeof EmbMatPsModule !== 'undefined' && EmbMatPsModule.carregarDados) {
+      EmbMatPsModule.carregarDados(psId);
+    }
+
     
     if (typeof AnomSMSModule !== 'undefined' && AnomSMSModule.carregarDados) {
           AnomSMSModule.carregarDados(psId);
@@ -420,6 +425,10 @@ async function excluirRascunho(psId) {
       InspNormModule.limpar();
     }
 
+    // Limpar Embarque de Materiais
+    if (typeof EmbMatPsModule !== 'undefined' && EmbMatPsModule.limpar) {
+      EmbMatPsModule.limpar();
+    }
     psAtualId = null;
 
     // Voltar para tela inicial
@@ -485,6 +494,11 @@ async function salvarRascunho(psId, silencioso = false) {
     // Salvar módulo Mobilização/Desmobilização
     if (typeof MobDesmModule !== 'undefined' && MobDesmModule.salvar) {
       await MobDesmModule.salvar();
+    }
+
+    // Salvar Embarque de Materiais
+    if (typeof EmbMatPsModule !== 'undefined' && EmbMatPsModule.salvar) {
+      await EmbMatPsModule.salvar();
     }
 
     const response = await fetch(`/api/passagens/${psId}/`, {
