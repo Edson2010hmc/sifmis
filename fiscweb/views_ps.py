@@ -2484,18 +2484,56 @@ def listar_materiais_embarque_ps(request, ps_id):
     GET: Lista materiais de embarque da PS
     """
     try:
-        from .models_ps import portoMatEmb
+        from .models_ps import portoMatEmb, PassServ
+        from .models_invmat import materialEmb
+        from .models_cad import BarcosCad
         
         print(f"[LIST] Listando materiais para PS {ps_id}")
         
+        # Buscar PS para pegar o barco
+        ps = PassServ.objects.get(id=ps_id)
+        
+        # Extrair tipo e nome do barco
+        partes = ps.BarcoPS.split(' - ', 1)
+        tipo_barco = partes[0].strip()
+        nome_barco = partes[1].strip()
+        
+        print(f"[LIST] Barco da PS: tipo='{tipo_barco}', nome='{nome_barco}'")
+        
+        # Buscar barco
+        barco = BarcosCad.objects.filter(
+            tipoBarco=tipo_barco,
+            nomeBarco=nome_barco
+        ).first()
+        
+        if not barco:
+            print(f"[LIST] ERRO: Barco não encontrado")
+        else:
+            print(f"[LIST] Barco encontrado: ID={barco.id}")
+        
         materiais = portoMatEmb.objects.filter(idxPortoMatEmb_id=ps_id)
         
-        print(f"[LIST] Total de materiais encontrados: {materiais.count()}")
+        print(f"[LIST] Total de materiais em portoMatEmb: {materiais.count()}")
         
         data = []
         for mat in materiais:
+            # Buscar material original para obter o ID
+            material_id = None
+            if barco:
+                mat_original = materialEmb.objects.filter(
+                    barcoMatEmb=barco,
+                    descMatEmb=mat.descMatEmbPs
+                ).first()
+                
+                if mat_original:
+                    material_id = mat_original.id
+                    print(f"[LIST] Material '{mat.descMatEmbPs}' encontrado com ID {material_id}")
+                else:
+                    print(f"[LIST] Material '{mat.descMatEmbPs}' NÃO encontrado no cadastro")
+            
             data.append({
                 'id': mat.id,
+                'materialId': material_id,
                 'descMatEmbPs': mat.descMatEmbPs,
                 'numRtMatEmbPs': mat.numRtMatEmbPs or '',
                 'osMatEmbPs': mat.osMatEmbPs or '',
@@ -2503,7 +2541,6 @@ def listar_materiais_embarque_ps(request, ps_id):
                 'descContMatEmbPs': mat.descContMatEmbPs or '',
                 'dataPrevEmbMatPs': str(mat.dataPrevEmbMatPs) if mat.dataPrevEmbMatPs else ''
             })
-            print(f"[LIST] Material: {mat.descMatEmbPs}")
         
         print(f"[LIST] Retornando {len(data)} materiais")
         
@@ -2520,12 +2557,6 @@ def listar_materiais_embarque_ps(request, ps_id):
             'success': False,
             'error': str(e)
         }, status=500)
-
-
-
-
-
-
 
 
 

@@ -1,21 +1,20 @@
 // static/js/emb-mat-ps.js
-// Módulo para Embarque de Materiais na Passagem de Serviço (1.8)
+// Módulo para Embarque de Materiais na Passagem de Serviço
 
 const EmbMatPsModule = (() => {
+  'use strict';
+
   let psAtualId = null;
   let intervaloAtualizacao = null;
 
-  // ===== ELEMENTOS DOM =====
   const elementos = {
     tabela: document.getElementById('tblEmbMatPs')
   };
 
-  // ===== INICIALIZAÇÃO =====
   function init() {
-    // Inicialização silenciosa
+    console.log('[EmbMatPs] Módulo inicializado');
   }
 
-  // ===== SINCRONIZAR MATERIAIS =====
   async function sincronizarMateriais(psId) {
     if (!psId) return;
     
@@ -25,18 +24,12 @@ const EmbMatPsModule = (() => {
         headers: {'Content-Type': 'application/json'}
       });
       
-      const result = await response.json();
-      
-      if (!result.success) {
-        return;
-      }
-      
+      await response.json();
     } catch (error) {
       // Silencioso
     }
   }
 
-  // ===== CARREGAR DADOS =====
   async function carregarDados(psId) {
     if (!psId) return;
     
@@ -46,13 +39,11 @@ const EmbMatPsModule = (() => {
       await sincronizarMateriais(psId);
       await atualizarTabela(psId);
       iniciarAtualizacaoTempoReal(psId);
-      
     } catch (error) {
-      alert('Erro ao carregar Embarque de Materiais: ' + error.message);
+      // Silencioso
     }
   }
 
-  // ===== ATUALIZAR TABELA =====
   async function atualizarTabela(psId) {
     if (!elementos.tabela) return;
     
@@ -61,7 +52,8 @@ const EmbMatPsModule = (() => {
       const result = await response.json();
       
       if (!result.success) {
-        throw new Error(result.error);
+        console.error('[EmbMatPs] Erro ao carregar materiais:', result.error);
+        return;
       }
       
       const tbody = elementos.tabela.querySelector('tbody');
@@ -74,6 +66,13 @@ const EmbMatPsModule = (() => {
       
       result.data.forEach(mat => {
         const tr = document.createElement('tr');
+        
+        // Criar botão que chama a função correta
+        const materialId = mat.materialId;
+        const btnDetalhes = materialId 
+          ? `<button class="btn secondary small" onclick="EmbMatPsModule.exibirDetalhes(${materialId})">Exibir Detalhes</button>`
+          : '<span style="color:#999;">-</span>';
+        
         tr.innerHTML = `
           <td style="border:1px solid #ddd; padding:8px;">${mat.descMatEmbPs}</td>
           <td style="border:1px solid #ddd; padding:8px;">${mat.numRtMatEmbPs || '-'}</td>
@@ -81,18 +80,17 @@ const EmbMatPsModule = (() => {
           <td style="border:1px solid #ddd; padding:8px;">${mat.respMatEmbPs || '-'}</td>
           <td style="border:1px solid #ddd; padding:8px;">${mat.descContMatEmbPs || '-'}</td>
           <td style="border:1px solid #ddd; padding:8px;">
-            <button class="btn secondary small" onclick="EmbMatPsModule.exibirDetalhes('${mat.descMatEmbPs}')">Exibir Detalhes</button>
+            ${btnDetalhes}
           </td>
         `;
         tbody.appendChild(tr);
       });
       
     } catch (error) {
-      alert('Erro ao atualizar tabela de materiais: ' + error.message);
+      console.error('[EmbMatPs] Erro ao atualizar tabela:', error);
     }
   }
 
-  // ===== INICIAR ATUALIZAÇÃO EM TEMPO REAL =====
   function iniciarAtualizacaoTempoReal(psId) {
     if (intervaloAtualizacao) {
       clearInterval(intervaloAtualizacao);
@@ -103,7 +101,6 @@ const EmbMatPsModule = (() => {
     }, 5000);
   }
 
-  // ===== PARAR ATUALIZAÇÃO EM TEMPO REAL =====
   function pararAtualizacaoTempoReal() {
     if (intervaloAtualizacao) {
       clearInterval(intervaloAtualizacao);
@@ -111,20 +108,17 @@ const EmbMatPsModule = (() => {
     }
   }
 
-  // ===== SALVAR (chamado pelo PassagensModule) =====
   async function salvar() {
     if (!psAtualId) return;
     
     try {
       await sincronizarMateriais(psAtualId);
       await atualizarTabela(psAtualId);
-      
     } catch (error) {
       throw error;
     }
   }
 
-  // ===== LIMPAR =====
   function limpar() {
     psAtualId = null;
     pararAtualizacaoTempoReal();
@@ -135,25 +129,33 @@ const EmbMatPsModule = (() => {
     }
   }
 
-  // ===== EXIBIR DETALHES =====
-  async function exibirDetalhes(descMaterial) {
-    alert(`Detalhes do material: ${descMaterial}\n\nEsta funcionalidade abrirá o modal de detalhes do módulo de Inventário de Materiais em modo somente leitura.`);
-      
+  // ===== EXIBIR DETALHES - CHAMA INVMATMODULE =====
+  function exibirDetalhes(materialId) {
+    if (!materialId) {
+      alert('ID do material não disponível');
+      return;
+    }
+    
+    // Verificar se InvMatModule está disponível
+    if (typeof InvMatModule === 'undefined' || typeof InvMatModule.verDetalhes !== 'function') {
+      alert('Erro: Módulo de Inventário não disponível');
+      return;
+    }
+    
+    // Chamar diretamente a função verDetalhes do InvMatModule
+    InvMatModule.verDetalhes(materialId);
   }
 
-  // ===== EXPORTAR FUNÇÕES =====
   return {
     init,
     carregarDados,
     salvar,
     limpar,
-    exibirDetalhes,
-    
+    exibirDetalhes
   };
 
 })();
 
-// Inicializar quando DOM carregar
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', EmbMatPsModule.init);
 } else {
