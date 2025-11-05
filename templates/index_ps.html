@@ -1,513 +1,554 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Passagem de Serviço</title>
-<link rel="stylesheet" href="/static/css/styles.css?v=2"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Passagem de Serviço</title>
+  <link rel="stylesheet" href="/static/css/styles.css?v=2" />
 </head>
+
 <body>
-<header class="app-header">
-  <img src="/static/assets/logo.png" class="logo" alt="logo"/>
-  <div class="titles">
-    <h1>SIRF-MIS PASSAGEM DE SERVIÇO</h1>
-    <small id="subTitle">Fiscalização SUB/OPSUB/MIS</small>
-  </div>
-  <div class="userbox">
-    <div class="user-info">
-      <span id="userName" class="tag"></span>
-      <span id="userProfile" class="profile-admin" style="display:none;">ADMINISTRADOR</span>
+  <header class="app-header">
+    <img src="/static/assets/logo.png" class="logo" alt="logo" />
+    <div class="titles">
+      <h1>SIRF-MIS PASSAGEM DE SERVIÇO</h1>
+      <small id="subTitle">Fiscalização SUB/OPSUB/MIS</small>
     </div>
-  </div>
-</header>
-
-<nav class="topnav">
-  <button class="tablink" id="volta_ps" onclick="window.location.href='/'">⬅ Voltar</button>
-  <button class="tablink active" data-tab="consultas">Inicio PS</button>
-</nav>
-
-<main>
-  <section id="tab-consultas" class="tab active">
-    <div class="filters fadein">
-      <div class="field"><label>Início</label><input type="date" id="fInicio"></div>
-      <div class="field"><label>Fim</label><input type="date" id="fFim"></div>
-      <button id="btnBuscar" class="btn">Buscar</button>
-      <button id="btnNova" class="btn secondary">Nova PS</button>
-      <span id="msgNovaPS" class="msg-erro"></span>
+    <div class="userbox">
+      <div class="user-info">
+        <span id="userName" class="tag"></span>
+        <span id="userProfile" class="profile-admin" style="display:none;">ADMINISTRADOR</span>
+      </div>
     </div>
-    <div class="list-container fadein"><ul id="listaPS"></ul></div>
-  </section>
+  </header>
 
-  <section id="tab-passagem" class="tab">
-    <div id="psPlaceholder" class="placeholder">MÓDULO PASSAGEM DE SERVIÇO</div>
-    <div id="psForm" class="psform hidden">
-      <div class="ps-header card fadein">
-        <div class="row">
-          <div class="col"><label>Número PS</label><input type="text" id="fNumero"></div>
-          <div class="col"><label>Data Emissão</label><input type="date" id="fData"></div>
-          <div class="col"><label>Embarcação</label><input type="text" id="fEmb"></div>
-        </div>
-        <div class="row">
-          <div class="col"><label>Inicio Quinzena</label><input type="date" id="fInicioPS"></div>
-          <div class="col"><label>Fim Quinzena</label><input type="date" id="fFimPS"></div>
-          <div class="col"><label>Status da PS</label><input type="text" id="fStatus" disabled></div>
-        </div>
-        <div class="row">
-          <div class="col"><label>Fiscal Embarcando</label><select id="fEmbC"><option value="">— selecione —</option></select></div>
-          <div class="col"><label>Fiscal Desembarcando</label><input type="text" id="fDesCNome" placeholder="Seu nome completo"></div>
-          <div class="col"><label>&nbsp;</label><button id="btnDadosEmb" class="btn small">Dados & Especificações</button></div>
-        </div>
-        <div class="btns">
-          <button id="btnSalvar" class="btn">Salva rascunho</button>
-          <button id="btnFinalizar" class="btn">Finalizar (PDF)</button>
-          <button id="btnExcluirRasc" class="btn secondary">Excluir rascunho</button>
-        </div>
+  <nav class="topnav">
+    <button class="tablink" id="volta_ps" onclick="window.location.href='/'">⬅ Voltar</button>
+    <button class="tablink active" data-tab="consultas">Inicio PS</button>
+  </nav>
+
+  <main>
+    <section id="tab-consultas" class="tab active">
+      <div class="filters fadein">
+        <div class="field"><label>Início</label><input type="date" id="fInicio"></div>
+        <div class="field"><label>Fim</label><input type="date" id="fFim"></div>
+        <button id="btnBuscar" class="btn">Buscar</button>
+        <button id="btnNova" class="btn secondary">Nova PS</button>
+        <span id="msgNovaPS" class="msg-erro"></span>
       </div>
-
-      <div class="tabs-sub">
-        <button class="sublink active" data-sub="porto">Porto</button>
-        <button class="sublink" data-sub="rotina">Rotina</button>
-        <button class="sublink" data-sub="sms">SMS</button>
-        <button class="sublink" data-sub="pendencias">Pendências</button>
-        <button class="sublink" data-sub="os">OS</button>
-        <button class="sublink" data-sub="gerais">Gerais</button>
-        <button class="sublink" data-sub="historico">Histórico</button>
+      <div class="list-container fadein">
+        <ul id="listaPS"></ul>
       </div>
+    </section>
 
-      <div class="subtab active" id="sub-porto">
-        <div class="card"><h2>1. PORTO</h2></div>
-        
-        <!-- 1.1 Troca de Turma -->
-        <div class="accordion-item">
-          <div class="accordion-header" data-target="trocaturma">
-            <span>1.1 Troca de Turma</span>
-            <span class="toggle">▼</span>
+    <section id="tab-passagem" class="tab">
+      <div id="psPlaceholder" class="placeholder">MÓDULO PASSAGEM DE SERVIÇO</div>
+      <div id="psForm" class="psform hidden">
+        <div class="ps-header card fadein">
+          <div class="row">
+            <div class="col"><label>Número PS</label><input type="text" id="fNumero"></div>
+            <div class="col"><label>Data Emissão</label><input type="date" id="fData"></div>
+            <div class="col"><label>Embarcação</label><input type="text" id="fEmb"></div>
           </div>
-          <div class="accordion-content" id="acc-trocaturma">
-            <div class="col">
-              <div style="display:flex; gap:12px; align-items:flex-start;">
-                <div style="flex:0 0 auto;">
-                  <label>Porto *</label><input id="ttPorto" type="text" maxlength="100" style="width:400px;">
-                </div>
-                <div style="flex:0 0 auto;">
-                  <label>Terminal *</label><input id="ttTerminal" type="text" maxlength="100" style="width:400px;">
-                </div>
-              </div>
-              <label>OS *</label><input id="ttOS" type="text" maxlength="50" style="width:160px;">
-              <div style="display:flex; gap:12px; align-items:flex-start;">
-                <div style="flex:0 0 auto;">
-                  <label>Atracação (hh:mm) *</label><input width="100" id="ttAtracacao" type="time" style="width:100px;">
-                </div>
-                <div style="flex:0 0 auto;">
-                  <label>Duração *</label><input id="ttDuracao" type="number" step="1" min="0" style="width:100px;">
-                </div>
-              </div>
-              <label>Observações</label><textarea id="ttObs" maxlength="4000" rows="8" style="width:100%;resize:vertical;overflow:auto;"></textarea>
+          <div class="row">
+            <div class="col"><label>Inicio Quinzena</label><input type="date" id="fInicioPS"></div>
+            <div class="col"><label>Fim Quinzena</label><input type="date" id="fFimPS"></div>
+            <div class="col"><label>Status da PS</label><input type="text" id="fStatus" disabled></div>
+          </div>
+          <div class="row">
+            <div class="col"><label>Fiscal Embarcando</label><select id="fEmbC">
+                <option value="">— selecione —</option>
+              </select></div>
+            <div class="col"><label>Fiscal Desembarcando</label><input type="text" id="fDesCNome"
+                placeholder="Seu nome completo"></div>
+            <div class="col"><label>&nbsp;</label><button id="btnDadosEmb" class="btn small">Dados &
+                Especificações</button></div>
+          </div>
+          <div class="btns">
+            <button id="btnSalvar" class="btn">Salva rascunho</button>
+            <button id="btnFinalizar" class="btn">Finalizar (PDF)</button>
+            <button id="btnExcluirRasc" class="btn secondary">Excluir rascunho</button>
+          </div>
+        </div>
+
+        <div class="tabs-sub">
+          <button class="sublink active" data-sub="porto">Porto</button>
+          <button class="sublink" data-sub="rotina">Rotina</button>
+          <button class="sublink" data-sub="sms">SMS</button>
+          <button class="sublink" data-sub="pendencias">Pendências</button>
+          <button class="sublink" data-sub="os">OS</button>
+          <button class="sublink" data-sub="gerais">Gerais</button>
+          <button class="sublink" data-sub="historico">Histórico</button>
+        </div>
+
+        <div class="subtab active" id="sub-porto">
+          <div class="card">
+            <h2>1. PORTO</h2>
+          </div>
+
+          <!-- 1.1 Troca de Turma -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="trocaturma">
+              <span>1.1 Troca de Turma</span>
+              <span class="toggle">▼</span>
             </div>
-          </div>
-        </div>
-
-        <!-- 1.2 Manutenção Preventiva -->
-        <div class="accordion-item">
-          <div class="accordion-header" data-target="manutprev">
-            <span>1.2 Manutenção Preventiva</span>
-            <span class="toggle">▼</span>
-          </div>
-          <div class="accordion-content" id="acc-manutprev">
-            <div class="col">
-              <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
-                <input id="mpNaoPrevisto" type="checkbox">
-                Não previsto para esse porto
-              </label>
-              
-              <div id="containerCamposManutPrev" style="display:block;">
+            <div class="accordion-content" id="acc-trocaturma">
+              <div class="col">
                 <div style="display:flex; gap:12px; align-items:flex-start;">
                   <div style="flex:0 0 auto;">
-                    <label>Franquia solicitada (min)</label><input id="mpFranquia" type="number" step="1" min="0" style="width:160px;">
+                    <label>Porto *</label><input id="ttPorto" type="text" maxlength="100" style="width:400px;">
                   </div>
                   <div style="flex:0 0 auto;">
-                    <label>Saldo de franquia (min)</label> <input id="mpSaldo" type="number" step="1" min="0" style="width:160px;">
+                    <label>Terminal *</label><input id="ttTerminal" type="text" maxlength="100" style="width:400px;">
                   </div>
                 </div>
-
-                <label>OS</label><input id="mpOS" type="text" maxlength="50" style="width:160px;">
-                
-                <label>RADE (anexo)</label>
-                <div style="display:flex; align-items:center; gap:10px;">
-                  <input id="mpRADE" type="file" style="width:400px" accept="application/pdf,image/*">
-                  <span id="linkDownloadRade"></span>
+                <label>OS *</label><input id="ttOS" type="text" maxlength="50" style="width:160px;">
+                <div style="display:flex; gap:12px; align-items:flex-start;">
+                  <div style="flex:0 0 auto;">
+                    <label>Atracação (hh:mm) *</label><input width="100" id="ttAtracacao" type="time"
+                      style="width:100px;">
+                  </div>
+                  <div style="flex:0 0 auto;">
+                    <label>Duração *</label><input id="ttDuracao" type="number" step="1" min="0" style="width:100px;">
+                  </div>
                 </div>
-                
-                <label>Observações</label><textarea id="mpObs" maxlength="4000" rows="8" style="width:100%;resize:vertical;overflow:auto;"></textarea>
+                <label>Observações</label><textarea id="ttObs" maxlength="4000" rows="8"
+                  style="width:100%;resize:vertical;overflow:auto;"></textarea>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- 1.3 Abastecimento -->
-        <div class="accordion-item">
-          <div class="accordion-header" data-target="abastecimento">
-            <span>1.3 Abastecimento</span>
-            <span class="toggle">▼</span>
+          <!-- 1.2 Manutenção Preventiva -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="manutprev">
+              <span>1.2 Manutenção Preventiva</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-manutprev">
+              <div class="col">
+                <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
+                  <input id="mpNaoPrevisto" type="checkbox">
+                  Não previsto para esse porto
+                </label>
+
+                <div id="containerCamposManutPrev" style="display:block;">
+                  <div style="display:flex; gap:12px; align-items:flex-start;">
+                    <div style="flex:0 0 auto;">
+                      <label>Franquia solicitada (min)</label><input id="mpFranquia" type="number" step="1" min="0"
+                        style="width:160px;">
+                    </div>
+                    <div style="flex:0 0 auto;">
+                      <label>Saldo de franquia (min)</label> <input id="mpSaldo" type="number" step="1" min="0"
+                        style="width:160px;">
+                    </div>
+                  </div>
+
+                  <label>OS</label><input id="mpOS" type="text" maxlength="50" style="width:160px;">
+
+                  <label>RADE (anexo)</label>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <input id="mpRADE" type="file" style="width:400px" accept="application/pdf,image/*">
+                    <span id="linkDownloadRade"></span>
+                  </div>
+
+                  <label>Observações</label><textarea id="mpObs" maxlength="4000" rows="8"
+                    style="width:100%;resize:vertical;overflow:auto;"></textarea>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="accordion-content" id="acc-abastecimento">
-            <div class="col">
-              <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
-                <input id="abNaoPrevisto" type="checkbox"> Não previsto para esse porto
-              </label>
-              
-              <div id="containerCamposAbast" style="display:block;">
-                <label>OS</label><input id="abOS" type="text" maxlength="50" style="width:160px;">
 
-                <div style="display:flex; gap:12px; align-items:flex-start;">
-                  <div style="flex:0 0 auto;">
-                    <label>Previsão de Inicio</label>
-                    <input type="datetime-local" id="prevInicioAbast" style="width:200px;">
+          <!-- 1.3 Abastecimento -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="abastecimento">
+              <span>1.3 Abastecimento</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-abastecimento">
+              <div class="col">
+                <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
+                  <input id="abNaoPrevisto" type="checkbox"> Não previsto para esse porto
+                </label>
+
+                <div id="containerCamposAbast" style="display:block;">
+                  <label>OS</label><input id="abOS" type="text" maxlength="50" style="width:160px;">
+
+                  <div style="display:flex; gap:12px; align-items:flex-start;">
+                    <div style="flex:0 0 auto;">
+                      <label>Previsão de Inicio</label>
+                      <input type="datetime-local" id="prevInicioAbast" style="width:200px;">
+                    </div>
+
+                    <div style="flex:0 0 auto;">
+                      <label>Qtde. M³</label><input id="abQtd" type="number" step="1" min="0" style="width:100px;">
+                    </div>
+
+                    <div style="flex:0 0 auto;">
+                      <label>Duração Prevista (h)</label><input id="abDuracao" type="number" step="1" min="0"
+                        style="width:100px;">
+                    </div>
                   </div>
-                  
-                  <div style="flex:0 0 auto;">
-                    <label>Qtde. M³</label><input id="abQtd" type="number" step="1" min="0" style="width:100px;">
+
+                  <div style="display:flex; gap:12px; align-items:flex-start;">
+                    <div style="flex:0 0 auto;">
+                      <label>Último Abastecimento</label><input type="date" id="ultimoAbast" style="width:180px;"
+                        disabled>
+                    </div>
+
+                    <div style="flex:0 0 auto;">
+                      <label>Qtde. M³</label>
+                      <input id="ultAbastQtd" type="number" step="1" min="0" style="width:100px;" disabled>
+                      <span id="msgUltAbast"></span>
+                    </div>
                   </div>
-                  
-                  <div style="flex:0 0 auto;">
-                    <label>Duração Prevista (h)</label><input id="abDuracao" type="number" step="1" min="0" style="width:100px;">
+
+                  <label>Anexo</label>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <input id="abAnexo" type="file" style="width:400px" accept="application/pdf,image/*">
+                    <span id="linkDownloadAbast"></span>
                   </div>
+
+                  <label>Observações</label>
+                  <textarea id="abObs" maxlength="4000" rows="8"
+                    style="width:100%;resize:vertical;overflow:auto;"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1.4 Inspeção Normativa -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="anvisa">
+              <span>1.4 Inspeção Normativa</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-anvisa">
+              <div class="col">
+                <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
+                  <input id="anNaoPrevisto" type="checkbox"> Não previsto para esse porto
+                </label>
+
+                <div id="containerSubtabelaInspNorm" style="display:block;">
+                  <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
+                    <div style="flex:0 0 auto;">
+                      <label>Descrição</label><select id="inspNorDesc" style="width:200px;">
+                        <option value="">— selecione —</option>
+                      </select>
+                    </div>
+                    <div style="flex:0 0 auto;">
+                      <label>OS</label><input id="inspNorOS" type="text" maxlength="50" style="width:160px;">
+                    </div>
+                    <div style="flex:0 0 auto; margin-top:20px;">
+                      <button id="btnAddInspNorm" class="btn small">Adicionar</button>
+                    </div>
+                  </div>
+
+                  <table id="tblInspNorm" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+                    <thead>
+                      <tr style="background:#f0f0f0;">
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">Descrição</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">OS</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:center; width:100px;">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                  </table>
                 </div>
 
-                <div style="display:flex; gap:12px; align-items:flex-start;">
-                  <div style="flex:0 0 auto;">
-                    <label>Último Abastecimento</label><input type="date" id="ultimoAbast" style="width:180px;" disabled>
-                  </div>
-                  
-                  <div style="flex:0 0 auto;">
-                    <label>Qtde. M³</label>
-                    <input id="ultAbastQtd" type="number" step="1" min="0" style="width:100px;" disabled>
-                    <span id="msgUltAbast"></span>
-                  </div>
-                </div>
-                
-                <label>Anexo</label>
-                <div style="display:flex; align-items:center; gap:10px;">
-                  <input id="abAnexo" type="file" style="width:400px" accept="application/pdf,image/*">
-                  <span id="linkDownloadAbast"></span>
-                </div>
-                
                 <label>Observações</label>
-                <textarea id="abObs" maxlength="4000" rows="8" style="width:100%;resize:vertical;overflow:auto;"></textarea>
+                <textarea id="anObs" maxlength="4000" rows="8"
+                  style="width:100%;resize:vertical;overflow:auto;"></textarea>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- 1.4 Inspeção Normativa -->
-        <div class="accordion-item">
-          <div class="accordion-header" data-target="anvisa">
-            <span>1.4 Inspeção Normativa</span>
-            <span class="toggle">▼</span>
-          </div>
-          <div class="accordion-content" id="acc-anvisa">
-            <div class="col">
-              <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
-                <input id="anNaoPrevisto" type="checkbox"> Não previsto para esse porto
-              </label>
-              
-              <div id="containerSubtabelaInspNorm" style="display:block;">
-                <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
-                  <div style="flex:0 0 auto;">
-                    <label>Descrição</label><select id="inspNorDesc" style="width:200px;"><option value="">— selecione —</option></select>
+          <!-- 1.5 Inspeções/Auditorias Petrobras -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="petrobras">
+              <span>1.5 Inspeções/Auditorias Petrobras</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-petrobras">
+              <div class="col">
+                <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
+                  <input id="ipNaoPrevisto" type="checkbox"> Não previsto para esse porto
+                </label>
+
+                <div id="containerSubtabelaInspPetr" style="display:block;">
+                  <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
+                    <div style="flex:0 0 auto;">
+                      <label>Descrição</label>
+                      <select id="inspPetrDesc" style="width:200px;">
+                        <option value="">— selecione —</option>
+                      </select>
+                    </div>
+                    <div style="flex:0 0 auto;">
+                      <label>Auditor/Visitante</label>
+                      <input id="ipAud" type="text" maxlength="30" style="width:250px;">
+                    </div>
+                    <div style="flex:0 0 auto;">
+                      <label>Gerência</label>
+                      <input id="ipGer" type="text" maxlength="30" style="width:250px;">
+                    </div>
+                    <div style="flex:0 0 auto; margin-top:20px;">
+                      <button id="btnAddInspPetr" class="btn small">Adicionar</button>
+                    </div>
                   </div>
-                  <div style="flex:0 0 auto;">
-                    <label>OS</label><input id="inspNorOS" type="text" maxlength="50" style="width:160px;">
-                  </div>
-                  <div style="flex:0 0 auto; margin-top:20px;">
-                    <button id="btnAddInspNorm" class="btn small">Adicionar</button>
-                  </div>
+
+                  <table id="tblInspPetr" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+                    <thead>
+                      <tr style="background:#f0f0f0;">
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">Descrição</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">Auditor/Visitante</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">Gerência</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:center; width:100px;">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                  </table>
                 </div>
-                
-                <table id="tblInspNorm" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+
+                <label>Observações</label>
+                <textarea id="ipObs" maxlength="4000" rows="8"
+                  style="width:100%;resize:vertical;overflow:auto;"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1.6 Embarque de Equipes -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="embequipes">
+              <span>1.6 Embarque de Equipes</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-embequipes">
+              <div class="col">
+                <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
+                  <input id="eqNaoPrevisto" type="checkbox"> Não previsto para esse porto
+                </label>
+
+                <div id="containerSubtabelaEmbEquip" style="display:block;">
+                  <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
+                    <div style="flex:0 0 auto;">
+                      <label>Descrição</label>
+                      <select id="embEquipDesc" style="width:200px;">
+                        <option value="">— selecione —</option>
+                      </select>
+                    </div>
+                    <div style="flex:0 0 auto;">
+                      <label>Nome</label>
+                      <input id="eqNome" type="text" maxlength="30" style="width:250px;">
+                    </div>
+                    <div style="flex:0 0 auto;">
+                      <label>Função</label>
+                      <input id="eqFuncao" type="text" maxlength="30" style="width:250px;">
+                    </div>
+                    <div style="flex:0 0 auto;">
+                      <label>Empresa</label>
+                      <input id="eqEmpresa" type="text" maxlength="30" style="width:250px;">
+                    </div>
+                    <div style="flex:0 0 auto; margin-top:20px;">
+                      <button id="btnAddEmbEquip" class="btn small">Adicionar</button>
+                    </div>
+                  </div>
+
+                  <table id="tblEmbEquip" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+                    <thead>
+                      <tr style="background:#f0f0f0;">
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">Descrição</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">Nome</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">Função</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">Empresa</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:center; width:100px;">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                  </table>
+                </div>
+
+                <label>Observações</label>
+                <textarea id="eqObs" maxlength="4000" rows="8"
+                  style="width:100%;resize:vertical;overflow:auto;"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1.7 OS Mobilização/Desmobilização -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="osmobdesm">
+              <span>1.7 OS Mobilização/Desmobilização</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-osmobdesm">
+              <div class="col">
+                <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
+                  <input id="omNaoPrevisto" type="checkbox"> Não previsto para esse porto
+                </label>
+
+                <div id="containerSubtabelaMobD" style="display:block;">
+                  <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
+                    <div style="flex:0 0 auto;">
+                      <label>OS</label>
+                      <input id="mobDOS" type="text" maxlength="12" style="width:160px;">
+                    </div>
+                    <div style="flex:0 0 auto;">
+                      <label>Descrição</label>
+                      <input id="mobDDesc" type="text" maxlength="300" style="width:400px;">
+                    </div>
+                    <div style="flex:0 0 auto; margin-top:20px;">
+                      <button id="btnAddMobD" class="btn small">Adicionar</button>
+                    </div>
+                  </div>
+
+                  <table id="tblMobD" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+                    <thead>
+                      <tr style="background:#f0f0f0;">
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">OS</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:left;">Descrição</th>
+                        <th style="border:1px solid #ddd; padding:8px; text-align:center; width:100px;">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                  </table>
+                </div>
+
+                <label>Observações</label>
+                <textarea id="omObs" maxlength="4000" rows="8"
+                  style="width:100%;resize:vertical;overflow:auto;"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1.8 Embarque de Materiais -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="embmateriais">
+              <span>1.8 Embarque de Materiais</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-embmateriais">
+              <div class="col">
+
+                <table id="tblEmbMatPs" style="width:100%; text-align:center;">
                   <thead>
-                    <tr style="background:#f0f0f0;">
-                      <th style="border:1px solid #ddd; padding:8px; text-align:left;">Descrição</th>
-                      <th style="border:1px solid #ddd; padding:8px; text-align:left;">OS</th>
-                      <th style="border:1px solid #ddd; padding:8px; text-align:center; width:100px;">Ações</th>
+                    <tr>
+                      <th>Descrição do Material</th>
+                      <th>Numero da RT</th>
+                      <th>Ordem de Serviço</th>
+                      <th>Responsável</th>
+                      <th>Descrição do contentor</th>
+                      <th style="width:150px;">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
+                    <tr>
+                      <td colspan="6" style="text-align:center; color:#999;">Nenhum material programado para embarque
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
+
               </div>
-              
-              <label>Observações</label>
-              <textarea id="anObs" maxlength="4000" rows="8" style="width:100%;resize:vertical;overflow:auto;"></textarea>
             </div>
           </div>
-        </div>
 
-        <!-- 1.5 Inspeções/Auditorias Petrobras -->
-        <div class="accordion-item">
-          <div class="accordion-header" data-target="petrobras">
-            <span>1.5 Inspeções/Auditorias Petrobras</span>
-            <span class="toggle">▼</span>
-          </div>
-          <div class="accordion-content" id="acc-petrobras">
-            <div class="col">
-              <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
-                <input id="ipNaoPrevisto" type="checkbox"> Não previsto para esse porto
-              </label>
-              
-              <div id="containerSubtabelaInspPetr" style="display:block;">
-                <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
-                  <div style="flex:0 0 auto;">
-                    <label>Descrição</label>
-                    <select id="inspPetrDesc" style="width:200px;">
-                      <option value="">— selecione —</option>
-                    </select>
-                  </div>
-                  <div style="flex:0 0 auto;">
-                    <label>Auditor/Visitante</label>
-                    <input id="ipAud" type="text" maxlength="30" style="width:250px;">
-                  </div>
-                  <div style="flex:0 0 auto;">
-                    <label>Gerência</label>
-                    <input id="ipGer" type="text" maxlength="30" style="width:250px;">
-                  </div>
-                  <div style="flex:0 0 auto; margin-top:20px;">
-                    <button id="btnAddInspPetr" class="btn small">Adicionar</button>
-                  </div>
-                </div>
-                
-                <table id="tblInspPetr" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+          <!-- 1.9 Desembarque de Materiais -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="desmateriais">
+              <span>1.9 Desembarque de Materiais</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-desmateriais">
+              <div class="col">
+
+                <table id="tblDesMatPs" style="width:100%; text-align:center;">
                   <thead>
-                    <tr style="background:#f0f0f0;">
-                      <th style="border:1px solid #ddd; padding:8px; text-align:left;">Descrição</th>
-                      <th style="border:1px solid #ddd; padding:8px; text-align:left;">Auditor/Visitante</th>
-                      <th style="border:1px solid #ddd; padding:8px; text-align:left;">Gerência</th>
-                      <th style="border:1px solid #ddd; padding:8px; text-align:center; width:100px;">Ações</th>
+                    <tr>
+                      <th>Descrição do Material</th>
+                      <th>Responsável</th>
+                      <th>Descrição do contentor</th>
+                      <th>Status</th>
+                      <th style="width:150px;">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
+                    <tr>
+                      <td colspan="5" style="text-align:center; color:#999;">Nenhum material solicitado para desembarque
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
+
               </div>
-              
-              <label>Observações</label>
-              <textarea id="ipObs" maxlength="4000" rows="8" style="width:100%;resize:vertical;overflow:auto;"></textarea>
             </div>
+          </div>
+
+        </div><!--Fim da subtab PORTO-->
+
+
+        <div class="subtab" id="sub-rotinas">
+          <div class="card">
+            <h3>2. ROTINAS – campos prontos</h3>
           </div>
         </div>
 
-        <!-- 1.6 Embarque de Equipes -->
-        <div class="accordion-item">
-          <div class="accordion-header" data-target="embequipes">
-            <span>1.6 Embarque de Equipes</span>
-            <span class="toggle">▼</span>
+
+        <!--subtab SMS -->
+        <div class="subtab" id="sub-sms">
+          <div class="card">
+            <h2>3. SMS</h2>
           </div>
-          <div class="accordion-content" id="acc-embequipes">
-            <div class="col">
-              <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
-                <input id="eqNaoPrevisto" type="checkbox"> Não previsto para esse porto
-              </label>
-              
-              <div id="containerSubtabelaEmbEquip" style="display:block;">
-                <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
-                  <div style="flex:0 0 auto;">
-                    <label>Descrição</label>
-                    <select id="embEquipDesc" style="width:200px;">
-                      <option value="">— selecione —</option>
-                    </select>
-                  </div>
-                  <div style="flex:0 0 auto;">
-                    <label>Nome</label>
-                    <input id="eqNome" type="text" maxlength="30" style="width:250px;">
-                  </div>
-                  <div style="flex:0 0 auto;">
-                    <label>Função</label>
-                    <input id="eqFuncao" type="text" maxlength="30" style="width:250px;">
-                  </div>
-                  <div style="flex:0 0 auto;">
-                    <label>Empresa</label>
-                    <input id="eqEmpresa" type="text" maxlength="30" style="width:250px;">
-                  </div>
-                  <div style="flex:0 0 auto; margin-top:20px;">
-                    <button id="btnAddEmbEquip" class="btn small">Adicionar</button>
-                  </div>
-                </div>
-                
-                <table id="tblEmbEquip" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
+          <!-- 2.1 Anomalias de SMS -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="anomsms">
+              <span>3.1 Anomalias de SMS da Quinzena</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-anomsms">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Informes de anomalia emitidos na quinzena.</p>
+
+                <table id="tblAnomSMS" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
                   <thead>
                     <tr style="background:#f0f0f0;">
+                      <th style="border:1px solid #ddd; padding:8px; text-align:center; width:90px;">Data</th>
+                      <th style="border:1px solid #ddd; padding:8px; text-align:center; width:70px;">Hora</th>
+                      <th style="border:1px solid #ddd; padding:8px; text-align:left; width:150px;">Referente a</th>
                       <th style="border:1px solid #ddd; padding:8px; text-align:left;">Descrição</th>
-                      <th style="border:1px solid #ddd; padding:8px; text-align:left;">Nome</th>
-                      <th style="border:1px solid #ddd; padding:8px; text-align:left;">Função</th>
-                      <th style="border:1px solid #ddd; padding:8px; text-align:left;">Empresa</th>
-                      <th style="border:1px solid #ddd; padding:8px; text-align:center; width:100px;">Ações</th>
+                      <th style="border:1px solid #ddd; padding:8px; text-align:center; width:120px;">Visualizar</th>
                     </tr>
                   </thead>
-                  <tbody>
-                  </tbody>
+                  <tbody></tbody>
                 </table>
-              </div>
-              
-              <label>Observações</label>
-              <textarea id="eqObs" maxlength="4000" rows="8" style="width:100%;resize:vertical;overflow:auto;"></textarea>
-            </div>
-          </div>
-        </div>
 
-        <!-- 1.7 OS Mobilização/Desmobilização -->
-        <div class="accordion-item">
-          <div class="accordion-header" data-target="osmobdesm">
-            <span>1.7 OS Mobilização/Desmobilização</span>
-            <span class="toggle">▼</span>
-          </div>
-          <div class="accordion-content" id="acc-osmobdesm">
-            <div class="col">
-              <label style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;margin-bottom:8px;">
-                <input id="omNaoPrevisto" type="checkbox"> Não previsto para esse porto
-              </label>
-              
-              <div id="containerSubtabelaMobD" style="display:block;">
-                <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
-                  <div style="flex:0 0 auto;">
-                    <label>OS</label>
-                    <input id="mobDOS" type="text" maxlength="12" style="width:160px;">
-                  </div>
-                  <div style="flex:0 0 auto;">
-                    <label>Descrição</label>
-                    <input id="mobDDesc" type="text" maxlength="300" style="width:400px;">
-                  </div>
-                  <div style="flex:0 0 auto; margin-top:20px;">
-                    <button id="btnAddMobD" class="btn small">Adicionar</button>
-                  </div>
+                <div id="msgSemAnomalias" style="display:none; padding:20px; text-align:center; color:#666;">
+                  Nenhuma anomalia registrada nesta quinzena.
                 </div>
-                
-                <table id="tblMobD" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
-                  <thead>
-                    <tr style="background:#f0f0f0;">
-                      <th style="border:1px solid #ddd; padding:8px; text-align:left;">OS</th>
-                      <th style="border:1px solid #ddd; padding:8px; text-align:left;">Descrição</th>
-                      <th style="border:1px solid #ddd; padding:8px; text-align:center; width:100px;">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                  </tbody>
-                </table>
-              </div>
-              
-              <label>Observações</label>
-              <textarea id="omObs" maxlength="4000" rows="8" style="width:100%;resize:vertical;overflow:auto;"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- 1.8 Embarque de Materiais -->
-        <div class="accordion-item">
-          <div class="accordion-header" data-target="embmateriais">
-            <span>1.8 Embarque de Materiais</span>
-            <span class="toggle">▼</span>
-          </div>
-          <div class="accordion-content" id="acc-embmateriais">
-            <div class="col">
-              
-              <table id="tblEmbMatPs" style="width:100%; text-align:center;">
-                <thead>
-                  <tr>
-                    <th>Descrição do Material</th>
-                    <th>Numero da RT</th>
-                    <th>Ordem de Serviço</th>
-                    <th>Responsável</th>
-                    <th>Descrição do contentor</th>
-                    <th style="width:150px;">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td colspan="6" style="text-align:center; color:#999;">Nenhum material programado para embarque</td>
-                  </tr>
-                </tbody>
-              </table>
-
-            </div>
-          </div>
-        </div>
-
-        <!-- 1.9 Desembarque de Materiais -->
-        <div class="accordion-item">
-          <div class="accordion-header" data-target="desmateriais">
-            <span>1.9 Desembarque de Materiais</span>
-            <span class="toggle">▼</span>
-          </div>
-          <div class="accordion-content" id="acc-desmateriais">
-            <div class="col">
-              
-              <table id="tblDesMatPs" style="width:100%; text-align:center;">
-                <thead>
-                  <tr>
-                    <th>Descrição do Material</th>
-                    <th>Responsável</th>
-                    <th>Descrição do contentor</th>
-                    <th>Status</th>
-                    <th style="width:150px;">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td colspan="5" style="text-align:center; color:#999;">Nenhum material solicitado para desembarque</td>
-                  </tr>
-                </tbody>
-              </table>
-
-            </div>
-          </div>
-        </div>
-
-      </div><!--Fim da subtab PORTO-->
-
-
-      <div class="subtab" id="sub-rotinas"><div class="card"><h3>2. ROTINAS – campos prontos</h3></div></div>
-
-
-      <!--subtab SMS -->
-      <div class="subtab" id="sub-sms"><div class="card"><h2>3. SMS</h2></div>
-        <!-- 2.1 Anomalias de SMS -->
-        <div class="accordion-item">
-          <div class="accordion-header" data-target="anomsms">
-            <span>3.1 Anomalias de SMS da Quinzena</span>
-            <span class="toggle">▼</span>
-          </div>
-          <div class="accordion-content" id="acc-anomsms">
-            <div class="col">
-              <p style="margin-bottom:12px; color:#666;">Informes de anomalia emitidos na quinzena.</p>
-              
-              <table id="tblAnomSMS" style="width:100%; border-collapse:collapse; margin-bottom:12px;">
-                <thead>
-                  <tr style="background:#f0f0f0;">
-                    <th style="border:1px solid #ddd; padding:8px; text-align:center; width:90px;">Data</th>
-                    <th style="border:1px solid #ddd; padding:8px; text-align:center; width:70px;">Hora</th>
-                    <th style="border:1px solid #ddd; padding:8px; text-align:left; width:150px;">Referente a</th>
-                    <th style="border:1px solid #ddd; padding:8px; text-align:left;">Descrição</th>
-                    <th style="border:1px solid #ddd; padding:8px; text-align:center; width:120px;">Visualizar</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-              
-              <div id="msgSemAnomalias" style="display:none; padding:20px; text-align:center; color:#666;">
-                Nenhuma anomalia registrada nesta quinzena.
               </div>
             </div>
           </div>
         </div>
-      </div>
       </div><!--Fim da subtab SMS-->
 
-      <div class="subtab" id="sub-os"><div class="card"><h3>4. ORDENS DE SERVIÇO – campos prontos</h3></div></div>
-      <div class="subtab" id="sub-gerais"><div class="card"><h3>5. INFORMAÇÕES GERAIS – campos prontos</h3></div></div>
+      <div class="subtab" id="sub-os">
+        <div class="card">
+          <h3>4. ORDENS DE SERVIÇO – campos prontos</h3>
+        </div>
+      </div>
+      <div class="subtab" id="sub-gerais">
+        <div class="card">
+          <h3>5. INFORMAÇÕES GERAIS – campos prontos</h3>
+        </div>
+      </div>
 
 
 
 
-          <!-- MODAL DE VISUALIZAÇÃO DE INFORME -->
+      <!-- MODAL DE VISUALIZAÇÃO DE INFORME -->
       <div id="modalVisualizarInforme" class="modal-overlay">
         <div class="modal-content">
           <div class="modal-header">
@@ -518,22 +559,26 @@
             <!-- Conteúdo será inserido via JavaScript -->
           </div>
         </div>
-      </div>  
+      </div>
 
-      
-      <!-- ========== MODAL DETALHES MATERIAL ========== -->
-      <div id="modalDetalhesMaterial" class="modal hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:1000;">
-        <div class="modal-content" style="max-width:900px; background:#fff; border-radius:10px; padding:20px; max-height:90vh; overflow-y:auto; position:relative;">
+
+      <!-- ========== MODAL DETALHES MATERIAL - COMPLETO ========== -->
+      <div id="modalDetalhesMaterial" class="modal hidden"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:1000;">
+        <div class="modal-content"
+          style="max-width:900px; background:#fff; border-radius:10px; padding:20px; max-height:90vh; overflow-y:auto; position:relative;">
           <span class="close" id="closeDetalhesMaterial">&times;</span>
           <h2 style="color:#0b7a66;">DETALHES DO MATERIAL</h2>
-          
+
           <div class="modal-body">
-            
+
+            <!-- Embarcação -->
             <div class="col">
               <label>Embarcação</label>
               <input id="det_barco" type="text" readonly style="width:400px; background:#f5f5f5;">
             </div>
 
+            <!-- Descrição e Identificação -->
             <div style="display:flex; gap:15px; flex-wrap:wrap;">
               <div class="col" style="flex:1 1 300px;">
                 <label>Descrição do Material</label>
@@ -545,37 +590,40 @@
               </div>
             </div>
 
+            <!-- Peso e Dimensões -->
             <div style="display:flex; gap:15px; flex-wrap:wrap;">
-              <div class="col" style="flex:0 0 150px;">
+              <div class="col" style="flex:1 1 150px;">
                 <label>Peso (kg)</label>
                 <input id="det_peso" type="text" readonly style="width:100%; background:#f5f5f5;">
               </div>
-              <div class="col" style="flex:0 0 150px;">
+              <div class="col" style="flex:1 1 150px;">
                 <label>Altura (m)</label>
                 <input id="det_altura" type="text" readonly style="width:100%; background:#f5f5f5;">
               </div>
-              <div class="col" style="flex:0 0 150px;">
+              <div class="col" style="flex:1 1 150px;">
                 <label>Largura (m)</label>
                 <input id="det_largura" type="text" readonly style="width:100%; background:#f5f5f5;">
               </div>
-              <div class="col" style="flex:0 0 150px;">
+              <div class="col" style="flex:1 1 150px;">
                 <label>Comprimento (m)</label>
                 <input id="det_compr" type="text" readonly style="width:100%; background:#f5f5f5;">
               </div>
             </div>
 
+            <!-- Responsável -->
+            <div class="col">
+              <label>Responsável pelo Material</label>
+              <input id="det_resp" type="text" readonly style="width:300px; background:#f5f5f5;">
+            </div>
+
+            <!-- Dados de Embarque -->
+            <h3 style="color:#0b7a66; margin-top:20px; margin-bottom:10px;">Informações de Embarque</h3>
+
             <div style="display:flex; gap:15px; flex-wrap:wrap;">
-              <div class="col" style="flex:1 1 200px;">
-                <label>Responsável pelo Material</label>
-                <input id="det_resp" type="text" readonly style="width:100%; background:#f5f5f5;">
-              </div>
               <div class="col" style="flex:1 1 200px;">
                 <label>Data Prevista Embarque</label>
                 <input id="det_data_prev" type="text" readonly style="width:100%; background:#f5f5f5;">
               </div>
-            </div>
-
-            <div style="display:flex; gap:15px; flex-wrap:wrap;">
               <div class="col" style="flex:1 1 200px;">
                 <label>Nº RT</label>
                 <input id="det_rt" type="text" readonly style="width:100%; background:#f5f5f5;">
@@ -590,9 +638,16 @@
               </div>
             </div>
 
-            <div class="col" id="det_campos_contentor" style="display:none;">
+            <!-- Material em Contentor -->
+            <div class="col" style="margin-top:15px;">
+              <label>Material em Contentor?</label>
+              <input id="det_cont_bordo" type="text" readonly style="width:200px; background:#f5f5f5;">
+            </div>
+
+            <!-- Informações do Contentor (Condicional) -->
+            <div id="det_campos_contentor" style="display:none;">
               <h3 style="color:#0b7a66; margin-top:20px; margin-bottom:10px;">Informações do Contentor</h3>
-              
+
               <div style="display:flex; gap:15px; flex-wrap:wrap;">
                 <div class="col" style="flex:1 1 200px;">
                   <label>Descrição do Contentor</label>
@@ -620,11 +675,14 @@
               </div>
             </div>
 
+            <!-- Observações -->
             <div class="col" style="margin-top:15px;">
               <label>Observações</label>
-              <textarea id="det_obs" readonly rows="3" style="width:100%; resize:vertical; background:#f5f5f5;"></textarea>
+              <textarea id="det_obs" readonly rows="3"
+                style="width:100%; resize:vertical; background:#f5f5f5;"></textarea>
             </div>
 
+            <!-- Status -->
             <div class="col" style="margin-top:15px;">
               <label>Status do Material</label>
               <input id="det_status" type="text" readonly style="width:100%; max-width:400px; background:#f5f5f5;">
@@ -632,52 +690,54 @@
 
           </div>
 
+          <!-- Botão Fechar -->
           <div class="modal-footer" style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
             <button id="btnFecharDetalhes" class="btn ghost">Fechar</button>
           </div>
 
         </div>
       </div>
-      
-     
-      
-      
-      
-      
-    </div>
-  </section>
 
-  <div id="modalNovaPS" class="modal hidden" aria-hidden="true">
-    <div class="modal-content">
-      <h3>Selecionar embarcação</h3>
-      <div class="field">
-        <label for="selEmbNova">Embarcação</label>
-        <select id="selEmbNova">
-          <option value="">— selecione —</option>
-        </select>
-      </div>
-      <div class="btns" style="margin-top:8px">
-        <button id="btnModalNovaConfirmar" class="btn" disabled>Confirmar</button>
-        <button id="btnModalNovaCancelar" class="btn secondary" type="button">Cancelar</button>
-      </div>
-      <div id="msgModalNovaPS" class="msg-erro"></div>
-    </div>
-  </div>
-</main>
 
-<script src="/static/js/auth.js"></script>
-<script src="/static/js/anom-sms.js?v=2"></script>
-<script src="/static/js/passagens.js"></script>
-<script src="/static/js/troca-turma.js"></script>
-<script src="/static/js/manut-prev.js"></script>
-<script src="/static/js/abast.js"></script>
-<script src="/static/js/insp-norm.js"></script>
-<script src="/static/js/insp-petr.js"></script>
-<script src="/static/js/emb-equip.js"></script>
-<script src="/static/js/mob-desm.js"></script>
-<script src="/static/js/emb-mat-ps.js"></script>
-<script src="/static/js/des-mat-ps.js"></script>
-<script src="/static/js/invmat.js"></script> 
-<script src="/static/js/app.js"></script>
+
+
+
+
+      </div>
+    </section>
+
+    <div id="modalNovaPS" class="modal hidden" aria-hidden="true">
+      <div class="modal-content">
+        <h3>Selecionar embarcação</h3>
+        <div class="field">
+          <label for="selEmbNova">Embarcação</label>
+          <select id="selEmbNova">
+            <option value="">— selecione —</option>
+          </select>
+        </div>
+        <div class="btns" style="margin-top:8px">
+          <button id="btnModalNovaConfirmar" class="btn" disabled>Confirmar</button>
+          <button id="btnModalNovaCancelar" class="btn secondary" type="button">Cancelar</button>
+        </div>
+        <div id="msgModalNovaPS" class="msg-erro"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/static/js/auth.js"></script>
+  <script src="/static/js/anom-sms.js?v=2"></script>
+  <script src="/static/js/passagens.js"></script>
+  <script src="/static/js/troca-turma.js"></script>
+  <script src="/static/js/manut-prev.js"></script>
+  <script src="/static/js/abast.js"></script>
+  <script src="/static/js/insp-norm.js"></script>
+  <script src="/static/js/insp-petr.js"></script>
+  <script src="/static/js/emb-equip.js"></script>
+  <script src="/static/js/mob-desm.js"></script>
+  <script src="/static/js/emb-mat-ps.js"></script>
+  <script src="/static/js/des-mat-ps.js"></script>
+  <script src="/static/js/invmat.js"></script>
+  <script src="/static/js/app.js"></script>
 </body>
+
 </html>

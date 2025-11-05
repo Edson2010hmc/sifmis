@@ -5,7 +5,7 @@ const EmbMatPsModule = (() => {
   'use strict';
 
   let psAtualId = null;
-  let sincronizandoEmAndamento = false; // NOVO: Flag para evitar sincronizações simultâneas
+  let sincronizandoEmAndamento = false;
 
   const elementos = {
     tabela: document.getElementById('tblEmbMatPs'),
@@ -15,18 +15,20 @@ const EmbMatPsModule = (() => {
     btnFechar: document.getElementById('btnFecharDetalhes')
   };
 
+  //============INICIALIZAR==========
   function init() {
     criarBotaoAtualizar();
     configurarModal();
   }
 
+  //============CRIAR BOTÃO ATUALIZAR==========
   function criarBotaoAtualizar() {
     const accordion = document.getElementById('acc-embmateriais');
     if (!accordion || document.getElementById('btnAtualizarEmbMat')) return;
-    
+
     const container = document.createElement('div');
     container.style.cssText = 'margin-bottom: 10px; display: flex; justify-content: flex-end;';
-    
+
     const btn = document.createElement('button');
     btn.id = 'btnAtualizarEmbMat';
     btn.className = 'btn secondary small';
@@ -35,13 +37,14 @@ const EmbMatPsModule = (() => {
     btn.addEventListener('click', () => {
       if (psAtualId) atualizarTabela(psAtualId);
     });
-    
+
     container.appendChild(btn);
     const tabelaParent = elementos.tabela.parentElement;
     tabelaParent.insertBefore(container, elementos.tabela);
     elementos.btnAtualizar = btn;
   }
 
+  //============CONFIGURAR MODAL==========
   function configurarModal() {
     if (elementos.closeModal) {
       elementos.closeModal.addEventListener('click', fecharModal);
@@ -54,6 +57,7 @@ const EmbMatPsModule = (() => {
     });
   }
 
+  //============FECHAR MODAL==========
   function fecharModal() {
     if (elementos.modal) {
       elementos.modal.style.display = 'none';
@@ -63,24 +67,23 @@ const EmbMatPsModule = (() => {
   //============SINCRONIZAR MATERIAIS==========
   async function sincronizarMateriais(psId) {
     if (!psId) return;
-    
-    // NOVO: Verificar se já há sincronização em andamento
+
     if (sincronizandoEmAndamento) {
       console.log('[EMB-MAT-PS] Sincronização já em andamento, aguardando...');
       return;
     }
-    
+
     sincronizandoEmAndamento = true;
-    
+
     try {
       const response = await fetch(`/api/ps/${psId}/sincronizar-materiais-embarque/`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'}
+        headers: { 'Content-Type': 'application/json' }
       });
-      
+
       const result = await response.json();
       console.log('[EMB-MAT-PS] Sincronização concluída:', result.message);
-      
+
     } catch (error) {
       console.error('[EMB-MAT-PS] Erro na sincronização:', error);
     } finally {
@@ -92,10 +95,9 @@ const EmbMatPsModule = (() => {
   async function carregarDados(psId) {
     if (!psId) return;
     psAtualId = psId;
-    
+
     try {
       await sincronizarMateriais(psId);
-      // NOVO: Aguardar um pouco antes de atualizar a tabela para garantir que a sincronização terminou
       await new Promise(resolve => setTimeout(resolve, 300));
       await atualizarTabela(psId);
     } catch (error) {
@@ -106,28 +108,28 @@ const EmbMatPsModule = (() => {
   //============ATUALIZAR TABELA==========
   async function atualizarTabela(psId) {
     if (!elementos.tabela) return;
-    
+
     try {
       const response = await fetch(`/api/ps/${psId}/materiais-embarque/`);
       const result = await response.json();
-      
+
       if (!result.success) return;
-      
+
       const tbody = elementos.tabela.querySelector('tbody');
       tbody.innerHTML = '';
-      
+
       if (result.data.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Nenhum material programado para embarque</td></tr>';
         return;
       }
-      
+
       result.data.forEach(mat => {
         const tr = document.createElement('tr');
         const materialId = mat.materialId;
-        const btnDetalhes = materialId 
+        const btnDetalhes = materialId
           ? `<button class="btn secondary small" onclick="EmbMatPsModule.abrirModal(${materialId})">Exibir Detalhes</button>`
           : '<span style="color:#999;">-</span>';
-        
+
         tr.innerHTML = `
           <td style="border:1px solid #ddd; padding:8px;">${mat.descMatEmbPs}</td>
           <td style="border:1px solid #ddd; padding:8px;">${mat.numRtMatEmbPs || '-'}</td>
@@ -146,10 +148,9 @@ const EmbMatPsModule = (() => {
   //============SALVAR==========
   async function salvar() {
     if (!psAtualId) return;
-    
+
     try {
       await sincronizarMateriais(psAtualId);
-      // NOVO: Aguardar antes de atualizar a tabela
       await new Promise(resolve => setTimeout(resolve, 300));
       await atualizarTabela(psAtualId);
     } catch (error) {
@@ -160,7 +161,7 @@ const EmbMatPsModule = (() => {
   //============LIMPAR==========
   function limpar() {
     psAtualId = null;
-    sincronizandoEmAndamento = false; // NOVO: Resetar flag
+    sincronizandoEmAndamento = false;
     if (elementos.tabela) {
       const tbody = elementos.tabela.querySelector('tbody');
       tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Nenhum material programado para embarque</td></tr>';
@@ -173,18 +174,19 @@ const EmbMatPsModule = (() => {
       alert('ID do material não disponível');
       return;
     }
-    
+
     try {
       const response = await fetch(`/api/materiais-embarque/${materialId}/`);
       const result = await response.json();
-      
+
       if (!result.success) {
         alert('Erro ao carregar material');
         return;
       }
-      
+
       const mat = result.data;
-      
+
+      // Preencher campos básicos
       document.getElementById('det_barco').value = `${mat.tipoBarco} ${mat.barcoMatEmb}`;
       document.getElementById('det_desc').value = mat.descMatEmb || '';
       document.getElementById('det_ident').value = mat.identMatEmb || '';
@@ -192,17 +194,14 @@ const EmbMatPsModule = (() => {
       document.getElementById('det_altura').value = mat.alturaMatEmb || '';
       document.getElementById('det_largura').value = mat.larguraMatEmb || '';
       document.getElementById('det_compr').value = mat.comprimentoMatEmb || '';
-      
+
       const resp = mat.respEmbMat === 'OUTRO' ? mat.outRespEmbMat || '' : mat.respEmbMat || '';
       document.getElementById('det_resp').value = resp;
-      
+
       document.getElementById('det_cont_bordo').value = mat.contBordoEmbMat || '';
-      document.getElementById('det_desc_cont').value = mat.descContMatEmb || '';
-      document.getElementById('det_id_cont').value = mat.idContMatEmb || '';
-      document.getElementById('det_resp_cont').value = mat.respContMatEmb || '';
       document.getElementById('det_status').value = mat.statusProgMatEmb || '';
       document.getElementById('det_obs').value = mat.obsMatEmb || '';
-      
+
       // Preencher campos de embarque
       if (mat.embarques && mat.embarques.length > 0) {
         const emb = mat.embarques[0];
@@ -210,20 +209,30 @@ const EmbMatPsModule = (() => {
         document.getElementById('det_rt').value = emb.numRtMatEmb || '';
         document.getElementById('det_os').value = emb.osEmbMat || '';
         document.getElementById('det_meio_rec').value = emb.meioRecEmbMat || '';
+      } else {
+        document.getElementById('det_data_prev').value = '';
+        document.getElementById('det_rt').value = '';
+        document.getElementById('det_os').value = '';
+        document.getElementById('det_meio_rec').value = '';
       }
-      
+
+      // Preencher campos de contentor (se aplicável)
       if (mat.contBordoEmbMat === 'SIM') {
         document.getElementById('det_campos_contentor').style.display = 'block';
+        document.getElementById('det_desc_cont').value = mat.descContMatEmb || '';
+        document.getElementById('det_id_cont').value = mat.idContMatEmb || '';
+        document.getElementById('det_resp_cont').value = mat.respContMatEmb || '';
         document.getElementById('det_cert_cont').value = mat.certContMatEmb || '';
         document.getElementById('det_val_cont').value = mat.valContMatEmb || '';
       } else {
         document.getElementById('det_campos_contentor').style.display = 'none';
       }
-      
+
+      // Exibir modal
       elementos.modal.style.display = 'flex';
-      
+
     } catch (error) {
-      alert('Erro ao carregar detalhes do material');
+      alert('Erro ao carregar detalhes do material: ' + error.message);
     }
   }
 
