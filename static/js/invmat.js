@@ -562,154 +562,119 @@
     await processarSolicitacaoDesembarque(barcoId, null);
   }
 
-  // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
+  // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE - CORRETO =====
   async function processarSolicitacaoDesembarque(barcoId) {
     try {
-      // Verificar se AuthModule existe
+      // Verificar autenticação
       if (typeof AuthModule === 'undefined') {
         alert('Sistema de autenticação não carregado. Recarregue a página.');
         return;
       }
 
-      // Buscar fiscal logado
       const usuario = AuthModule.getUsuarioLogado();
 
-      // Validação robusta do usuário
-      if (!usuario) {
-        alert('Usuário não autenticado. Recarregue a página e faça login novamente.');
-        return;
-      }
-
-      if (!usuario.chave || !usuario.nome) {
-        alert('Dados do usuário incompletos. Entre em contato com o administrador.');
+      if (!usuario || !usuario.chave || !usuario.nome) {
+        alert('Usuário não autenticado ou dados incompletos.');
         return;
       }
 
       const fiscalNome = `${usuario.chave} - ${usuario.nome}`;
 
-      // Verificar PS rascunho
-      const responsePS = await fetch('/api/verificar-ps-rascunho-material/', {
+      // Verificar PS em rascunho
+      const resultPS = await fetch('/api/verificar-ps-rascunho-material/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          barcoId,
-          fiscalNome
-        })
+        body: JSON.stringify({ barcoId, fiscalNome })
       });
 
-      const resultPS = await responsePS.json();
+      const respPS = await resultPS.json();
 
-      if (!resultPS.success) {
-        alert('Erro ao verificar PS: ' + resultPS.error);
+      if (!respPS.success) {
+        alert('Erro: ' + respPS.error);
         return;
       }
 
-      if (!resultPS.existeRascunho || !resultPS.dadosCompletos) {
-        alert('Não existe PS em rascunho com dados de porto completos. Complete esses dados antes de solicitar o desembarque.');
+      if (!respPS.psRascunho) {
+        alert('Não há PS em rascunho para esta embarcação. Complete esses dados antes de solicitar o desembarque.');
         return;
       }
 
-      const psData = resultPS.psData;
+      const psData = respPS.psData;
 
-      // Buscar nome do barco
-      const respBarco = await fetch(`/api/barcos/`);
-      const resBarco = await respBarco.json();
-      const barco = resBarco.data.find(b => b.id == barcoId);
-      const barcoNome = barco ? `${barco.tipoBarco} ${barco.nomeBarco}` : '';
+      // Buscar materiais relacionados para desembarque
+      const resMateriais = await fetch(`/api/materiais-embarque/?barcoId=${barcoId}&status=RELACIONADO PARA DESEMBARQUE`);
+      const resultMat = await resMateriais.json();
 
-      // Abrir modal de seleção de modelo
-      abrirModalSelecaoModelo(barcoId, barcoNome, fiscalNome, psData);
+      if (!resultMat.success || resultMat.data.length === 0) {
+        alert('Nenhum material relacionado para desembarque');
+        return;
+      }
+
+      const materiais = resultMat.data;
+
+      // Separar materiais por tipo
+      const matCrd = materiais.filter(m => m.respEmbMat === 'CRD');
+      const matNaoCrd = materiais.filter(m => m.respEmbMat !== 'CRD');
+
+      // ===== PROCESSAR MATERIAIS CRD =====
+      if (matCrd.length > 0) {
+        // CRD sempre usa modelo 004 (sem modal)
+        await enviarSolicitacaoDesembarque('004', barcoId, fiscalNome, psData, {}, 'CRD');
+      }
+
+      // ===== PROCESSAR MATERIAIS NÃO-CRD =====
+      if (matNaoCrd.length > 0) {
+        // Verificar se há materiais com e sem contentor
+        const comContentor = matNaoCrd.filter(m => m.contBordoEmbMat === 'SIM');
+        const semContentor = matNaoCrd.filter(m => m.contBordoEmbMat !== 'SIM');
+
+        if (comContentor.length > 0 && semContentor.length === 0) {
+          // MODELO 002: Apenas materiais COM contentor
+          // Perguntar se deseja agrupar todos
+          const agrupar = confirm('Há materiais com contentor relacionados para desembarque. Deseja solicitar o desembarque de todos agrupados?');
+
+          if (agrupar) {
+            // Abrir modal para coletar dados de contentores
+            const dadosModal = await abrirModalContentoresPromise('002', barcoId, fiscalNome, psData);
+
+            if (dadosModal) {
+              await enviarSolicitacaoDesembarque('002', barcoId, fiscalNome, psData, dadosModal, 'NAO_CRD');
+            }
+          } else {
+            // Enviar modelo 001 (sem contentor adicional)
+            await enviarSolicitacaoDesembarque('001', barcoId, fiscalNome, psData, {}, 'NAO_CRD');
+          }
+
+        } else if (comContentor.length === 0 && semContentor.length > 0) {
+          // MODELO 001: Apenas materiais SEM contentor
+          await enviarSolicitacaoDesembarque('001', barcoId, fiscalNome, psData, {}, 'NAO_CRD');
+
+        } else if (comContentor.length > 0 && semContentor.length > 0) {
+          // MODELO 003: MISTO (com e sem contentor)
+          // Perguntar se deseja agrupar todos
+          const agrupar = confirm('Há materiais com e sem contentor relacionados para desembarque. Deseja solicitar o desembarque de todos agrupados?');
+
+          if (agrupar) {
+            // Abrir modal para coletar dados de contentores
+            const dadosModal = await abrirModalContentoresPromise('003', barcoId, fiscalNome, psData);
+
+            if (dadosModal) {
+              await enviarSolicitacaoDesembarque('003', barcoId, fiscalNome, psData, dadosModal, 'NAO_CRD');
+            }
+          } else {
+            // Enviar modelo 001 (sem contentor adicional)
+            await enviarSolicitacaoDesembarque('001', barcoId, fiscalNome, psData, {}, 'NAO_CRD');
+          }
+        }
+      }
+
+      // Atualizar tabelas após envio
+      await carregarTabelas();
+      alert('Solicitação(ões) de desembarque enviada(s) com sucesso!');
 
     } catch (error) {
       alert('Erro ao processar solicitação: ' + error.message);
     }
-  }
-
-  // ===== ABRIR MODAL SELEÇÃO DE MODELO =====
-  function abrirModalSelecaoModelo(barcoId, barcoNome, fiscalNome, psData) {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:2000;';
-
-    modal.innerHTML = `
-    <div class="modal-content" style="background:#fff; border-radius:10px; padding:30px; max-width:700px; width:90%;">
-      <h2 style="color:#0b7a66; margin-bottom:20px;">Selecione o modelo de email</h2>
-      
-      <p style="margin-bottom:20px; color:#666;">
-        Escolha o modelo apropriado para a solicitação de desembarque dos materiais:
-      </p>
-      
-      <div style="display:flex; flex-direction:column; gap:15px; margin-bottom:30px;">
-        <button class="btn-modelo" data-modelo="001" style="padding:15px; border:2px solid #0b7a66; border-radius:8px; background:#fff; cursor:pointer; text-align:left; transition:all 0.3s;">
-          <strong style="display:block; color:#0b7a66; margin-bottom:5px;">Modelo 001</strong>
-          <span style="color:#666; font-size:14px;">Materiais JÁ em contentores a bordo</span>
-        </button>
-        
-        <button class="btn-modelo" data-modelo="002" style="padding:15px; border:2px solid #0b7a66; border-radius:8px; background:#fff; cursor:pointer; text-align:left; transition:all 0.3s;">
-          <strong style="display:block; color:#0b7a66; margin-bottom:5px;">Modelo 002</strong>
-          <span style="color:#666; font-size:14px;">Materiais SEM contentores (solicita contentores com coleta)</span>
-        </button>
-        
-        <button class="btn-modelo" data-modelo="003" style="padding:15px; border:2px solid #0b7a66; border-radius:8px; background:#fff; cursor:pointer; text-align:left; transition:all 0.3s;">
-          <strong style="display:block; color:#0b7a66; margin-bottom:5px;">Modelo 003</strong>
-          <span style="color:#666; font-size:14px;">Materiais SEM contentores e COM contentores (misto)</span>
-        </button>
-        
-        <button class="btn-modelo" data-modelo="004" style="padding:15px; border:2px solid #0b7a66; border-radius:8px; background:#fff; cursor:pointer; text-align:left; transition:all 0.3s;">
-          <strong style="display:block; color:#0b7a66; margin-bottom:5px;">Modelo 004</strong>
-          <span style="color:#666; font-size:14px;">Materiais CRD</span>
-        </button>
-      </div>
-      
-      <div style="display:flex; justify-content:flex-end;">
-        <button id="btnCancelarModelo" class="btn secondary">Cancelar</button>
-      </div>
-    </div>
-  `;
-
-    document.body.appendChild(modal);
-
-    // Efeito hover nos botões de modelo
-    modal.querySelectorAll('.btn-modelo').forEach(btn => {
-      btn.addEventListener('mouseenter', function () {
-        this.style.background = '#f0f9f7';
-        this.style.borderColor = '#089876';
-      });
-
-      btn.addEventListener('mouseleave', function () {
-        this.style.background = '#fff';
-        this.style.borderColor = '#0b7a66';
-      });
-
-      // Clicar no modelo
-      btn.addEventListener('click', async function () {
-        const modeloSelecionado = this.dataset.modelo;
-
-        // Modelos 002 e 003 precisam de dados dos contentores
-        if (modeloSelecionado === '002' || modeloSelecionado === '003') {
-          document.body.removeChild(modal);
-
-          try {
-            const dadosContentor = await abrirModalContentoresPromise(modeloSelecionado, barcoId, fiscalNome, psData);
-            await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, modeloSelecionado, dadosContentor);
-          } catch (error) {
-            if (error.message !== 'Cancelado') {
-              alert('Erro: ' + error.message);
-            }
-          }
-
-        } else {
-          // Modelos 001 e 004 não precisam de dados adicionais
-          document.body.removeChild(modal);
-          await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, modeloSelecionado, null);
-        }
-      });
-    });
-
-    // Botão cancelar
-    modal.querySelector('#btnCancelarModelo').addEventListener('click', function () {
-      document.body.removeChild(modal);
-    });
   }
 
 
