@@ -1,7 +1,7 @@
 // static/js/invmat.js
 // Módulo Inventário de Materiais
 
-(function() {
+(function () {
   'use strict';
 
   const API_BASE = '/api/materiais-embarque/';
@@ -28,22 +28,22 @@
     modalRtDesembInput: document.getElementById('modal_rt_desemb'),
     btnCancelarRtDesemb: document.getElementById('btnCancelarRtDesemb'),
     btnConfirmarRtDesemb: document.getElementById('btnConfirmarRtDesemb'),
-    
+
     // Botões principais
     btnAddProgEmbarque: document.getElementById('btnAddProgEmbarque'),
-    
+
     // Tabelas
     tblProgEmbarque: document.getElementById('tblProgEmbarque'),
     tblMatBordo: document.getElementById('tblMatBordo'),
     filtroBarcoDesembarque: document.getElementById('filtro_barco_desembarque'),
     btnSolicitarDesembarque: document.getElementById('btnSolicitarDesembarque'),
     tblMatDesembarque: document.getElementById('tblMatDesembarque'),
-    
+
     // Modal
     modal: document.getElementById('modalProgEmbarque'),
     modalClose: document.querySelector('#modalProgEmbarque .close'),
     modalTitle: document.getElementById('modalProgTitle'),
-    
+
     // Campos do modal - Principal
     modalBarco: document.getElementById('modal_barco'),
     modalDesc: document.getElementById('modal_desc'),
@@ -55,7 +55,7 @@
     modalResp: document.getElementById('modal_resp'),
     modalOutroResp: document.getElementById('modal_outro_resp'),
     modalOutroRespContainer: document.getElementById('modal_outro_resp_container'),
-    
+
     // Campos do modal - Contentor
     modalContBordo: document.getElementById('modal_cont_bordo'),
     modalCamposContentor: document.getElementById('modal_campos_contentor'),
@@ -64,7 +64,7 @@
     modalRespCont: document.getElementById('modal_resp_cont'),
     modalCertCont: document.getElementById('modal_cert_cont'),
     modalValCont: document.getElementById('modal_val_cont'),
-    
+
     // Campos do modal - Embarque
     modalDataPrev: document.getElementById('modal_data_prev'),
     modalRt: document.getElementById('modal_rt'),
@@ -73,7 +73,7 @@
     modalMeioRec: document.getElementById('modal_meio_rec'),
     labelRtObrig: document.getElementById('label_rt_obrig'),
     labelOsObrig: document.getElementById('label_os_obrig'),
-    
+
     // Campos condicionais meio recebimento
     modalCampoUep: document.getElementById('modal_campo_uep'),
     modalUep: document.getElementById('modal_uep'),
@@ -83,11 +83,11 @@
     modalMisBarcoContainer: document.getElementById('modal_mis_barco_container'),
     modalBarcoNaoMis: document.getElementById('modal_barco_nao_mis'),
     modalBarcoNaoMisContainer: document.getElementById('modal_barco_nao_mis_container'),
-    
+
     // Outros campos
     modalObs: document.getElementById('modal_obs'),
     modalStatus: document.getElementById('modal_status'),
-    
+
     // Botões do modal
     btnModalSalvar: document.getElementById('btnModalSalvar'),
     btnModalCancelar: document.getElementById('btnModalCancelar'),
@@ -112,7 +112,7 @@
   };
 
   // ===== INICIALIZAÇÃO =====
-// ===== INICIALIZAÇÃO =====
+  // ===== INICIALIZAÇÃO =====
   async function init() {
     // VALIDAR USUÁRIO ANTES DE INICIALIZAR
     if (typeof AuthModule !== 'undefined' && AuthModule.validarUsuario) {
@@ -121,9 +121,9 @@
         return;
       }
     }
-    
+
     const isInventarioPage = window.location.pathname.includes('/inventario/');
-    
+
     if (isInventarioPage) {
       configurarAccordion();
       configurarEventos();
@@ -136,62 +136,62 @@
   }
 
   // ===== CONFIGURAR ACCORDION =====
-function configurarAccordion() {
-  const headers = document.querySelectorAll('.accordion-header');
-  
-  headers.forEach(header => {
-    header.addEventListener('click', function() {
-      const target = this.getAttribute('data-target');
-      const content = document.getElementById(`acc-${target}`);
-      const toggle = this.querySelector('.toggle');
-      
-      if (content.classList.contains('active')) {
-        content.classList.remove('active');
-        toggle.textContent = '▼';
-        header.closest('.accordion-item').style.width = '600px';
-        return;
-      }
-      
-      document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('active'));
-      document.querySelectorAll('.accordion-header .toggle').forEach(t => t.textContent = '▼');
-      document.querySelectorAll('.accordion-item').forEach(item => item.style.width = '600px');
-      
-      content.classList.add('active');
-      toggle.textContent = '▲';
-      header.closest('.accordion-item').style.width = '100%';
+  function configurarAccordion() {
+    const headers = document.querySelectorAll('.accordion-header');
+
+    headers.forEach(header => {
+      header.addEventListener('click', function () {
+        const target = this.getAttribute('data-target');
+        const content = document.getElementById(`acc-${target}`);
+        const toggle = this.querySelector('.toggle');
+
+        if (content.classList.contains('active')) {
+          content.classList.remove('active');
+          toggle.textContent = '▼';
+          header.closest('.accordion-item').style.width = '600px';
+          return;
+        }
+
+        document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.accordion-header .toggle').forEach(t => t.textContent = '▼');
+        document.querySelectorAll('.accordion-item').forEach(item => item.style.width = '600px');
+
+        content.classList.add('active');
+        toggle.textContent = '▲';
+        header.closest('.accordion-item').style.width = '100%';
+      });
     });
-  });
-}
+  }
 
   // ===== CONFIGURAR EVENTOS =====
-function configurarEventos() {
+  function configurarEventos() {
     const btnNav = document.getElementById('btnAddMaterialNav');
     if (btnNav) btnNav.addEventListener('click', abrirModalNovo);
-    
+
     if (elementos.modalClose) elementos.modalClose.addEventListener('click', fecharModal);
     if (elementos.btnModalSalvar) elementos.btnModalSalvar.addEventListener('click', salvarMaterial);
     if (elementos.btnModalCancelar) elementos.btnModalCancelar.addEventListener('click', fecharModal);
     if (elementos.btnModalExcluir) elementos.btnModalExcluir.addEventListener('click', excluirMaterial);
-    
+
     if (elementos.filtroBarcoProgEmb) elementos.filtroBarcoProgEmb.addEventListener('change', () => carregarTabelas());
     if (elementos.filtroBarcoBordo) elementos.filtroBarcoBordo.addEventListener('change', () => carregarTabelas());
     if (elementos.filtroRtBordo) elementos.filtroRtBordo.addEventListener('change', () => carregarTabelaMatBordo());
     if (elementos.filtroOsBordo) elementos.filtroOsBordo.addEventListener('change', () => carregarTabelaMatBordo());
-    
+
     if (elementos.modalResp) elementos.modalResp.addEventListener('change', toggleOutroResponsavel);
     if (elementos.modalContBordo) elementos.modalContBordo.addEventListener('change', toggleCamposContentor);
     if (elementos.modalMeioRec) elementos.modalMeioRec.addEventListener('change', toggleCamposMeioRecebimento);
     if (elementos.modalMisFlag) elementos.modalMisFlag.addEventListener('change', toggleBarcoMis);
-    
+
     if (elementos.modal) {
-        window.addEventListener('click', (e) => {
-            if (e.target === elementos.modal) fecharModal();
-        });
+      window.addEventListener('click', (e) => {
+        if (e.target === elementos.modal) fecharModal();
+      });
     }
 
     const btnEmail = document.getElementById('btnEmailsEquipes');
     if (btnEmail) btnEmail.addEventListener('click', abrirModalEmails);
-    
+
     if (elementos.closeEmailsModal) elementos.closeEmailsModal.addEventListener('click', fecharModalEmails);
     if (elementos.btnCancelarEmails) elementos.btnCancelarEmails.addEventListener('click', fecharModalEmails);
     if (elementos.btnSalvarEmails) elementos.btnSalvarEmails.addEventListener('click', salvarEmails);
@@ -203,9 +203,9 @@ function configurarEventos() {
     if (elementos.btnLimparCc) elementos.btnLimparCc.addEventListener('click', () => limparCampoEmail('cc'));
 
     if (elementos.modalEmails) {
-        window.addEventListener('click', (e) => {
-            if (e.target === elementos.modalEmails) fecharModalEmails();
-        });
+      window.addEventListener('click', (e) => {
+        if (e.target === elementos.modalEmails) fecharModalEmails();
+      });
     }
 
     if (elementos.filtroBarcoDesembarque) elementos.filtroBarcoDesembarque.addEventListener('change', carregarTabelaMatDesembarque);
@@ -216,28 +216,28 @@ function configurarEventos() {
     if (elementos.btnConfirmarRtDesemb) elementos.btnConfirmarRtDesemb.addEventListener('click', confirmarRtDesembarque);
 
     if (elementos.modalRtDesemb) {
-        window.addEventListener('click', (e) => {
-            if (e.target === elementos.modalRtDesemb) fecharModalRtDesemb();
-        });
+      window.addEventListener('click', (e) => {
+        if (e.target === elementos.modalRtDesemb) fecharModalRtDesemb();
+      });
     }
-}
+  }
 
   // ===== CARREGAR EMBARCAÇÕES =====
   async function carregarEmbarcacoes() {
     try {
       const response = await fetch('/api/barcos/');
       const result = await response.json();
-      
+
       if (result.success) {
         const barcos = result.data;
-        
+
         [elementos.filtroBarcoProgEmb, elementos.filtroBarcoBordo, elementos.modalBarco, elementos.modalMisBarco].forEach(select => {
           if (select.id.includes('filtro')) {
             select.innerHTML = '<option value="">— todas as embarcações —</option>';
           } else {
             select.innerHTML = '<option value="">— selecione —</option>';
           }
-          
+
           barcos.forEach(barco => {
             const option = document.createElement('option');
             option.value = barco.id;
@@ -257,14 +257,14 @@ function configurarEventos() {
         }
 
         if (elementos.filtroBarcoSolicDesemb) {
-            elementos.filtroBarcoSolicDesemb.innerHTML = '<option value="">— selecione —</option>';
-            barcos.forEach(barco => {
-              const option = document.createElement('option');
-              option.value = barco.id;
-              option.textContent = `${barco.tipoBarco} ${barco.nomeBarco}`;
-              elementos.filtroBarcoSolicDesemb.appendChild(option);
-            });
-          }
+          elementos.filtroBarcoSolicDesemb.innerHTML = '<option value="">— selecione —</option>';
+          barcos.forEach(barco => {
+            const option = document.createElement('option');
+            option.value = barco.id;
+            option.textContent = `${barco.tipoBarco} ${barco.nomeBarco}`;
+            elementos.filtroBarcoSolicDesemb.appendChild(option);
+          });
+        }
       }
 
 
@@ -287,13 +287,13 @@ function configurarEventos() {
     try {
       const barcoId = elementos.filtroBarcoProgEmb.value;
       const url = barcoId ? `${API_BASE}?status=EMBARQUE PROGRAMADO&barco_id=${barcoId}` : `${API_BASE}?status=EMBARQUE PROGRAMADO`;
-      
+
       const response = await fetch(url);
       const result = await response.json();
-      
+
       const tbody = elementos.tblProgEmbarque.querySelector('tbody');
       tbody.innerHTML = '';
-      
+
       if (result.success && result.data.length > 0) {
         result.data.forEach(mat => {
           const tr = document.createElement('tr');
@@ -320,91 +320,91 @@ function configurarEventos() {
       alert('Erro ao carregar programação de embarque');
     }
   }
-//==========POPULAR FILTROS=================
-async function popularFiltrosRtOs() {
-  try {
-    const response = await fetch(`${API_BASE}?status=MATERIAL A BORDO`);
-    const result = await response.json();
-    
-    if (!result.success || !result.data.length) {
-      elementos.filtroRtBordo.innerHTML = '<option value="">— todos os RTs —</option>';
-      elementos.filtroOsBordo.innerHTML = '<option value="">— todas as OS —</option>';
-      return;
-    }
-    
-    const materiais = result.data;
-    
-    // Extrair valores únicos de RT
-    const rtsUnicos = [...new Set(materiais.map(m => m.numRtEmb).filter(rt => rt))];
-    rtsUnicos.sort();
-    
-    // Extrair valores únicos de OS
-    const osUnicos = [...new Set(materiais.map(m => m.osEmb).filter(os => os))];
-    osUnicos.sort();
-    
-    // Popular select RT
-    elementos.filtroRtBordo.innerHTML = '<option value="">— todos os RTs —</option>';
-    rtsUnicos.forEach(rt => {
-      const option = document.createElement('option');
-      option.value = rt;
-      option.textContent = rt;
-      elementos.filtroRtBordo.appendChild(option);
-    });
-    
-    // Popular select OS
-    elementos.filtroOsBordo.innerHTML = '<option value="">— todas as OS —</option>';
-    osUnicos.forEach(os => {
-      const option = document.createElement('option');
-      option.value = os;
-      option.textContent = os;
-      elementos.filtroOsBordo.appendChild(option);
-    });
-    
-  } catch (error) {
-    console.error('Erro ao popular filtros RT/OS:', error);
-  }
-}
+  //==========POPULAR FILTROS=================
+  async function popularFiltrosRtOs() {
+    try {
+      const response = await fetch(`${API_BASE}?status=MATERIAL A BORDO`);
+      const result = await response.json();
 
-//=============CARREGAR TABELA MATERIAL A BORDO===========
-async function carregarTabelaMatBordo() {
-  try {
-    // Buscar todos os materiais a bordo
-    const response = await fetch(`${API_BASE}?status=MATERIAL A BORDO`);
-    const result = await response.json();
-    
-    const tbody = elementos.tblMatBordo.querySelector('tbody');
-    tbody.innerHTML = '';
-    
-    if (!result.success || result.data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Nenhum material a bordo</td></tr>';
-      return;
+      if (!result.success || !result.data.length) {
+        elementos.filtroRtBordo.innerHTML = '<option value="">— todos os RTs —</option>';
+        elementos.filtroOsBordo.innerHTML = '<option value="">— todas as OS —</option>';
+        return;
+      }
+
+      const materiais = result.data;
+
+      // Extrair valores únicos de RT
+      const rtsUnicos = [...new Set(materiais.map(m => m.numRtEmb).filter(rt => rt))];
+      rtsUnicos.sort();
+
+      // Extrair valores únicos de OS
+      const osUnicos = [...new Set(materiais.map(m => m.osEmb).filter(os => os))];
+      osUnicos.sort();
+
+      // Popular select RT
+      elementos.filtroRtBordo.innerHTML = '<option value="">— todos os RTs —</option>';
+      rtsUnicos.forEach(rt => {
+        const option = document.createElement('option');
+        option.value = rt;
+        option.textContent = rt;
+        elementos.filtroRtBordo.appendChild(option);
+      });
+
+      // Popular select OS
+      elementos.filtroOsBordo.innerHTML = '<option value="">— todas as OS —</option>';
+      osUnicos.forEach(os => {
+        const option = document.createElement('option');
+        option.value = os;
+        option.textContent = os;
+        elementos.filtroOsBordo.appendChild(option);
+      });
+
+    } catch (error) {
+      console.error('Erro ao popular filtros RT/OS:', error);
     }
-    
-    // Obter valores dos filtros
-    const barcoId = elementos.filtroBarcoBordo.value;
-    const rtFiltro = elementos.filtroRtBordo.value;
-    const osFiltro = elementos.filtroOsBordo.value;
-    
-    // Aplicar filtros combinados
-    let materiaisFiltrados = result.data;
-    
-    if (barcoId) {
-      materiaisFiltrados = materiaisFiltrados.filter(m => m.barcoMatEmbId == barcoId);
-    }
-    
-    if (rtFiltro) {
-      materiaisFiltrados = materiaisFiltrados.filter(m => m.numRtEmb === rtFiltro);
-    }
-    
-    if (osFiltro) {
-      materiaisFiltrados = materiaisFiltrados.filter(m => m.osEmb === osFiltro);
-    }
-    
-    // Exibir resultados filtrados
-    if (materiaisFiltrados.length > 0) {
-      materiaisFiltrados.forEach(mat => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+  }
+
+  //=============CARREGAR TABELA MATERIAL A BORDO===========
+  async function carregarTabelaMatBordo() {
+    try {
+      // Buscar todos os materiais a bordo
+      const response = await fetch(`${API_BASE}?status=MATERIAL A BORDO`);
+      const result = await response.json();
+
+      const tbody = elementos.tblMatBordo.querySelector('tbody');
+      tbody.innerHTML = '';
+
+      if (!result.success || result.data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Nenhum material a bordo</td></tr>';
+        return;
+      }
+
+      // Obter valores dos filtros
+      const barcoId = elementos.filtroBarcoBordo.value;
+      const rtFiltro = elementos.filtroRtBordo.value;
+      const osFiltro = elementos.filtroOsBordo.value;
+
+      // Aplicar filtros combinados
+      let materiaisFiltrados = result.data;
+
+      if (barcoId) {
+        materiaisFiltrados = materiaisFiltrados.filter(m => m.barcoMatEmbId == barcoId);
+      }
+
+      if (rtFiltro) {
+        materiaisFiltrados = materiaisFiltrados.filter(m => m.numRtEmb === rtFiltro);
+      }
+
+      if (osFiltro) {
+        materiaisFiltrados = materiaisFiltrados.filter(m => m.osEmb === osFiltro);
+      }
+
+      // Exibir resultados filtrados
+      if (materiaisFiltrados.length > 0) {
+        materiaisFiltrados.forEach(mat => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
           <td style="border:1px solid #ddd; padding:8px;">${mat.tipoBarco} ${mat.barcoMatEmb}</td>
           <td style="border:1px solid #ddd; padding:8px;">${mat.meioRecEmbMat || '-'}</td>
           <td style="border:1px solid #ddd; padding:8px;">${mat.numRtEmb || '-'}</td>
@@ -418,55 +418,55 @@ async function carregarTabelaMatBordo() {
             </div>
           </td>
         `;
-        tbody.appendChild(tr);
-      });
-    } else {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Nenhum material a bordo</td></tr>';
+          tbody.appendChild(tr);
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Nenhum material a bordo</td></tr>';
+      }
+
+    } catch (error) {
+      alert('Erro ao carregar materiais a bordo');
     }
-    
-  } catch (error) {
-    alert('Erro ao carregar materiais a bordo');
   }
-}
 
   // ===== CARREGAR TABELA MATERIAIS DESEMBARQUE =====
   async function carregarTabelaMatDesembarque() {
     if (!elementos.tblMatDesembarque) return;
-    
+
     try {
       const barcoId = elementos.filtroBarcoDesembarque.value;
-      
+
       const tbody = elementos.tblMatDesembarque.querySelector('tbody');
-      
+
       if (!barcoId) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">Selecione uma embarcação</td></tr>';
         elementos.btnSolicitarDesembarque.style.display = 'none';
         return;
       }
-      
+
       const response = await fetch(`/api/materiais-desembarque/?barco_id=${barcoId}`);
       const result = await response.json();
-      
+
       if (!result.success) {
         alert('Erro ao carregar materiais: ' + result.error);
         return;
       }
-      
+
       const materiais = result.data;
-      
+
       if (materiais.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">Nenhum material relacionado para desembarque</td></tr>';
         elementos.btnSolicitarDesembarque.style.display = 'none';
         return;
       }
-      
+
       elementos.btnSolicitarDesembarque.style.display = 'block';
       tbody.innerHTML = '';
-      
+
       materiais.forEach(mat => {
         const tr = document.createElement('tr');
         const responsavel = mat.respEmbMat === 'OUTRO' ? mat.outRespEmbMat : mat.respEmbMat;
-        
+
         tr.innerHTML = `
           <td style="border:1px solid #ddd; padding:8px;">${mat.tipoBarco} ${mat.barcoMatEmb}</td>
           <td style="border:1px solid #ddd; padding:8px;">${mat.descMatEmb}</td>
@@ -479,10 +479,10 @@ async function carregarTabelaMatBordo() {
             </div>
           </td>
         `;
-        
+
         tbody.appendChild(tr);
       });
-      
+
     } catch (error) {
       alert('Erro ao carregar materiais: ' + error.message);
     }
@@ -491,24 +491,24 @@ async function carregarTabelaMatBordo() {
   // ===== REMOVER DA SELEÇÃO PARA DESEMBARQUE =====
   async function removerSelecaoDesembarque(id) {
     if (!confirm('Remover este material da seleção para desembarque?')) return;
-    
+
     try {
       const response = await fetch(`${API_BASE}${id}/status/`, {
         method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({status: 'MATERIAL A BORDO'})
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'MATERIAL A BORDO' })
       });
-      
+
       const result = await response.json();
-      
+
       if (!result.success) {
         alert('Erro: ' + result.error);
         return;
       }
-      
+
       alert('Material removido da seleção para desembarque');
       await carregarTabelas();
-      
+
     } catch (error) {
       alert('Erro: ' + error.message);
     }
@@ -519,30 +519,30 @@ async function carregarTabelaMatBordo() {
     try {
       const response = await fetch(`${API_BASE}${id}/`);
       const result = await response.json();
-      
+
       if (!result.success) {
         alert('Erro: ' + result.error);
         return;
       }
-      
+
       const mat = result.data;
       modoSomenteLeitura = true;
-      
+
       elementos.modalTitle.textContent = 'DETALHES DO MATERIAL';
       preencherModal(mat);
       elementos.modal.style.display = 'flex';
-      
+
       // Desabilitar todos os campos
       Object.keys(elementos).forEach(key => {
         if (key.startsWith('modal') && elementos[key].tagName) {
           elementos[key].disabled = true;
         }
       });
-      
+
       elementos.btnModalSalvar.style.display = 'none';
       elementos.btnModalExcluir.style.display = 'none';
       elementos.btnModalCancelar.textContent = 'Fechar';
-      
+
     } catch (error) {
       alert('Erro: ' + error.message);
     }
@@ -557,12 +557,12 @@ async function carregarTabelaMatBordo() {
   // ===== SOLICITAR DESEMBARQUE TODOS =====
   async function solicitarDesembarqueTodos() {
     if (!confirm('Confirma a solicitação de DESEMBARQUE de todos os materiais relacionados?')) return;
-    
+
     const barcoId = elementos.filtroBarcoDesembarque.value;
     await processarSolicitacaoDesembarque(barcoId, null);
   }
 
-// ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
+  // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
   async function processarSolicitacaoDesembarque(barcoId) {
     try {
       // Verificar se AuthModule existe
@@ -573,7 +573,7 @@ async function carregarTabelaMatBordo() {
 
       // Buscar fiscal logado
       const usuario = AuthModule.getUsuarioLogado();
-      
+
       // Validação robusta do usuário
       if (!usuario) {
         alert('Usuário não autenticado. Recarregue a página e faça login novamente.');
@@ -586,42 +586,159 @@ async function carregarTabelaMatBordo() {
       }
 
       const fiscalNome = `${usuario.chave} - ${usuario.nome}`;
-      
+
       // Verificar PS rascunho
       const responsePS = await fetch('/api/verificar-ps-rascunho-material/', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           barcoId,
           fiscalNome
         })
       });
-      
+
       const resultPS = await responsePS.json();
-      
+
       if (!resultPS.success) {
         alert('Erro ao verificar PS: ' + resultPS.error);
         return;
       }
-      
+
       if (!resultPS.existeRascunho || !resultPS.dadosCompletos) {
         alert('Não existe PS em rascunho com dados de porto completos. Complete esses dados antes de solicitar o desembarque.');
         return;
       }
-      
+
       const psData = resultPS.psData;
-      
+
       // Buscar nome do barco
       const respBarco = await fetch(`/api/barcos/`);
       const resBarco = await respBarco.json();
       const barco = resBarco.data.find(b => b.id == barcoId);
       const barcoNome = barco ? `${barco.tipoBarco} ${barco.nomeBarco}` : '';
-      
+
       // Abrir modal de seleção de modelo
       abrirModalSelecaoModelo(barcoId, barcoNome, fiscalNome, psData);
-      
+
     } catch (error) {
       alert('Erro ao processar solicitação: ' + error.message);
+    }
+  }
+
+  // ===== ABRIR MODAL SELEÇÃO DE MODELO =====
+  function abrirModalSelecaoModelo(barcoId, barcoNome, fiscalNome, psData) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:2000;';
+
+    modal.innerHTML = `
+    <div class="modal-content" style="background:#fff; border-radius:10px; padding:30px; max-width:700px; width:90%;">
+      <h2 style="color:#0b7a66; margin-bottom:20px;">Selecione o modelo de email</h2>
+      
+      <p style="margin-bottom:20px; color:#666;">
+        Escolha o modelo apropriado para a solicitação de desembarque dos materiais:
+      </p>
+      
+      <div style="display:flex; flex-direction:column; gap:15px; margin-bottom:30px;">
+        <button class="btn-modelo" data-modelo="001" style="padding:15px; border:2px solid #0b7a66; border-radius:8px; background:#fff; cursor:pointer; text-align:left; transition:all 0.3s;">
+          <strong style="display:block; color:#0b7a66; margin-bottom:5px;">Modelo 001</strong>
+          <span style="color:#666; font-size:14px;">Materiais JÁ em contentores a bordo</span>
+        </button>
+        
+        <button class="btn-modelo" data-modelo="002" style="padding:15px; border:2px solid #0b7a66; border-radius:8px; background:#fff; cursor:pointer; text-align:left; transition:all 0.3s;">
+          <strong style="display:block; color:#0b7a66; margin-bottom:5px;">Modelo 002</strong>
+          <span style="color:#666; font-size:14px;">Materiais SEM contentores (solicita contentores com coleta)</span>
+        </button>
+        
+        <button class="btn-modelo" data-modelo="003" style="padding:15px; border:2px solid #0b7a66; border-radius:8px; background:#fff; cursor:pointer; text-align:left; transition:all 0.3s;">
+          <strong style="display:block; color:#0b7a66; margin-bottom:5px;">Modelo 003</strong>
+          <span style="color:#666; font-size:14px;">Materiais SEM contentores e COM contentores (misto)</span>
+        </button>
+        
+        <button class="btn-modelo" data-modelo="004" style="padding:15px; border:2px solid #0b7a66; border-radius:8px; background:#fff; cursor:pointer; text-align:left; transition:all 0.3s;">
+          <strong style="display:block; color:#0b7a66; margin-bottom:5px;">Modelo 004</strong>
+          <span style="color:#666; font-size:14px;">Materiais CRD</span>
+        </button>
+      </div>
+      
+      <div style="display:flex; justify-content:flex-end;">
+        <button id="btnCancelarModelo" class="btn secondary">Cancelar</button>
+      </div>
+    </div>
+  `;
+
+    document.body.appendChild(modal);
+
+    // Efeito hover nos botões de modelo
+    modal.querySelectorAll('.btn-modelo').forEach(btn => {
+      btn.addEventListener('mouseenter', function () {
+        this.style.background = '#f0f9f7';
+        this.style.borderColor = '#089876';
+      });
+
+      btn.addEventListener('mouseleave', function () {
+        this.style.background = '#fff';
+        this.style.borderColor = '#0b7a66';
+      });
+
+      // Clicar no modelo
+      btn.addEventListener('click', async function () {
+        const modeloSelecionado = this.dataset.modelo;
+
+        // Modelos 002 e 003 precisam de dados dos contentores
+        if (modeloSelecionado === '002' || modeloSelecionado === '003') {
+          document.body.removeChild(modal);
+
+          try {
+            const dadosContentor = await abrirModalContentoresPromise(modeloSelecionado, barcoId, fiscalNome, psData);
+            await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, modeloSelecionado, dadosContentor);
+          } catch (error) {
+            if (error.message !== 'Cancelado') {
+              alert('Erro: ' + error.message);
+            }
+          }
+
+        } else {
+          // Modelos 001 e 004 não precisam de dados adicionais
+          document.body.removeChild(modal);
+          await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, modeloSelecionado, null);
+        }
+      });
+    });
+
+    // Botão cancelar
+    modal.querySelector('#btnCancelarModelo').addEventListener('click', function () {
+      document.body.removeChild(modal);
+    });
+  }
+
+
+  // ===== ENVIAR SOLICITAÇÃO DE DESEMBARQUE =====
+  async function enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, modelo, dadosModal) {
+    try {
+      const response = await fetch('/api/solicitar-desembarque/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          barcoId: barcoId,
+          fiscalNome: fiscalNome,
+          psData: psData,
+          modelo: modelo,
+          dadosModal: dadosModal
+        })
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      alert('Solicitação de desembarque enviada com sucesso!');
+      await carregarTabelas();
+
+    } catch (error) {
+      alert('Erro ao enviar solicitação: ' + error.message);
     }
   }
 
@@ -632,7 +749,7 @@ async function carregarTabelaMatBordo() {
       const modal = document.createElement('div');
       modal.className = 'modal';
       modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:2000;';
-      
+
       modal.innerHTML = `
         <div class="modal-content" style="background:#fff; border-radius:10px; padding:30px; max-width:600px; width:90%;">
           <h2 style="color:#0b7a66; margin-bottom:20px;">Contentores para desembarque</h2>
@@ -655,23 +772,23 @@ async function carregarTabelaMatBordo() {
           </div>
         </div>
       `;
-      
+
       document.body.appendChild(modal);
-      
+
       document.getElementById('btnCancelarCont').addEventListener('click', () => {
         document.body.removeChild(modal);
         resolve(null); // Retorna null quando cancela
       });
-      
+
       document.getElementById('btnSalvarCont').addEventListener('click', () => {
         const qtde = document.getElementById('qtdeContentores').value.trim();
         const desc = document.getElementById('descContentores').value.trim();
-        
+
         if (!qtde || !desc) {
           alert('Preencha todos os campos obrigatórios');
           return;
         }
-        
+
         document.body.removeChild(modal);
         resolve({
           qtdeContentores: qtde,
@@ -686,7 +803,7 @@ async function carregarTabelaMatBordo() {
     try {
       const response = await fetch('/api/solicitar-desembarque/', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           barcoId,
           fiscalNome,
@@ -696,22 +813,22 @@ async function carregarTabelaMatBordo() {
           tipoMaterial
         })
       });
-      
+
       const result = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error);
       }
-      
+
       console.log(`E-mail ${tipoMaterial} enviado com sucesso (Modelo ${modelo})`);
-      
+
     } catch (error) {
       alert('Erro ao enviar solicitação ' + tipoMaterial + ': ' + error.message);
       throw error;
     }
   }
 
-   // ===== MODAL - ABRIR/FECHAR =====
+  // ===== MODAL - ABRIR/FECHAR =====
   function abrirModalNovo() {
     limparModal();
     modoEdicao = false;
@@ -727,15 +844,15 @@ async function carregarTabelaMatBordo() {
     try {
       const response = await fetch(`${API_BASE}${id}/`);
       const result = await response.json();
-      
+
       if (result.success) {
         const mat = result.data;
         modoEdicao = true;
         modoSomenteLeitura = false;
         materialEditandoId = id;
-        
+
         preencherModal(mat);
-        
+
         elementos.modalTitle.textContent = 'EDITAR MATERIAL';
         elementos.btnModalExcluir.style.display = 'inline-block';
         elementos.modal.style.display = 'flex';
@@ -750,15 +867,15 @@ async function carregarTabelaMatBordo() {
     try {
       const response = await fetch(`${API_BASE}${id}/`);
       const result = await response.json();
-      
+
       if (result.success) {
         const mat = result.data;
         modoEdicao = false;
         modoSomenteLeitura = true;
         materialEditandoId = id;
-        
+
         preencherModal(mat);
-        
+
         elementos.modalTitle.textContent = 'EXIBIR DETALHES DE MATERIAL';
         elementos.btnModalExcluir.style.display = 'none';
         elementos.modal.style.display = 'flex';
@@ -772,7 +889,7 @@ async function carregarTabelaMatBordo() {
   function fecharModal() {
     elementos.modal.style.display = 'none';
     limparModal();
-    
+
     // Reabilitar todos os campos
     Object.keys(elementos).forEach(key => {
       if (key.startsWith('modal') && elementos[key].tagName) {
@@ -782,11 +899,11 @@ async function carregarTabelaMatBordo() {
         }
       }
     });
-    
+
     elementos.btnModalSalvar.style.display = 'inline-block';
     elementos.btnModalExcluir.style.display = 'inline-block';
     elementos.btnModalCancelar.textContent = 'Cancelar';
-    
+
     modoEdicao = false;
     materialEditandoId = null;
     modoSomenteLeitura = false;
@@ -804,7 +921,7 @@ async function carregarTabelaMatBordo() {
         }
       }
     });
-    
+
     elementos.modalCamposContentor.style.display = 'none';
     elementos.modalOutroRespContainer.style.display = 'none';
     elementos.modalCampoUep.style.display = 'none';
@@ -831,7 +948,7 @@ async function carregarTabelaMatBordo() {
     elementos.modalValCont.value = mat.valContMatEmb;
     elementos.modalObs.value = mat.obsMatEmb;
     elementos.modalStatus.value = mat.statusProgMatEmb;
-    
+
     if (mat.embarques && mat.embarques.length > 0) {
       const emb = mat.embarques[0];
       elementos.modalDataPrev.value = emb.dataPrevEmbMat;
@@ -844,7 +961,7 @@ async function carregarTabelaMatBordo() {
       elementos.modalMisBarco.value = emb.misBarcoRecMatEmb;
       elementos.modalBarcoNaoMis.value = emb.barcoRecMatEmb;
     }
-    
+
     toggleOutroResponsavel();
     toggleCamposContentor();
     toggleCamposMeioRecebimento();
@@ -859,7 +976,7 @@ async function carregarTabelaMatBordo() {
         }
       }
     });
-    
+
     elementos.btnModalSalvar.style.display = desabilitar ? 'none' : 'inline-block';
   }
 
@@ -876,12 +993,12 @@ async function carregarTabelaMatBordo() {
 
   function toggleCamposMeioRecebimento() {
     const meio = elementos.modalMeioRec.value;
-    
+
     elementos.modalCampoUep.style.display = 'none';
     elementos.modalCampoBarco.style.display = 'none';
     elementos.labelRtObrig.style.display = 'none';
     elementos.labelOsObrig.style.display = 'none';
-    
+
     if (meio === 'TRANSBORDO UEP') {
       elementos.modalCampoUep.style.display = 'block';
     } else if (meio === 'TRANSBORDO BARCO') {
@@ -901,16 +1018,16 @@ async function carregarTabelaMatBordo() {
   // ===== SALVAR MATERIAL =====
   async function salvarMaterial() {
     if (!validarCampos()) return;
-    
+
     const meio = elementos.modalMeioRec.value;
     let status = '';
-    
+
     if (meio === 'PORTO') {
       status = 'EMBARQUE PROGRAMADO';
     } else {
       status = 'MATERIAL A BORDO';
     }
-    
+
     const dados = {
       barcoMatEmb: parseInt(elementos.modalBarco.value),
       descMatEmb: elementos.modalDesc.value,
@@ -939,25 +1056,25 @@ async function carregarTabelaMatBordo() {
       barcoRecMatEmb: elementos.modalBarcoNaoMis.value || null,
       osEmbMat: elementos.modalOs.value || null
     };
-    
+
     try {
       let response;
       if (modoEdicao) {
         response = await fetch(`${API_BASE}${materialEditandoId}/`, {
           method: 'PUT',
-          headers: {'Content-Type': 'application/json'},
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(dados)
         });
       } else {
         response = await fetch(API_BASE, {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(dados)
         });
       }
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         alert(modoEdicao ? 'Material atualizado com sucesso!' : 'Material cadastrado com sucesso!');
         fecharModal();
@@ -975,17 +1092,17 @@ async function carregarTabelaMatBordo() {
       alert('Selecione uma embarcação');
       return false;
     }
-    
+
     if (!elementos.modalDesc.value.trim()) {
       alert('Informe a descrição do material');
       return false;
     }
-    
+
     if (!elementos.modalContBordo.value) {
       alert('Selecione se o material ficará em contentor a bordo');
       return false;
     }
-    
+
     if (elementos.modalContBordo.value === 'SIM') {
       if (!elementos.modalDescCont.value.trim()) {
         alert('Informe a descrição do contentor');
@@ -1000,12 +1117,12 @@ async function carregarTabelaMatBordo() {
         return false;
       }
     }
-    
+
     if (!elementos.modalDataPrev.value) {
       alert('Informe a data prevista de embarque');
       return false;
     }
-    
+
     const meio = elementos.modalMeioRec.value;
     if (meio === 'PORTO' || meio === 'RETIRADO DE OS') {
       if (!elementos.modalRt.value.trim()) {
@@ -1017,21 +1134,21 @@ async function carregarTabelaMatBordo() {
         return false;
       }
     }
-    
+
     return true;
   }
 
   // ===== EXCLUIR MATERIAL =====
   async function excluirMaterial() {
     if (!confirm('Deseja realmente excluir este material?')) return;
-    
+
     try {
       const response = await fetch(`${API_BASE}${materialEditandoId}/`, {
         method: 'DELETE'
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         alert('Material excluído com sucesso!');
         fecharModal();
@@ -1069,12 +1186,12 @@ async function carregarTabelaMatBordo() {
     try {
       const response = await fetch(`${API_BASE}${id}/status/`, {
         method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({status: novoStatus})
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: novoStatus })
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         alert('Status atualizado com sucesso!');
         await carregarTabelas();
@@ -1093,150 +1210,150 @@ async function carregarTabelaMatBordo() {
     return `${dia}/${mes}/${ano}`;
   }
 
-// ===== MODAL E-MAILS =====
+  // ===== MODAL E-MAILS =====
 
-async function abrirModalEmails() {
-  try {
-    const response = await fetch('/api/emails-desembarque/');
-    const result = await response.json();
-    
-    if (result.success) {
-      const data = result.data;
-      emailsId = data.id;
-      elementos.emailsCrd.value = data.emailMatCrd;
-      elementos.emailsMis.value = data.emailMatMis;
-      elementos.emailsCc.value = data.emailsMatCc;
+  async function abrirModalEmails() {
+    try {
+      const response = await fetch('/api/emails-desembarque/');
+      const result = await response.json();
+
+      if (result.success) {
+        const data = result.data;
+        emailsId = data.id;
+        elementos.emailsCrd.value = data.emailMatCrd;
+        elementos.emailsMis.value = data.emailMatMis;
+        elementos.emailsCc.value = data.emailsMatCc;
+      }
+
+      elementos.modalEmails.style.display = 'flex';
+    } catch (error) {
+      alert('Erro ao carregar e-mails');
     }
-    
-    elementos.modalEmails.style.display = 'flex';
-  } catch (error) {
-    alert('Erro ao carregar e-mails');
   }
-}
 
-function fecharModalEmails() {
-  elementos.modalEmails.style.display = 'none';
-  elementos.emailInputCrd.value = '';
-  elementos.emailInputMis.value = '';
-  elementos.emailInputCc.value = '';
-}
+  function fecharModalEmails() {
+    elementos.modalEmails.style.display = 'none';
+    elementos.emailInputCrd.value = '';
+    elementos.emailInputMis.value = '';
+    elementos.emailInputCc.value = '';
+  }
 
-function incluirEmail(tipo) {
-  let input, textarea;
-  
-  if (tipo === 'crd') {
-    input = elementos.emailInputCrd;
-    textarea = elementos.emailsCrd;
-  } else if (tipo === 'mis') {
-    input = elementos.emailInputMis;
-    textarea = elementos.emailsMis;
-  } else if (tipo === 'cc') {
-    input = elementos.emailInputCc;
-    textarea = elementos.emailsCc;
-  }
-  
-  const email = input.value.trim();
-  
-  if (!email) {
-    alert('Digite um e-mail');
-    return;
-  }
-  
-  if (!validarEmail(email)) {
-    alert('E-mail inválido');
-    return;
-  }
-  
-  const emailsAtuais = textarea.value.trim();
-  if (emailsAtuais) {
-    textarea.value = emailsAtuais + ';' + email;
-  } else {
-    textarea.value = email;
-  }
-  
-  input.value = '';
-}
+  function incluirEmail(tipo) {
+    let input, textarea;
 
-function limparCampoEmail(tipo) {
-  if (tipo === 'crd') {
-    elementos.emailsCrd.value = '';
-  } else if (tipo === 'mis') {
-    elementos.emailsMis.value = '';
-  } else if (tipo === 'cc') {
-    elementos.emailsCc.value = '';
-  }
-}
+    if (tipo === 'crd') {
+      input = elementos.emailInputCrd;
+      textarea = elementos.emailsCrd;
+    } else if (tipo === 'mis') {
+      input = elementos.emailInputMis;
+      textarea = elementos.emailsMis;
+    } else if (tipo === 'cc') {
+      input = elementos.emailInputCc;
+      textarea = elementos.emailsCc;
+    }
 
-async function salvarEmails() {
-  const dados = {
-    id: emailsId,
-    emailMatCrd: elementos.emailsCrd.value.trim(),
-    emailMatMis: elementos.emailsMis.value.trim(),
-    emailsMatCc: elementos.emailsCc.value.trim()
-  };
-  
-  try {
-    const method = emailsId ? 'PUT' : 'POST';
-    const response = await fetch('/api/emails-desembarque/', {
-      method: method,
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(dados)
-    });
-    
-    const result = await response.json();
-    
-    if (result.success) {
-      alert('E-mails salvos com sucesso!');
-      fecharModalEmails();
+    const email = input.value.trim();
+
+    if (!email) {
+      alert('Digite um e-mail');
+      return;
+    }
+
+    if (!validarEmail(email)) {
+      alert('E-mail inválido');
+      return;
+    }
+
+    const emailsAtuais = textarea.value.trim();
+    if (emailsAtuais) {
+      textarea.value = emailsAtuais + ';' + email;
     } else {
-      alert('Erro ao salvar: ' + result.error);
+      textarea.value = email;
     }
-  } catch (error) {
-    alert('Erro ao salvar e-mails');
+
+    input.value = '';
   }
-}
 
-function validarEmail(email) {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return regex.test(email);
-}
+  function limparCampoEmail(tipo) {
+    if (tipo === 'crd') {
+      elementos.emailsCrd.value = '';
+    } else if (tipo === 'mis') {
+      elementos.emailsMis.value = '';
+    } else if (tipo === 'cc') {
+      elementos.emailsCc.value = '';
+    }
+  }
+
+  async function salvarEmails() {
+    const dados = {
+      id: emailsId,
+      emailMatCrd: elementos.emailsCrd.value.trim(),
+      emailMatMis: elementos.emailsMis.value.trim(),
+      emailsMatCc: elementos.emailsCc.value.trim()
+    };
+
+    try {
+      const method = emailsId ? 'PUT' : 'POST';
+      const response = await fetch('/api/emails-desembarque/', {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert('E-mails salvos com sucesso!');
+        fecharModalEmails();
+      } else {
+        alert('Erro ao salvar: ' + result.error);
+      }
+    } catch (error) {
+      alert('Erro ao salvar e-mails');
+    }
+  }
+
+  function validarEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  }
 
 
-// ===== CARREGAR TABELA SOLICITAÇÕES DESEMBARQUE =====
-async function carregarTabelaSolicDesembarque() {
-  if (!elementos.tblSolicDesembarque) return;
-  
-  try {
-    const barcoId = elementos.filtroBarcoSolicDesemb.value;
-    const tbody = elementos.tblSolicDesembarque.querySelector('tbody');
-    
-    if (!barcoId) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Selecione uma embarcação</td></tr>';
-      return;
-    }
-    
-    const response = await fetch(`/api/solicitacoes-desembarque/?barco_id=${barcoId}`);
-    const result = await response.json();
-    
-    if (!result.success) {
-      alert('Erro ao carregar solicitações: ' + result.error);
-      return;
-    }
-    
-    const materiais = result.data;
-    
-    if (materiais.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Nenhuma solicitação de desembarque</td></tr>';
-      return;
-    }
-    
-    tbody.innerHTML = '';
-    
-    materiais.forEach(mat => {
-      const tr = document.createElement('tr');
-      const responsavel = mat.respEmbMat === 'OUTRO' ? mat.outRespEmbMat : mat.respEmbMat;
-      
-      tr.innerHTML = `
+  // ===== CARREGAR TABELA SOLICITAÇÕES DESEMBARQUE =====
+  async function carregarTabelaSolicDesembarque() {
+    if (!elementos.tblSolicDesembarque) return;
+
+    try {
+      const barcoId = elementos.filtroBarcoSolicDesemb.value;
+      const tbody = elementos.tblSolicDesembarque.querySelector('tbody');
+
+      if (!barcoId) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Selecione uma embarcação</td></tr>';
+        return;
+      }
+
+      const response = await fetch(`/api/solicitacoes-desembarque/?barco_id=${barcoId}`);
+      const result = await response.json();
+
+      if (!result.success) {
+        alert('Erro ao carregar solicitações: ' + result.error);
+        return;
+      }
+
+      const materiais = result.data;
+
+      if (materiais.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Nenhuma solicitação de desembarque</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = '';
+
+      materiais.forEach(mat => {
+        const tr = document.createElement('tr');
+        const responsavel = mat.respEmbMat === 'OUTRO' ? mat.outRespEmbMat : mat.respEmbMat;
+
+        tr.innerHTML = `
         <td style="border:1px solid #ddd; padding:8px;">${mat.tipoBarco} ${mat.barcoMatEmb}</td>
         <td style="border:1px solid #ddd; padding:8px;">${mat.descMatEmb}</td>
         <td style="border:1px solid #ddd; padding:8px;">${mat.osEmb || '-'}</td>
@@ -1251,180 +1368,180 @@ async function carregarTabelaSolicDesembarque() {
           </div>
         </td>
       `;
-      
-      tbody.appendChild(tr);
-    });
-    
-  } catch (error) {
-    alert('Erro ao carregar solicitações: ' + error.message);
-  }
-}
 
-// ===== EXIBIR DETALHES DO MATERIAL (SOMENTE LEITURA) =====
-async function exibirDetalhesSolicDesemb(id) {
-  try {
-    const response = await fetch(`${API_BASE}${id}/`);
-    const result = await response.json();
-    
-    if (!result.success) {
-      alert('Erro: ' + result.error);
-      return;
+        tbody.appendChild(tr);
+      });
+
+    } catch (error) {
+      alert('Erro ao carregar solicitações: ' + error.message);
     }
-    
-    const mat = result.data;
-    modoSomenteLeitura = true;
-    
-    elementos.modalTitle.textContent = 'DETALHES DO MATERIAL - SOMENTE LEITURA';
-    preencherModal(mat);
-    elementos.modal.style.display = 'flex';
-    
-    // Desabilitar todos os campos EXCETO os do modal de RT
-    Object.keys(elementos).forEach(key => {
-      if (key.startsWith('modal') && elementos[key].tagName) {
-        // NÃO desabilitar campos do modal de RT de desembarque
-        if (key.includes('RtDesemb')) {
-          return;
-        }
-        
-        const elem = elementos[key];
-        if (elem.type !== 'button') {
-          elem.disabled = true;
-        }
+  }
+
+  // ===== EXIBIR DETALHES DO MATERIAL (SOMENTE LEITURA) =====
+  async function exibirDetalhesSolicDesemb(id) {
+    try {
+      const response = await fetch(`${API_BASE}${id}/`);
+      const result = await response.json();
+
+      if (!result.success) {
+        alert('Erro: ' + result.error);
+        return;
       }
-    });
-    
-    elementos.btnModalSalvar.style.display = 'none';
-    elementos.btnModalExcluir.style.display = 'none';
-    elementos.btnModalCancelar.textContent = 'Fechar';
-    
-  } catch (error) {
-    alert('Erro: ' + error.message);
-  }
-}
 
-// ===== REMOVER SOLICITAÇÃO DE DESEMBARQUE =====
-async function removerSolicitacaoDesemb(id) {
-  if (!confirm('Confirma a remoção da solicitação de desembarque? O material voltará ao status MATERIAL A BORDO.')) {
-    return;
+      const mat = result.data;
+      modoSomenteLeitura = true;
+
+      elementos.modalTitle.textContent = 'DETALHES DO MATERIAL - SOMENTE LEITURA';
+      preencherModal(mat);
+      elementos.modal.style.display = 'flex';
+
+      // Desabilitar todos os campos EXCETO os do modal de RT
+      Object.keys(elementos).forEach(key => {
+        if (key.startsWith('modal') && elementos[key].tagName) {
+          // NÃO desabilitar campos do modal de RT de desembarque
+          if (key.includes('RtDesemb')) {
+            return;
+          }
+
+          const elem = elementos[key];
+          if (elem.type !== 'button') {
+            elem.disabled = true;
+          }
+        }
+      });
+
+      elementos.btnModalSalvar.style.display = 'none';
+      elementos.btnModalExcluir.style.display = 'none';
+      elementos.btnModalCancelar.textContent = 'Fechar';
+
+    } catch (error) {
+      alert('Erro: ' + error.message);
+    }
   }
-  
-  try {
-    const response = await fetch(`${API_BASE}${id}/remover-solicitacao/`, {
-      method: 'PUT',
-      headers: {'Content-Type': 'application/json'}
-    });
-    
-    const result = await response.json();
-    
-    if (!result.success) {
-      alert('Erro: ' + result.error);
+
+  // ===== REMOVER SOLICITAÇÃO DE DESEMBARQUE =====
+  async function removerSolicitacaoDesemb(id) {
+    if (!confirm('Confirma a remoção da solicitação de desembarque? O material voltará ao status MATERIAL A BORDO.')) {
       return;
     }
-    
-    alert('Solicitação de desembarque removida com sucesso');
-    await carregarTabelas();
-    
-  } catch (error) {
-    alert('Erro: ' + error.message);
-  }
-}
 
-// ===== MATERIAL COLETADO =====
-function materialColetado(id) {
-  if (!confirm('Confirma o desembarque do material?')) {
-    return;
-  }
-  
-  rtDesembContext = {materialId: id, acao: 'coletado'};
-  elementos.modalRtDesembTitle.textContent = 'Material Coletado - RT de Desembarque';
-  elementos.modalRtDesembInput.value = '';
-  elementos.modalRtDesembInput.disabled = false; // GARANTIR QUE ESTÁ HABILITADO
-  elementos.modalRtDesemb.style.display = 'flex';
-}
+    try {
+      const response = await fetch(`${API_BASE}${id}/remover-solicitacao/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-// ===== MATERIAL NÃO COLETADO =====
-function materialNaoColetado(id) {
-  if (!confirm('Confirma que o material não foi coletado e permanece a bordo?')) {
-    return;
-  }
-  
-  rtDesembContext = {materialId: id, acao: 'nao_coletado'};
-  elementos.modalRtDesembTitle.textContent = 'Material Não Coletado - RT de Desembarque';
-  elementos.modalRtDesembInput.value = '';
-  elementos.modalRtDesembInput.disabled = false; // GARANTIR QUE ESTÁ HABILITADO
-  elementos.modalRtDesemb.style.display = 'flex';
-}
-// ===== FECHAR MODAL RT DESEMBARQUE =====
-function fecharModalRtDesemb() {
-  elementos.modalRtDesemb.style.display = 'none';
-  elementos.modalRtDesembInput.value = '';
-  rtDesembContext = null;
-}
+      const result = await response.json();
 
-// ===== CONFIRMAR RT DESEMBARQUE =====
-async function confirmarRtDesembarque() {
-  const numRt = elementos.modalRtDesembInput.value.trim();
-  
-  if (!numRt) {
-    alert('Por favor, informe o número da RT de desembarque');
-    return;
+      if (!result.success) {
+        alert('Erro: ' + result.error);
+        return;
+      }
+
+      alert('Solicitação de desembarque removida com sucesso');
+      await carregarTabelas();
+
+    } catch (error) {
+      alert('Erro: ' + error.message);
+    }
   }
-  
-  if (!rtDesembContext) {
-    alert('Erro: contexto não definido');
-    return;
-  }
-  
-  try {
-    const endpoint = rtDesembContext.acao === 'coletado' 
-      ? `${API_BASE}${rtDesembContext.materialId}/material-coletado/`
-      : `${API_BASE}${rtDesembContext.materialId}/material-nao-coletado/`;
-    
-    const response = await fetch(endpoint, {
-      method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({numRtDesemb: numRt})
-    });
-    
-    const result = await response.json();
-    
-    if (!result.success) {
-      alert('Erro: ' + result.error);
+
+  // ===== MATERIAL COLETADO =====
+  function materialColetado(id) {
+    if (!confirm('Confirma o desembarque do material?')) {
       return;
     }
-    
-    const mensagem = rtDesembContext.acao === 'coletado'
-      ? 'Material registrado como coletado (desembarcado)'
-      : 'Material registrado como não coletado (permanece a bordo)';
-    
-    alert(mensagem);
-    fecharModalRtDesemb();
-    await carregarTabelas();
-    
-  } catch (error) {
-    alert('Erro: ' + error.message);
-  }
-}
 
-// ===== UTILITÁRIOS =====
+    rtDesembContext = { materialId: id, acao: 'coletado' };
+    elementos.modalRtDesembTitle.textContent = 'Material Coletado - RT de Desembarque';
+    elementos.modalRtDesembInput.value = '';
+    elementos.modalRtDesembInput.disabled = false; // GARANTIR QUE ESTÁ HABILITADO
+    elementos.modalRtDesemb.style.display = 'flex';
+  }
+
+  // ===== MATERIAL NÃO COLETADO =====
+  function materialNaoColetado(id) {
+    if (!confirm('Confirma que o material não foi coletado e permanece a bordo?')) {
+      return;
+    }
+
+    rtDesembContext = { materialId: id, acao: 'nao_coletado' };
+    elementos.modalRtDesembTitle.textContent = 'Material Não Coletado - RT de Desembarque';
+    elementos.modalRtDesembInput.value = '';
+    elementos.modalRtDesembInput.disabled = false; // GARANTIR QUE ESTÁ HABILITADO
+    elementos.modalRtDesemb.style.display = 'flex';
+  }
+  // ===== FECHAR MODAL RT DESEMBARQUE =====
+  function fecharModalRtDesemb() {
+    elementos.modalRtDesemb.style.display = 'none';
+    elementos.modalRtDesembInput.value = '';
+    rtDesembContext = null;
+  }
+
+  // ===== CONFIRMAR RT DESEMBARQUE =====
+  async function confirmarRtDesembarque() {
+    const numRt = elementos.modalRtDesembInput.value.trim();
+
+    if (!numRt) {
+      alert('Por favor, informe o número da RT de desembarque');
+      return;
+    }
+
+    if (!rtDesembContext) {
+      alert('Erro: contexto não definido');
+      return;
+    }
+
+    try {
+      const endpoint = rtDesembContext.acao === 'coletado'
+        ? `${API_BASE}${rtDesembContext.materialId}/material-coletado/`
+        : `${API_BASE}${rtDesembContext.materialId}/material-nao-coletado/`;
+
+      const response = await fetch(endpoint, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ numRtDesemb: numRt })
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        alert('Erro: ' + result.error);
+        return;
+      }
+
+      const mensagem = rtDesembContext.acao === 'coletado'
+        ? 'Material registrado como coletado (desembarcado)'
+        : 'Material registrado como não coletado (permanece a bordo)';
+
+      alert(mensagem);
+      fecharModalRtDesemb();
+      await carregarTabelas();
+
+    } catch (error) {
+      alert('Erro: ' + error.message);
+    }
+  }
+
+  // ===== UTILITÁRIOS =====
 
 
   // ===== EXPORTAR MÓDULO =====
-window.InvMatModule = {
-  editarMaterial,
-  verDetalhes,
-  confirmarEmbarque,
-  embarqueNaoConcluido,
-  relacionarDesembarque,
-  aplicarOperacao,
-  removerSelecaoDesembarque,
-  exibirDetalhesDesembarque,
-  solicitarDesembarqueIndividual,
-  exibirDetalhesSolicDesemb,
-  removerSolicitacaoDesemb,
-  materialColetado,
-  materialNaoColetado
-};
+  window.InvMatModule = {
+    editarMaterial,
+    verDetalhes,
+    confirmarEmbarque,
+    embarqueNaoConcluido,
+    relacionarDesembarque,
+    aplicarOperacao,
+    removerSelecaoDesembarque,
+    exibirDetalhesDesembarque,
+    solicitarDesembarqueIndividual,
+    exibirDetalhesSolicDesemb,
+    removerSolicitacaoDesemb,
+    materialColetado,
+    materialNaoColetado
+  };
 
   // ===== INICIAR =====
   if (document.readyState === 'loading') {

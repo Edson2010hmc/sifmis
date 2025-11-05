@@ -15,7 +15,8 @@ db.sqlite3
 # IDE
 .vscode/
 .idea/
-flow/
+flow/.vscode/
+
 sios models/
 run_admin.bat
 run_admin.py
