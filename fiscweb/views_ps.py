@@ -2363,7 +2363,7 @@ def subtab_mob_desm_detail(request, item_id):
                 'error': str(e)
             }, status=400)
 
-
+#========================================== EMBARQUE MATERIAIS PS - SINCRONIZAR ==========================================
 #========================================== EMBARQUE MATERIAIS PS - SINCRONIZAR ==========================================
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -2443,19 +2443,17 @@ def sincronizar_materiais_embarque_ps(request, ps_id):
         portoMatEmb.objects.filter(idxPortoMatEmb=ps).delete()
         print(f"[SYNC] Removidos {registros_antigos} registros antigos")
         
-        # Criar novos registros
+        # Criar novos registros - CORRIGIDO: campos agora estão em materialEmb
         criados = 0
         for mat in materiais_prog:
-            primeiro_emb = mat.embarques.first()
-            
             novo_registro = portoMatEmb.objects.create(
                 idxPortoMatEmb=ps,
                 descMatEmbPs=mat.descMatEmb,
-                numRtMatEmbPs=primeiro_emb.numRtMatEmb if primeiro_emb else None,
-                osMatEmbPs=primeiro_emb.osEmbMat if primeiro_emb else None,
+                numRtMatEmbPs=mat.numRtMatEmb,  # Campo migrado para materialEmb
+                osMatEmbPs=mat.osEmbMat,         # Campo migrado para materialEmb
                 respMatEmbPs=mat.respEmbMat if mat.respEmbMat != 'OUTRO' else mat.outRespEmbMat,
                 descContMatEmbPs=mat.descContMatEmb,
-                dataPrevEmbMatPs=primeiro_emb.dataPrevEmbMat if primeiro_emb else None
+                dataPrevEmbMatPs=mat.dataPrevEmbMat  # Campo migrado para materialEmb
             )
             criados += 1
             print(f"[SYNC] Criado registro: {novo_registro.descMatEmbPs}")
@@ -2475,6 +2473,8 @@ def sincronizar_materiais_embarque_ps(request, ps_id):
         import traceback
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
 
 @csrf_exempt
 @require_http_methods(["GET"])
@@ -2626,20 +2626,18 @@ def sincronizar_materiais_desembarque_ps(request, ps_id):
         portoMatDesemb.objects.filter(idxPortoMatDesemb=ps).delete()
         print(f"[SYNC-DESEMB] Removidos {registros_antigos} registros antigos")
         
-        # Criar novos registros
+        # Criar novos registros - CORRIGIDO: campos agora estão em materialEmb
         criados = 0
         for mat in materiais_solic:
-            primeiro_desemb = mat.desembarques.first()
-            
             novo_registro = portoMatDesemb.objects.create(
                 idxPortoMatDesemb=ps,
                 descMatDesembPs=mat.descMatEmb,
-                numRtMatDesembPs=primeiro_desemb.numRtMatDesemb if primeiro_desemb else None,
-                osMatDesembPs=primeiro_desemb.osRecDesembMat if primeiro_desemb else None,
+                numRtMatDesembPs=mat.numRtMatDesemb,  # Campo migrado para materialEmb
+                osMatDesembPs=mat.osEmbMat,            # Usar osEmbMat (campo do embarque)
                 respMatDesembPs=mat.respEmbMat if mat.respEmbMat != 'OUTRO' else mat.outRespEmbMat,
                 descContMatDesembPs=mat.descContMatEmb,
                 statusProgMatEmbPs=mat.statusProgMatEmb,
-                dataPrevDesembMatPs=primeiro_desemb.dataPrevDesmbMat if primeiro_desemb else None
+                dataPrevDesembMatPs=None  # Campo de data de desembarque não existe mais na estrutura atual
             )
             criados += 1
             print(f"[SYNC-DESEMB] Criado registro: {novo_registro.descMatDesembPs}")

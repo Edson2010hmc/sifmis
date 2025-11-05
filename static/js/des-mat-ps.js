@@ -201,19 +201,11 @@ const DesMatPsModule = (() => {
       document.getElementById('det_status').value = mat.statusProgMatEmb || '';
       document.getElementById('det_obs').value = mat.obsMatEmb || '';
 
-      // Preencher campos de embarque
-      if (mat.embarques && mat.embarques.length > 0) {
-        const emb = mat.embarques[0];
-        document.getElementById('det_data_prev').value = emb.dataPrevEmbMat || '';
-        document.getElementById('det_rt').value = emb.numRtMatEmb || '';
-        document.getElementById('det_os').value = emb.osEmbMat || '';
-        document.getElementById('det_meio_rec').value = emb.meioRecEmbMat || '';
-      } else {
-        document.getElementById('det_data_prev').value = '';
-        document.getElementById('det_rt').value = '';
-        document.getElementById('det_os').value = '';
-        document.getElementById('det_meio_rec').value = '';
-      }
+      // ✅ CORRIGIDO: Campos de embarque agora estão diretamente em mat
+      document.getElementById('det_data_prev').value = mat.dataPrevEmbMat || '';
+      document.getElementById('det_rt').value = mat.numRtMatEmb || '';
+      document.getElementById('det_os').value = mat.osEmbMat || '';
+      document.getElementById('det_meio_rec').value = mat.meioRecEmbMat || '';
 
       // Preencher campos de contentor (se aplicável)
       if (mat.contBordoEmbMat === 'SIM') {
@@ -231,7 +223,7 @@ const DesMatPsModule = (() => {
       elementos.modal.style.display = 'flex';
 
     } catch (error) {
-      alert('Erro ao abrir detalhes: ' + error.message);
+      alert('Erro ao carregar detalhes do material: ' + error.message);
     }
   }
 
