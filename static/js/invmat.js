@@ -563,7 +563,7 @@
   }
 
 
-  // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
+  // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE - LÓGICA CORRETA =====
   async function processarSolicitacaoDesembarque(barcoId) {
     try {
       // Verificar autenticação
@@ -617,7 +617,7 @@
       const matCrd = materiais.filter(m => m.respEmbMat === 'CRD');
       const matNaoCrd = materiais.filter(m => m.respEmbMat !== 'CRD');
 
-      // ===== PROCESSAR MATERIAIS CRD =====
+      // ===== PROCESSAR MATERIAIS CRD (sempre primeiro, se existir) =====
       if (matCrd.length > 0) {
         // CRD sempre usa modelo 004 (sem modal)
         await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, '004', {}, 'CRD');
@@ -625,46 +625,35 @@
 
       // ===== PROCESSAR MATERIAIS NÃO-CRD =====
       if (matNaoCrd.length > 0) {
-        // Verificar se há materiais com e sem contentor
+        // Separar por contentor
         const comContentor = matNaoCrd.filter(m => m.contBordoEmbMat === 'SIM');
         const semContentor = matNaoCrd.filter(m => m.contBordoEmbMat !== 'SIM');
 
+        // CENÁRIO 1: Apenas materiais COM contentor
         if (comContentor.length > 0 && semContentor.length === 0) {
-          // MODELO 002: Apenas materiais COM contentor
-          // Perguntar se deseja agrupar todos
-          const agrupar = confirm('Há materiais com contentor relacionados para desembarque. Deseja solicitar o desembarque de todos agrupados?');
-
-          if (agrupar) {
-            // Abrir modal para coletar dados de contentores
-            const dadosModal = await abrirModalContentoresPromise('002', barcoId, fiscalNome, psData);
-
-            if (dadosModal) {
-              await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, '002', dadosModal, 'NAO_CRD');
-            }
-          } else {
-            // Enviar modelo 001 (sem contentor adicional)
-            await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, '001', {}, 'NAO_CRD');
-          }
-
-        } else if (comContentor.length === 0 && semContentor.length > 0) {
-          // MODELO 001: Apenas materiais SEM contentor
+          // Email modelo 001 DIRETO (sem modal, sem pergunta)
           await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, '001', {}, 'NAO_CRD');
-
-        } else if (comContentor.length > 0 && semContentor.length > 0) {
-          // MODELO 003: MISTO (com e sem contentor)
-          // Perguntar se deseja agrupar todos
-          const agrupar = confirm('Há materiais com e sem contentor relacionados para desembarque. Deseja solicitar o desembarque de todos agrupados?');
-
+        }
+        // CENÁRIO 2: Apenas materiais SEM contentor
+        else if (comContentor.length === 0 && semContentor.length > 0) {
+          // Abrir modal → Email modelo 002
+          const dadosModal = await abrirModalContentoresPromise('002', barcoId, fiscalNome, psData);
+          if (dadosModal) {
+            await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, '002', dadosModal, 'NAO_CRD');
+          }
+        }
+        // CENÁRIO 3: MISTO (com + sem contentor)
+        else if (comContentor.length > 0 && semContentor.length > 0) {
+          const agrupar = confirm('Materiais sem contentor podem ser agrupados com os materiais em contentor?');
           if (agrupar) {
-            // Abrir modal para coletar dados de contentores
+            // SIM → Email modelo 001 DIRETO (sem modal)
+            await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, '001', {}, 'NAO_CRD');
+          } else {
+            // NÃO → Abrir modal → Email modelo 003
             const dadosModal = await abrirModalContentoresPromise('003', barcoId, fiscalNome, psData);
-
             if (dadosModal) {
               await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, '003', dadosModal, 'NAO_CRD');
             }
-          } else {
-            // Enviar modelo 001 (sem contentor adicional)
-            await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, '001', {}, 'NAO_CRD');
           }
         }
       }
@@ -700,11 +689,14 @@
         throw new Error(result.error);
       }
 
+      console.log(`E-mail ${tipoMaterial} enviado com sucesso (Modelo ${modelo})`);
+
     } catch (error) {
       alert('Erro ao enviar solicitação ' + tipoMaterial + ': ' + error.message);
       throw error;
     }
   }
+
   // ===== ABRIR MODAL CONTENTORES COM PROMISE =====
   function abrirModalContentoresPromise(modelo, barcoId, fiscalNome, psData) {
     return new Promise((resolve, reject) => {
