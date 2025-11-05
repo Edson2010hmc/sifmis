@@ -8,7 +8,7 @@ from .models_ps import inoPendContr
 from .models_ps import iapo, smsLvMang,smsLvSeg
 
 from .models_anom import InformeAnomalia, SubTabPessoasAnomalia 
-from .models_invmat import materialEmb, subMatEmb, subMatDesemb, emailsSolicDesemb 
+from .models_invmat import materialEmb,  emailsSolicDesemb 
 
 
 
@@ -51,6 +51,4 @@ admin.site.register(SubTabPessoasAnomalia)
 
 #=============================MODULO INVENTARIO DE MATERIAIS=======================
 admin.site.register(materialEmb)
-admin.site.register(subMatEmb)
-admin.site.register(subMatDesemb)
 admin.site.register(emailsSolicDesemb)

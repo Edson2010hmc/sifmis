@@ -7,8 +7,9 @@ from django.views.decorators.http import require_http_methods
 import json
 from django.utils.dateparse import parse_date
 
-from .models_invmat import materialEmb, subMatEmb, subMatDesemb,emailsSolicDesemb
+from .models_invmat import materialEmb, emailsSolicDesemb
 from .models_cad import BarcosCad
+from .models_ps import PassServ, PortoTrocaTurma
 
 
 #========================================== MATERIAIS EMBARQUE - API REST ==========================================
@@ -549,6 +550,8 @@ def verificar_ps_rascunho_material(request):
             print(f"[VERIF-PS]     - fiscalDes: '{ps.fiscalDes}'")
             print(f"[VERIF-PS]     - Match Barco? {ps.BarcoPS == barco_nome}")
             print(f"[VERIF-PS]     - Match Fiscal? {ps.fiscalDes == fiscal_nome}")
+            print(f"[VERIF-PS]     - Porto: '{PortoTrocaTurma.Porto}'")
+            print(f"[VERIF-PS]     - Terminal: '{PortoTrocaTurma.Terminal}'")
         
         print(f"[VERIF-PS] ========== BUSCANDO PS ESPECÍFICA ==========")
         print(f"[VERIF-PS] Critérios de busca:")
@@ -645,8 +648,10 @@ def solicitar_desembarque_materiais(request):
         modelo = data.get('modelo')  # 001, 002, 003, 004
         dados_modal = data.get('dadosModal', {})  # Para modelos 002 e 003
         tipo_material = data.get('tipoMaterial', '')  # 'CRD' ou 'NAO_CRD'
-        print(f"[API] POST /api/solicitar-desembarque/ - Modelo: {modelo}, Barco: {barco_id}")
         
+        print(f"[API] POST /api/solicitar-desembarque/ - Modelo: {modelo}, Barco: {barco_id}")
+        print(f"[API] POST api/ps/<int:ps_id>/troca-turma/ - Fiscal: '{PortoTrocaTurma.Porto}'")
+        print(f"[API] POST api/ps/<int:ps_id>/troca-turma/ - Fiscal: '{PortoTrocaTurma.Terminal}'")
         if not barco_id or not fiscal_nome or not ps_data or not modelo:
             return JsonResponse({'success': False, 'error': 'Dados incompletos'}, status=400)
         

@@ -8,7 +8,7 @@ from .models_cad import BarcosCad
 #================================ MODELO PRINCIPAL - MATERIAL EMBARQUE ====================================================
 class materialEmb(models.Model):
     """Modelo de Tabela de Programação de Embarque de Materiais"""
-    embarques=[]
+    
     RESPONSAVEL_CHOICES = [
         ('CRD', 'CRD'),
         ('MIS', 'MIS'),
@@ -42,6 +42,13 @@ class materialEmb(models.Model):
         ('DESEMBARQUE NÃO CONCLUIDO', 'DESEMBARQUE NÃO CONCLUIDO'),
         ('MATERIAL DESEMBARCADO', 'MATERIAL DESEMBARCADO'),
     ]
+
+    MEIO_RECEBIMENTO_CHOICES = [
+        ('PORTO', 'PORTO'),
+        ('TRANSBORDO UEP', 'TRANSBORDO UEP'),
+        ('TRANSBORDO BARCO', 'TRANSBORDO BARCO'),
+        ('RETIRADO DE OS', 'RETIRADO DE OS'),
+    ]
     
     # Campos
     barcoMatEmb = models.ForeignKey(BarcosCad, on_delete=models.PROTECT, verbose_name='Embarcação')
@@ -61,6 +68,18 @@ class materialEmb(models.Model):
     valContMatEmb = models.DateField(verbose_name='Validade do Certificado do Contentor', blank=True, null=True)
     obsMatEmb = models.TextField(max_length=500, verbose_name='Observações', blank=True, null=True)
     statusProgMatEmb = models.CharField(max_length=30, choices=STATUS_CHOICES, verbose_name='Status do Material', default='', blank=True)
+    dataPrevEmbMat = models.DateField(verbose_name='Data Prevista para embarque',blank=True,null=True)
+    numRtMatEmb = models.CharField(max_length=12, verbose_name='Numero da RT de Embarque', blank=True, null=True)
+    numNotaFiscMatEmb = models.CharField(max_length=12, verbose_name='Numero da Nota Fiscal', blank=True, null=True)
+    meioRecEmbMat = models.CharField(max_length=20, choices=MEIO_RECEBIMENTO_CHOICES, verbose_name='Meio de recebimento', blank=True, null=True)
+    uepRecMatEmb = models.CharField(max_length=20, verbose_name='UEP transbordo', blank=True, null=True)
+    misBarcoFlag = models.BooleanField(default=True, verbose_name='Barco MIS?')
+    misBarcoRecMatEmb = models.CharField(max_length=30, verbose_name='Barco MIS transbordo', blank=True, null=True)
+    barcoRecMatEmb = models.CharField(max_length=30, verbose_name='Barco Não MIS Transbordo', blank=True, null=True)
+    osEmbMat = models.CharField(max_length=15, verbose_name='Ordem de Serviço', blank=True, null=True)
+    statusRegEmb = models.CharField(max_length=30, verbose_name='Status do registro', default='', blank=True)
+    numRtMatDesemb = models.CharField(max_length=12, verbose_name='Numero da RT de Desembarque', blank=True, null=True)
+    
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
     
@@ -73,75 +92,6 @@ class materialEmb(models.Model):
         return f"{self.barcoMatEmb.nomeBarco} - {self.descMatEmb}"
 
 
-#================================ MODELO SUBTABELA - EMBARQUE DE MATERIAIS ================================================
-class subMatEmb(models.Model):
-    """Modelo de subtabela para embarque de materiais"""
-    
-    MEIO_RECEBIMENTO_CHOICES = [
-        ('PORTO', 'PORTO'),
-        ('TRANSBORDO UEP', 'TRANSBORDO UEP'),
-        ('TRANSBORDO BARCO', 'TRANSBORDO BARCO'),
-        ('RETIRADO DE OS', 'RETIRADO DE OS'),
-    ]
-    
-    # ForeignKey para tabela principal
-    idxMatEmb = models.ForeignKey(materialEmb, on_delete=models.CASCADE, related_name='embarques')
-    dataPrevEmbMat = models.DateField(verbose_name='Data Prevista para embarque')
-    numRtMatEmb = models.CharField(max_length=12, verbose_name='Numero da RT de Embarque', blank=True, null=True)
-    numNotaFiscMatEmb = models.CharField(max_length=12, verbose_name='Numero da Nota Fiscal', blank=True, null=True)
-    meioRecEmbMat = models.CharField(max_length=20, choices=MEIO_RECEBIMENTO_CHOICES, verbose_name='Meio de recebimento', blank=True, null=True)
-    uepRecMatEmb = models.CharField(max_length=20, verbose_name='UEP transbordo', blank=True, null=True)
-    misBarcoFlag = models.BooleanField(default=True, verbose_name='Barco MIS?')
-    misBarcoRecMatEmb = models.CharField(max_length=30, verbose_name='Barco MIS transbordo', blank=True, null=True)
-    barcoRecMatEmb = models.CharField(max_length=30, verbose_name='Barco Não MIS Transbordo', blank=True, null=True)
-    osEmbMat = models.CharField(max_length=15, verbose_name='Ordem de Serviço', blank=True, null=True)
-    statusRegEmb = models.CharField(max_length=30, verbose_name='Status do registro', default='', blank=True)
-    criado_em = models.DateTimeField(auto_now_add=True)
-    atualizado_em = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        verbose_name = 'Subtabela - Embarque Material'
-        verbose_name_plural = 'Subtabelas - Embarque Materiais'
-        ordering = ['-dataPrevEmbMat']
-    
-    def __str__(self):
-        return f"Embarque - {self.idxMatEmb.descMatEmb} - {self.dataPrevEmbMat}"
-
-
-#================================ MODELO SUBTABELA - DESEMBARQUE DE MATERIAIS ==============================================
-class subMatDesemb(models.Model):
-    """Modelo de subtabela para desembarque de materiais"""
-    
-    MEIO_ENVIO_CHOICES = [
-        ('PORTO', 'PORTO'),
-        ('TRANSBORDO UEP', 'TRANSBORDO UEP'),
-        ('TRANSBORDO BARCO', 'TRANSBORDO BARCO'),
-        ('APLICADO A OS', 'APLICADO A OS'),
-    ]
-    
-    # ForeignKey para tabela principal
-    idxMatDesemb = models.ForeignKey(materialEmb, on_delete=models.CASCADE, related_name='desembarques')
-    dataPrevDesmbMat = models.DateField(verbose_name='Data Prevista para Desembarque')
-    meioEnvDesmbMat = models.CharField(max_length=20, choices=MEIO_ENVIO_CHOICES, verbose_name='Meio de Envio', blank=True, null=True)
-    uepDesembMatEmb = models.CharField(max_length=20, verbose_name='UEP transbordo', blank=True, null=True)
-    misBarcoFlagDesemb = models.BooleanField(default=True, verbose_name='Barco MIS?')
-    misBarcoDesembMatEmb = models.CharField(max_length=30, verbose_name='Barco MIS transbordo', blank=True, null=True)
-    barcoDesembMatEmb = models.CharField(max_length=30, verbose_name='Barco Não MIS Transbordo', blank=True, null=True)
-    osRecDesembMat = models.CharField(max_length=15, verbose_name='Ordem de serviço', blank=True, null=True)
-    numRtMatDesemb = models.CharField(max_length=12, verbose_name='Numero da RT de Desembarque', blank=True, null=True)
-    numNotaFiscMatDesemb = models.CharField(max_length=12, verbose_name='Numero da Nota Fiscal', blank=True, null=True)
-    statusRegDesemb = models.CharField(max_length=30, verbose_name='Status do registro', default='', blank=True)
-    criado_em = models.DateTimeField(auto_now_add=True)
-    atualizado_em = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        verbose_name = 'Subtabela - Desembarque Material'
-        verbose_name_plural = 'Subtabelas - Desembarque Materiais'
-        ordering = ['-dataPrevDesmbMat']
-    
-    def __str__(self):
-        return f"Desembarque - {self.idxMatDesemb.descMatEmb} - {self.dataPrevDesmbMat}"
-    
 #=================================MODELO TABELA EMAILS DAS EQUIPES DE MATERIAIS ============================================
 class emailsSolicDesemb(models.Model):
     """Modelo para cadastro de e-mails para solicitação de desembarque de materiais"""
