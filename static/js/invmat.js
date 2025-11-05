@@ -1316,7 +1316,7 @@
       const mat = result.data;
       modoSomenteLeitura = true;
 
-      elementos.modalTitle.textContent = 'DETALHES DO MATERIAL - SOMENTE LEITURA';
+      elementos.modalTitle.textContent = 'DETALHES DO MATERIAL';
       preencherModal(mat);
       elementos.modal.style.display = 'flex';
 
