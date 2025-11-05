@@ -36,9 +36,6 @@ def materiais_embarque_list(request):
             data = []
             
             for mat in materiais:
-                # Buscar último embarque da subtabela
-                ultimo_embarque = mat.embarques.first()
-                print(f"[DEBUG] ultimo_embarque:{ultimo_embarque}")
                 data.append({
                     'id': mat.id,
                     'barcoMatEmb': mat.barcoMatEmb.nomeBarco,
@@ -60,10 +57,10 @@ def materiais_embarque_list(request):
                     'valContMatEmb': str(mat.valContMatEmb) if mat.valContMatEmb else '',
                     'obsMatEmb': mat.obsMatEmb or '',
                     'statusProgMatEmb': mat.statusProgMatEmb,
-                    'dataPrevEmb': str(ultimo_embarque.dataPrevEmbMat) if ultimo_embarque else '',
-                    'numRtEmb': ultimo_embarque.numRtMatEmb if ultimo_embarque else '',
-                    'meioRecEmbMat': ultimo_embarque.meioRecEmbMat if ultimo_embarque else '',
-                    'osEmb': ultimo_embarque.osEmbMat if ultimo_embarque else '',
+                    'dataPrevEmb': str(mat.dataPrevEmbMat) if mat.dataPrevEmbMat else '',
+                    'numRtEmb': mat.numRtMatEmb or '',
+                    'meioRecEmbMat': mat.meioRecEmbMat or '',
+                    'osEmb': mat.osEmbMat or '',
                     'criado_em': mat.criado_em.isoformat(),
                     'atualizado_em': mat.atualizado_em.isoformat()
                 })
@@ -82,7 +79,7 @@ def materiais_embarque_list(request):
             
             print(f"[API] POST /api/materiais-embarque/ - Dados recebidos: {data.keys()}")
             
-            # Criar material
+            # Criar material com TODOS os campos (incluindo os que eram da subtabela)
             material = materialEmb.objects.create(
                 barcoMatEmb_id=data['barcoMatEmb'],
                 descMatEmb=data['descMatEmb'],
@@ -100,13 +97,9 @@ def materiais_embarque_list(request):
                 certContMatEmb=data.get('certContMatEmb'),
                 valContMatEmb=parse_date(data['valContMatEmb']) if data.get('valContMatEmb') else None,
                 obsMatEmb=data.get('obsMatEmb'),
-                statusProgMatEmb=data['statusProgMatEmb']
-            )
-            
-            # Criar registro na subtabela de embarque
-            subMatEmb.objects.create(
-                idxMatEmb=material,
-                dataPrevEmbMat=parse_date(data['dataPrevEmbMat']),
+                statusProgMatEmb=data['statusProgMatEmb'],
+                # Campos que eram da subtabela de embarque
+                dataPrevEmbMat=parse_date(data['dataPrevEmbMat']) if data.get('dataPrevEmbMat') else None,
                 numRtMatEmb=data.get('numRtMatEmb'),
                 numNotaFiscMatEmb=data.get('numNotaFiscMatEmb'),
                 meioRecEmbMat=data.get('meioRecEmbMat'),
@@ -143,40 +136,6 @@ def materiais_embarque_detail(request, material_id):
     
     if request.method == 'GET':
         try:
-            # Buscar embarques relacionados
-            embarques = []
-            for emb in material.embarques.all():
-                embarques.append({
-                    'id': emb.id,
-                    'dataPrevEmbMat': str(emb.dataPrevEmbMat),
-                    'numRtMatEmb': emb.numRtMatEmb or '',
-                    'numNotaFiscMatEmb': emb.numNotaFiscMatEmb or '',
-                    'meioRecEmbMat': emb.meioRecEmbMat or '',
-                    'uepRecMatEmb': emb.uepRecMatEmb or '',
-                    'misBarcoFlag': emb.misBarcoFlag,
-                    'misBarcoRecMatEmb': emb.misBarcoRecMatEmb or '',
-                    'barcoRecMatEmb': emb.barcoRecMatEmb or '',
-                    'osEmbMat': emb.osEmbMat or '',
-                    'statusRegEmb': emb.statusRegEmb
-                })
-            
-            # Buscar desembarques relacionados
-            desembarques = []
-            for des in material.desembarques.all():
-                desembarques.append({
-                    'id': des.id,
-                    'dataPrevDesmbMat': str(des.dataPrevDesmbMat),
-                    'meioEnvDesmbMat': des.meioEnvDesmbMat or '',
-                    'uepDesembMatEmb': des.uepDesembMatEmb or '',
-                    'misBarcoFlagDesemb': des.misBarcoFlagDesemb,
-                    'misBarcoDesembMatEmb': des.misBarcoDesembMatEmb or '',
-                    'barcoDesembMatEmb': des.barcoDesembMatEmb or '',
-                    'osRecDesembMat': des.osRecDesembMat or '',
-                    'numRtMatDesemb': des.numRtMatDesemb or '',
-                    'numNotaFiscMatDesemb': des.numNotaFiscMatDesemb or '',
-                    'statusRegDesemb': des.statusRegDesemb
-                })
-            
             data = {
                 'id': material.id,
                 'barcoMatEmb': material.barcoMatEmb.nomeBarco,
@@ -198,8 +157,19 @@ def materiais_embarque_detail(request, material_id):
                 'valContMatEmb': str(material.valContMatEmb) if material.valContMatEmb else '',
                 'obsMatEmb': material.obsMatEmb or '',
                 'statusProgMatEmb': material.statusProgMatEmb,
-                'embarques': embarques,
-                'desembarques': desembarques
+                # Campos de embarque (antes na subtabela)
+                'dataPrevEmbMat': str(material.dataPrevEmbMat) if material.dataPrevEmbMat else '',
+                'numRtMatEmb': material.numRtMatEmb or '',
+                'numNotaFiscMatEmb': material.numNotaFiscMatEmb or '',
+                'meioRecEmbMat': material.meioRecEmbMat or '',
+                'uepRecMatEmb': material.uepRecMatEmb or '',
+                'misBarcoFlag': material.misBarcoFlag,
+                'misBarcoRecMatEmb': material.misBarcoRecMatEmb or '',
+                'barcoRecMatEmb': material.barcoRecMatEmb or '',
+                'osEmbMat': material.osEmbMat or '',
+                'statusRegEmb': material.statusRegEmb or '',
+                # Campo de desembarque
+                'numRtMatDesemb': material.numRtMatDesemb or ''
             }
             
             print(f"[API] GET /api/materiais-embarque/{material_id}/ - Material retornado")
@@ -216,7 +186,7 @@ def materiais_embarque_detail(request, material_id):
             
             print(f"[API] PUT /api/materiais-embarque/{material_id}/ - Atualizando material")
             
-            # Atualizar tabela principal - materialEmb
+            # Atualizar TODOS os campos diretamente no material
             material.barcoMatEmb_id = data['barcoMatEmb']
             material.descMatEmb = data['descMatEmb']
             material.identMatEmb = data.get('identMatEmb')
@@ -234,41 +204,18 @@ def materiais_embarque_detail(request, material_id):
             material.valContMatEmb = parse_date(data['valContMatEmb']) if data.get('valContMatEmb') else None
             material.obsMatEmb = data.get('obsMatEmb')
             material.statusProgMatEmb = data.get('statusProgMatEmb', material.statusProgMatEmb)
+            # Campos de embarque (antes na subtabela)
+            material.dataPrevEmbMat = parse_date(data['dataPrevEmbMat']) if data.get('dataPrevEmbMat') else None
+            material.numRtMatEmb = data.get('numRtMatEmb')
+            material.numNotaFiscMatEmb = data.get('numNotaFiscMatEmb')
+            material.meioRecEmbMat = data.get('meioRecEmbMat')
+            material.uepRecMatEmb = data.get('uepRecMatEmb')
+            material.misBarcoFlag = data.get('misBarcoFlag', True)
+            material.misBarcoRecMatEmb = data.get('misBarcoRecMatEmb')
+            material.barcoRecMatEmb = data.get('barcoRecMatEmb')
+            material.osEmbMat = data.get('osEmbMat')
+            material.statusRegEmb = material.statusProgMatEmb
             material.save()
-            
-            # CORREÇÃO DO BUG: Atualizar ou criar registro na subtabela de embarque
-            primeiro_embarque = material.embarques.first()
-            
-            if primeiro_embarque:
-                # Atualizar embarque existente
-                primeiro_embarque.dataPrevEmbMat = parse_date(data['dataPrevEmbMat'])
-                primeiro_embarque.numRtMatEmb = data.get('numRtMatEmb')
-                primeiro_embarque.numNotaFiscMatEmb = data.get('numNotaFiscMatEmb')
-                primeiro_embarque.meioRecEmbMat = data.get('meioRecEmbMat')
-                primeiro_embarque.uepRecMatEmb = data.get('uepRecMatEmb')
-                primeiro_embarque.misBarcoFlag = data.get('misBarcoFlag', True)
-                primeiro_embarque.misBarcoRecMatEmb = data.get('misBarcoRecMatEmb')
-                primeiro_embarque.barcoRecMatEmb = data.get('barcoRecMatEmb')
-                primeiro_embarque.osEmbMat = data.get('osEmbMat')
-                primeiro_embarque.statusRegEmb = material.statusProgMatEmb
-                primeiro_embarque.save()
-                print(f"[API] Subtabela de embarque atualizada - ID: {primeiro_embarque.id}")
-            else:
-                # Criar novo registro de embarque se não existir
-                novo_embarque = subMatEmb.objects.create(
-                    idxMatEmb=material,
-                    dataPrevEmbMat=parse_date(data['dataPrevEmbMat']),
-                    numRtMatEmb=data.get('numRtMatEmb'),
-                    numNotaFiscMatEmb=data.get('numNotaFiscMatEmb'),
-                    meioRecEmbMat=data.get('meioRecEmbMat'),
-                    uepRecMatEmb=data.get('uepRecMatEmb'),
-                    misBarcoFlag=data.get('misBarcoFlag', True),
-                    misBarcoRecMatEmb=data.get('misBarcoRecMatEmb'),
-                    barcoRecMatEmb=data.get('barcoRecMatEmb'),
-                    osEmbMat=data.get('osEmbMat'),
-                    statusRegEmb=material.statusProgMatEmb
-                )
-                print(f"[API] Nova subtabela de embarque criada - ID: {novo_embarque.id}")
             
             print(f"[API] Material {material_id} atualizado com sucesso")
             
@@ -285,7 +232,7 @@ def materiais_embarque_detail(request, material_id):
 @require_http_methods(["PUT"])
 def materiais_embarque_status(request, material_id):
     """
-    PUT: Atualiza apenas o status do material e replica para subtabelas
+    PUT: Atualiza apenas o status do material
     """
     
     try:
@@ -301,13 +248,8 @@ def materiais_embarque_status(request, material_id):
         
         # Atualizar status do material
         material.statusProgMatEmb = novo_status
+        material.statusRegEmb = novo_status
         material.save()
-        
-        # Replicar para subtabelas de embarque
-        material.embarques.update(statusRegEmb=novo_status)
-        
-        # Replicar para subtabelas de desembarque
-        material.desembarques.update(statusRegDesemb=novo_status)
         
         print(f"[API] Status do material {material_id} atualizado para: {novo_status}")
         
@@ -317,49 +259,6 @@ def materiais_embarque_status(request, material_id):
         print(f"[API ERROR] PUT /api/materiais-embarque/{material_id}/status/ - {str(e)}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
-
-@csrf_exempt
-@require_http_methods(["POST"])
-def materiais_desembarque_add(request, material_id):
-    """
-    POST: Adiciona registro de desembarque para um material
-    """
-    
-    try:
-        material = materialEmb.objects.get(id=material_id)
-    except materialEmb.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'Material não encontrado'}, status=404)
-    
-    try:
-        data = json.loads(request.body)
-        
-        print(f"[API] POST /api/materiais-embarque/{material_id}/desembarque/ - Adicionando desembarque")
-        
-        # Criar registro de desembarque
-        desembarque = subMatDesemb.objects.create(
-            idxMatDesemb=material,
-            dataPrevDesmbMat=parse_date(data['dataPrevDesmbMat']),
-            meioEnvDesmbMat=data.get('meioEnvDesmbMat'),
-            uepDesembMatEmb=data.get('uepDesembMatEmb'),
-            misBarcoFlagDesemb=data.get('misBarcoFlagDesemb', True),
-            misBarcoDesembMatEmb=data.get('misBarcoDesembMatEmb'),
-            barcoDesembMatEmb=data.get('barcoDesembMatEmb'),
-            osRecDesembMat=data.get('osRecDesembMat'),
-            numRtMatDesemb=data.get('numRtMatDesemb'),
-            numNotaFiscMatDesemb=data.get('numNotaFiscMatDesemb'),
-            statusRegDesemb=material.statusProgMatEmb
-        )
-        
-        print(f"[API] Desembarque criado com sucesso - ID: {desembarque.id}")
-        
-        return JsonResponse({'success': True, 'id': desembarque.id, 'message': 'Desembarque adicionado com sucesso'})
-        
-    except Exception as e:
-        print(f"[API ERROR] POST /api/materiais-embarque/{material_id}/desembarque/ - {str(e)}")
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
-    
-
-    #========================================== E-MAILS SOLICITAÇÃO DESEMBARQUE - API REST ==========================================
 
 @csrf_exempt
 @require_http_methods(["GET", "POST", "PUT"])
@@ -474,9 +373,6 @@ def materiais_desembarque_list(request):
         
         data = []
         for mat in materiais:
-            # Buscar primeiro embarque para pegar OS
-            primeiro_embarque = mat.embarques.first()
-            
             data.append({
                 'id': mat.id,
                 'barcoMatEmb': mat.barcoMatEmb.nomeBarco,
@@ -492,7 +388,7 @@ def materiais_desembarque_list(request):
                 'alturaMatEmb': str(mat.alturaMatEmb) if mat.alturaMatEmb else '',
                 'larguraMatEmb': str(mat.larguraMatEmb) if mat.larguraMatEmb else '',
                 'comprimentoMatEmb': str(mat.comprimentoMatEmb) if mat.comprimentoMatEmb else '',
-                'osEmb': primeiro_embarque.osEmbMat if primeiro_embarque else ''
+                'osEmb': mat.osEmbMat or ''
             })
         
         print(f"[API] GET /api/materiais-desembarque/ - {len(data)} materiais retornados para barco {barco_id}")
@@ -650,8 +546,7 @@ def solicitar_desembarque_materiais(request):
         tipo_material = data.get('tipoMaterial', '')  # 'CRD' ou 'NAO_CRD'
         
         print(f"[API] POST /api/solicitar-desembarque/ - Modelo: {modelo}, Barco: {barco_id}")
-        print(f"[API] POST api/ps/<int:ps_id>/troca-turma/ - Fiscal: '{PortoTrocaTurma.Porto}'")
-        print(f"[API] POST api/ps/<int:ps_id>/troca-turma/ - Fiscal: '{PortoTrocaTurma.Terminal}'")
+       
         if not barco_id or not fiscal_nome or not ps_data or not modelo:
             return JsonResponse({'success': False, 'error': 'Dados incompletos'}, status=400)
         
@@ -759,13 +654,13 @@ def solicitar_desembarque_materiais(request):
         data_envio = agora.strftime('%d/%m/%Y')
         hora_envio = agora.strftime('%H:%M')
         
+        #Atualizar status dos materiais e adicionar observação
         for mat in materiais:
-            # Atualizar status
             mat.statusProgMatEmb = 'DESEMBARQUE SOLICITADO'
+            mat.statusRegEmb = 'DESEMBARQUE SOLICITADO'
             
-            # Adicionar observação
-            obs_adicional = f"\nSolicitado o desembarque deste material em e-mail enviado em {data_envio} às {hora_envio} por {nome_fiscal}."
-            
+            # Adicionar observação sobre solicitação
+            obs_adicional = f"\nSolicitação de desembarque enviada em {datetime.now().strftime('%d/%m/%Y %H:%M')}"
             if modelo in ['002', '003']:
                 qtde_cont = dados_modal.get('qtdeContentores', '')
                 desc_cont = dados_modal.get('descContentores', '')
@@ -774,9 +669,6 @@ def solicitar_desembarque_materiais(request):
             mat.obsMatEmb = (mat.obsMatEmb or '') + obs_adicional
             mat.save()
             
-            # Replicar status para subtabelas
-            mat.embarques.update(statusRegEmb='DESEMBARQUE SOLICITADO')
-            mat.desembarques.update(statusRegDesemb='DESEMBARQUE SOLICITADO')
         
         print(f"[EMAIL][OK] Desembarque solicitado - {materiais.count()} materiais")
         
@@ -787,7 +679,6 @@ def solicitar_desembarque_materiais(request):
         import traceback
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
 
 #========================================== GERAR CORPO EMAIL DESEMBARQUE ==========================================
 def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, data_emissao_formatada, hora_atrac_formatada, hora_saida_formatada, nome_fiscal, from_addr, dados_modal):
@@ -810,8 +701,7 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, data_emissa
         lista_materiais = ""
         for mat in mats_filtrados:
             if mat.contBordoEmbMat == 'SIM':
-                primeiro_emb = mat.embarques.first()
-                os_texto = primeiro_emb.osEmbMat if primeiro_emb else ''
+                os_texto = mat.osEmbMat or ''
                 lista_materiais += f"""
                 <tr>
                     <td style="border:1px solid #ddd; padding:8px;">{mat.descMatEmb}</td>
@@ -848,8 +738,7 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, data_emissa
         lista_materiais = ""
         for mat in mats_filtrados:
             if mat.contBordoEmbMat != 'SIM':
-                primeiro_emb = mat.embarques.first()
-                os_texto = primeiro_emb.osEmbMat if primeiro_emb else ''
+                os_texto = mat.osEmbMat or ''
                 dimensoes = f"A{mat.alturaMatEmb or ''}m x L{mat.larguraMatEmb or ''}m x C{mat.comprimentoMatEmb or ''}m"
                 lista_materiais += f"""
                 <tr>
@@ -889,13 +778,12 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, data_emissa
         """
     
     elif modelo == '003':
-        # Misto - com e sem contentor
+        # Com e sem contentor
         lista_sem_cont = ""
         lista_com_cont = ""
         
         for mat in mats_filtrados:
-            primeiro_emb = mat.embarques.first()
-            os_texto = primeiro_emb.osEmbMat if primeiro_emb else ''
+            os_texto = mat.osEmbMat or ''
             
             if mat.contBordoEmbMat == 'SIM':
                 lista_com_cont += f"""
@@ -966,8 +854,7 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, data_emissa
         # CRD
         lista_materiais = ""
         for mat in mats_filtrados:
-            primeiro_emb = mat.embarques.first()
-            os_texto = primeiro_emb.osEmbMat if primeiro_emb else ''
+            os_texto = mat.osEmbMat or ''
             lista_materiais += f"""
             <tr>
                 <td style="border:1px solid #ddd; padding:8px;">{mat.descMatEmb}</td>
@@ -1030,7 +917,6 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, data_emissa
     
     return html_completo
 
-
 #========================================== SOLICITAÇÕES DE DESEMBARQUE - LISTAGEM ==========================================
 @csrf_exempt
 @require_http_methods(["GET"])
@@ -1052,10 +938,6 @@ def solicitacoes_desembarque_list(request):
         
         data = []
         for mat in materiais:
-            # Buscar primeiro embarque para pegar OS
-            primeiro_embarque = mat.embarques.first()
-            
-            # Buscar data de solicitação do desembarque (campo atualizado_em)
             data_solicitacao = mat.atualizado_em.strftime('%d/%m/%Y %H:%M') if mat.atualizado_em else ''
             
             data.append({
@@ -1063,7 +945,7 @@ def solicitacoes_desembarque_list(request):
                 'barcoMatEmb': mat.barcoMatEmb.nomeBarco,
                 'tipoBarco': mat.barcoMatEmb.tipoBarco,
                 'descMatEmb': mat.descMatEmb,
-                'osEmb': primeiro_embarque.osEmbMat if primeiro_embarque else '',
+                'osEmb': mat.osEmbMat or '',
                 'respEmbMat': mat.respEmbMat or '',
                 'outRespEmbMat': mat.outRespEmbMat or '',
                 'dataSolicitacao': data_solicitacao
@@ -1076,7 +958,6 @@ def solicitacoes_desembarque_list(request):
     except Exception as e:
         print(f"[API ERROR] GET /api/solicitacoes-desembarque/ - {str(e)}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
 
 #========================================== REMOVER SOLICITAÇÃO DESEMBARQUE ==========================================
 @csrf_exempt
@@ -1096,11 +977,8 @@ def remover_solicitacao_desembarque(request, material_id):
         
         # Atualizar status
         material.statusProgMatEmb = 'MATERIAL A BORDO'
+        material.statusRegEmb = 'MATERIAL A BORDO'
         material.save()
-        
-        # Replicar para subtabelas
-        material.embarques.update(statusRegEmb='MATERIAL A BORDO')
-        material.desembarques.update(statusRegDesemb='MATERIAL A BORDO')
         
         print(f"[API] Solicitação de desembarque removida - Material {material_id}")
         
@@ -1110,8 +988,7 @@ def remover_solicitacao_desembarque(request, material_id):
         print(f"[API ERROR] PUT /api/materiais-embarque/{material_id}/remover-solicitacao/ - {str(e)}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
-
-#========================================== MATERIAL COLETADO ==========================================
+#========================================== MATERIAL COLETADO ========================================================
 @csrf_exempt
 @require_http_methods(["PUT"])
 def material_coletado(request, material_id):
@@ -1134,8 +1011,10 @@ def material_coletado(request, material_id):
         
         print(f"[API] PUT /api/materiais-embarque/{material_id}/material-coletado/ - RT: {num_rt}")
         
-        # Atualizar status
+        # Atualizar status e RT de desembarque
         material.statusProgMatEmb = 'MATERIAL DESEMBARCADO'
+        material.statusRegEmb = 'MATERIAL DESEMBARCADO'
+        material.numRtMatDesemb = num_rt
         
         # Adicionar observação
         data_atual = datetime.now().strftime('%d/%m/%Y')
@@ -1143,15 +1022,6 @@ def material_coletado(request, material_id):
         material.obsMatEmb = (material.obsMatEmb or '') + obs_adicional
         
         material.save()
-        
-        # Atualizar subtabela de desembarque com o número da RT
-        material.desembarques.update(
-            numRtMatDesemb=num_rt,
-            statusRegDesemb='MATERIAL DESEMBARCADO'
-        )
-        
-        # Replicar para subtabelas de embarque
-        material.embarques.update(statusRegEmb='MATERIAL DESEMBARCADO')
         
         print(f"[API] Material coletado registrado - Material {material_id}, RT {num_rt}")
         
@@ -1161,8 +1031,7 @@ def material_coletado(request, material_id):
         print(f"[API ERROR] PUT /api/materiais-embarque/{material_id}/material-coletado/ - {str(e)}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
-
-#========================================== MATERIAL NÃO COLETADO ==========================================
+#========================================== MATERIAL NÃO COLETADO =====================================================
 @csrf_exempt
 @require_http_methods(["PUT"])
 def material_nao_coletado(request, material_id):
@@ -1185,8 +1054,10 @@ def material_nao_coletado(request, material_id):
         
         print(f"[API] PUT /api/materiais-embarque/{material_id}/material-nao-coletado/ - RT: {num_rt}")
         
-        # Atualizar status
+        # Atualizar status e RT de desembarque
         material.statusProgMatEmb = 'RELACIONADO PARA DESEMBARQUE'
+        material.statusRegEmb = 'RELACIONADO PARA DESEMBARQUE'
+        material.numRtMatDesemb = num_rt
         
         # Adicionar observação
         data_atual = datetime.now().strftime('%d/%m/%Y')
@@ -1194,15 +1065,6 @@ def material_nao_coletado(request, material_id):
         material.obsMatEmb = (material.obsMatEmb or '') + obs_adicional
         
         material.save()
-        
-        # Atualizar subtabela de desembarque com o número da RT
-        material.desembarques.update(
-            numRtMatDesemb=num_rt,
-            statusRegDesemb='RELACIONADO PARA DESEMBARQUE'
-        )
-        
-        # Replicar para subtabelas de embarque
-        material.embarques.update(statusRegEmb='RELACIONADO PARA DESEMBARQUE')
         
         print(f"[API] Material não coletado registrado - Material {material_id}, RT {num_rt}")
         

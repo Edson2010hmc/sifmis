@@ -137,7 +137,6 @@ urlpatterns = [
     path('api/materiais-embarque/', views_invmat.materiais_embarque_list, name='materiais_embarque_list'),
     path('api/materiais-embarque/<int:material_id>/', views_invmat.materiais_embarque_detail, name='materiais_embarque_detail'),
     path('api/materiais-embarque/<int:material_id>/status/', views_invmat.materiais_embarque_status, name='materiais_embarque_status'),
-    path('api/materiais-embarque/<int:material_id>/desembarque/', views_invmat.materiais_desembarque_add, name='materiais_desembarque_add'),
     path('api/emails-desembarque/', views_invmat.emails_solic_desemb, name='emails_solic_desemb'),
 
     # API Materiais Desembarque
