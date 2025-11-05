@@ -201,7 +201,7 @@ const DesMatPsModule = (() => {
       document.getElementById('det_status').value = mat.statusProgMatEmb || '';
       document.getElementById('det_obs').value = mat.obsMatEmb || '';
 
-      // ✅ CORRIGIDO: Campos de embarque agora estão diretamente em mat
+      // 
       document.getElementById('det_data_prev').value = mat.dataPrevEmbMat || '';
       document.getElementById('det_rt').value = mat.numRtMatEmb || '';
       document.getElementById('det_os').value = mat.osEmbMat || '';
