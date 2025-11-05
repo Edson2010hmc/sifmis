@@ -562,7 +562,8 @@
     await processarSolicitacaoDesembarque(barcoId, null);
   }
 
-  // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE - CORRETO =====
+
+  // ===== PROCESSAR SOLICITAÇÃO DE DESEMBARQUE =====
   async function processarSolicitacaoDesembarque(barcoId) {
     try {
       // Verificar autenticação
@@ -594,8 +595,8 @@
         return;
       }
 
-      if (!respPS.psRascunho) {
-        alert('Não há PS em rascunho para esta embarcação. Complete esses dados antes de solicitar o desembarque.');
+      if (!respPS.existeRascunho || !respPS.dadosCompletos) {
+        alert('Não há PS em rascunho com dados de porto completos para esta embarcação. Complete esses dados antes de solicitar o desembarque.');
         return;
       }
 
@@ -619,7 +620,7 @@
       // ===== PROCESSAR MATERIAIS CRD =====
       if (matCrd.length > 0) {
         // CRD sempre usa modelo 004 (sem modal)
-        await enviarSolicitacaoDesembarque('004', barcoId, fiscalNome, psData, {}, 'CRD');
+        await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, '004', {}, 'CRD');
       }
 
       // ===== PROCESSAR MATERIAIS NÃO-CRD =====
@@ -638,16 +639,16 @@
             const dadosModal = await abrirModalContentoresPromise('002', barcoId, fiscalNome, psData);
 
             if (dadosModal) {
-              await enviarSolicitacaoDesembarque('002', barcoId, fiscalNome, psData, dadosModal, 'NAO_CRD');
+              await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, '002', dadosModal, 'NAO_CRD');
             }
           } else {
             // Enviar modelo 001 (sem contentor adicional)
-            await enviarSolicitacaoDesembarque('001', barcoId, fiscalNome, psData, {}, 'NAO_CRD');
+            await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, '001', {}, 'NAO_CRD');
           }
 
         } else if (comContentor.length === 0 && semContentor.length > 0) {
           // MODELO 001: Apenas materiais SEM contentor
-          await enviarSolicitacaoDesembarque('001', barcoId, fiscalNome, psData, {}, 'NAO_CRD');
+          await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, '001', {}, 'NAO_CRD');
 
         } else if (comContentor.length > 0 && semContentor.length > 0) {
           // MODELO 003: MISTO (com e sem contentor)
@@ -659,11 +660,11 @@
             const dadosModal = await abrirModalContentoresPromise('003', barcoId, fiscalNome, psData);
 
             if (dadosModal) {
-              await enviarSolicitacaoDesembarque('003', barcoId, fiscalNome, psData, dadosModal, 'NAO_CRD');
+              await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, '003', dadosModal, 'NAO_CRD');
             }
           } else {
             // Enviar modelo 001 (sem contentor adicional)
-            await enviarSolicitacaoDesembarque('001', barcoId, fiscalNome, psData, {}, 'NAO_CRD');
+            await enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, '001', {}, 'NAO_CRD');
           }
         }
       }
@@ -677,19 +678,19 @@
     }
   }
 
-
-  // ===== ENVIAR SOLICITAÇÃO DE DESEMBARQUE =====
-  async function enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, modelo, dadosModal) {
+  // ===== ENVIAR SOLICITAÇÃO DESEMBARQUE =====
+  async function enviarSolicitacaoDesembarque(barcoId, fiscalNome, psData, modelo, dadosModal, tipoMaterial) {
     try {
       const response = await fetch('/api/solicitar-desembarque/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          barcoId: barcoId,
-          fiscalNome: fiscalNome,
-          psData: psData,
-          modelo: modelo,
-          dadosModal: dadosModal
+          barcoId,
+          fiscalNome,
+          psData,
+          modelo,
+          dadosModal,
+          tipoMaterial
         })
       });
 
@@ -699,15 +700,11 @@
         throw new Error(result.error);
       }
 
-      alert('Solicitação de desembarque enviada com sucesso!');
-      await carregarTabelas();
-
     } catch (error) {
-      alert('Erro ao enviar solicitação: ' + error.message);
+      alert('Erro ao enviar solicitação ' + tipoMaterial + ': ' + error.message);
+      throw error;
     }
   }
-
-
   // ===== ABRIR MODAL CONTENTORES COM PROMISE =====
   function abrirModalContentoresPromise(modelo, barcoId, fiscalNome, psData) {
     return new Promise((resolve, reject) => {
@@ -763,35 +760,6 @@
     });
   }
 
-  // ===== ENVIAR SOLICITAÇÃO =====
-  async function enviarSolicitacao(modelo, barcoId, fiscalNome, psData, dadosModal, tipoMaterial) {
-    try {
-      const response = await fetch('/api/solicitar-desembarque/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          barcoId,
-          fiscalNome,
-          psData,
-          modelo,
-          dadosModal,
-          tipoMaterial
-        })
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      console.log(`E-mail ${tipoMaterial} enviado com sucesso (Modelo ${modelo})`);
-
-    } catch (error) {
-      alert('Erro ao enviar solicitação ' + tipoMaterial + ': ' + error.message);
-      throw error;
-    }
-  }
 
   // ===== MODAL - ABRIR/FECHAR =====
   function abrirModalNovo() {
