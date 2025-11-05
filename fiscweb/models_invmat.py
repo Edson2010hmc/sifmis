@@ -8,7 +8,7 @@ from .models_cad import BarcosCad
 #================================ MODELO PRINCIPAL - MATERIAL EMBARQUE ====================================================
 class materialEmb(models.Model):
     """Modelo de Tabela de Programação de Embarque de Materiais"""
-    
+    embarques=[]
     RESPONSAVEL_CHOICES = [
         ('CRD', 'CRD'),
         ('MIS', 'MIS'),
