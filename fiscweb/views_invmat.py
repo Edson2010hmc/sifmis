@@ -119,7 +119,6 @@ def materiais_embarque_list(request):
             print(f"[API ERROR] POST /api/materiais-embarque/ - {str(e)}")
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
-
 @csrf_exempt
 @require_http_methods(["GET", "PUT", "DELETE"])
 def materiais_embarque_detail(request, material_id):
@@ -227,7 +226,6 @@ def materiais_embarque_detail(request, material_id):
             traceback.print_exc()
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
-
 @csrf_exempt
 @require_http_methods(["PUT"])
 def materiais_embarque_status(request, material_id):
@@ -258,7 +256,6 @@ def materiais_embarque_status(request, material_id):
     except Exception as e:
         print(f"[API ERROR] PUT /api/materiais-embarque/{material_id}/status/ - {str(e)}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
 
 @csrf_exempt
 @require_http_methods(["GET", "POST", "PUT"])
@@ -351,7 +348,6 @@ def emails_solic_desemb(request):
             print(f"[API ERROR] PUT /api/emails-desembarque/ - {str(e)}")
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
         
-
 #========================================== MATERIAIS DESEMBARQUE - LISTAGEM ==========================================
 @csrf_exempt
 @require_http_methods(["GET"])
@@ -398,7 +394,6 @@ def materiais_desembarque_list(request):
     except Exception as e:
         print(f"[API ERROR] GET /api/materiais-desembarque/ - {str(e)}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
 
 #========================================== VERIFICAR PS RASCUNHO ==========================================
 @csrf_exempt
@@ -508,18 +503,20 @@ def verificar_ps_rascunho_material(request):
         
         print(f"[VERIF-PS] ========== PS VÁLIDA COM DADOS COMPLETOS ==========")
         
+        
         return JsonResponse({
-            'success': True,
-            'existeRascunho': True,
-            'dadosCompletos': True,
-            'psData': {
-                'id': ps_rascunho.id,
-                'dataEmissao': str(ps_rascunho.dataEmissaoPS),
-                'porto': troca_turma.Porto,
-                'atracacao': str(troca_turma.AtracPorto),
-                'duracao': troca_turma.DuracPorto
-            }
-        })
+          'success': True,
+          'existeRascunho': True,
+          'dadosCompletos': True,
+          'psData': {
+          'id': ps_rascunho.id,
+          'dataEmissao': str(ps_rascunho.dataEmissaoPS),
+          'porto': troca_turma.Porto,
+          'terminal': troca_turma.Terminal,  # <-- LINHA ADICIONADA
+          'atracacao': str(troca_turma.AtracPorto),
+          'duracao': troca_turma.DuracPorto
+       }
+})
         
     except Exception as e:
         print(f"[VERIF-PS] ========== ERRO CRÍTICO ==========")
@@ -694,6 +691,10 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, data_emissa
     else:
         # Não CRD
         mats_filtrados = [m for m in materiais if m.respEmbMat != 'CRD']
+
+    # Extrair Porto e Terminal do ps_data
+    porto = ps_data.get('porto', '')
+    terminal = ps_data.get('terminal', '')
     
     # Construir lista de materiais
     if modelo == '001':
@@ -713,7 +714,7 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, data_emissa
                 """
         
         corpo = f"""
-        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {data_emissao_formatada} das {hora_atrac_formatada} às {hora_saida_formatada}</p>
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {data_emissao_formatada} das {hora_atrac_formatada} às {hora_saida_formatada} no porto {porto}, terminal {terminal}.</p>
       
         <table style="width:100%; border-collapse:collapse; margin:20px 0;">
             <thead>
@@ -754,7 +755,7 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, data_emissa
         desc_cont = dados_modal.get('descContentores', '')
         
         corpo = f"""
-        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {data_emissao_formatada} das {hora_atrac_formatada} às {hora_saida_formatada}</p>
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {data_emissao_formatada} das {hora_atrac_formatada} às {hora_saida_formatada} no porto {porto}, terminal {terminal}.</p>
 
        
         <table style="width:100%; border-collapse:collapse; margin:20px 0;">
@@ -811,7 +812,7 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, data_emissa
         desc_cont = dados_modal.get('descContentores', '')
         
         corpo = f"""
-        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {data_emissao_formatada} das {hora_atrac_formatada} às {hora_saida_formatada}</p>
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {data_emissao_formatada} das {hora_atrac_formatada} às {hora_saida_formatada} no porto {porto}, terminal {terminal}.</p>
        
         <table style="width:100%; border-collapse:collapse; margin:20px 0;">
             <thead>
@@ -864,7 +865,7 @@ def gerar_corpo_email_desembarque(modelo, materiais, barco, ps_data, data_emissa
             """
         
         corpo = f"""
-        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {data_emissao_formatada} das {hora_atrac_formatada} às {hora_saida_formatada}</p>
+        <p>Solicito o desembarque dos materiais relacionados abaixo, que se encontram a bordo do {barco.tipoBarco} {barco.nomeBarco}, para a próxima estadia de porto prevista para {data_emissao_formatada} das {hora_atrac_formatada} às {hora_saida_formatada} no porto {porto}, terminal {terminal}.</p>
         <table style="width:100%; border-collapse:collapse; margin:20px 0;">
             <thead>
                 <tr style="background-color:#0b7a66; color:white;">
