@@ -198,9 +198,7 @@ def fiscais_perfil_fiscal(request):
     Retorna fiscais que possuem perfFisc=True
     """
     try:
-        fiscais = FiscaisCad.objects.filter(perfFisc=True).values(
-            'id', 'chave', 'nome'
-        )
+        fiscais = FiscaisCad.objects.filter(perfFisc=True).values('id', 'chave', 'nome')
         fiscais_list = list(fiscais)
         
         return JsonResponse({

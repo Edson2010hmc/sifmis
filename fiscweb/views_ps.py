@@ -2364,7 +2364,6 @@ def subtab_mob_desm_detail(request, item_id):
             }, status=400)
 
 #========================================== EMBARQUE MATERIAIS PS - SINCRONIZAR ==========================================
-#========================================== EMBARQUE MATERIAIS PS - SINCRONIZAR ==========================================
 @csrf_exempt
 @require_http_methods(["POST"])
 def sincronizar_materiais_embarque_ps(request, ps_id):

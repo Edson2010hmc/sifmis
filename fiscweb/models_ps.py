@@ -9,7 +9,7 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
 
-#================== SIGNAL PARA DELETAR ANEXOS DE REGISTROS EXCLUIDOS==================
+#================== SIGNAL PARA DELETAR ANEXOS DE REGISTROS EXCLUIDOS==========================================
 @receiver(post_delete)
 def deletar_arquivos_anexos(sender, instance, **kwargs):
     # Verifica todos os campos FileField do modelo
@@ -20,7 +20,7 @@ def deletar_arquivos_anexos(sender, instance, **kwargs):
                 if os.path.isfile(arquivo.path):
                     os.remove(arquivo.path)
 
-#=================================FUNÇÃO DE TRATAMENTO DOS ARQUIVOS ANEXOS================================================
+#=================================FUNÇÃO DE TRATAMENTO DOS ARQUIVOS ANEXOS=====================================
 def caminho_PS(instance, filename):
         """Função genérica que encontra PassServ automaticamente"""
         
@@ -47,7 +47,7 @@ def caminho_PS(instance, filename):
         
         return f"storage/PS/{barco}/{ano}/{folder}/{nome_arquivo}"
  
-#=================================1 MODELO PASSAGENS DE SERVIÇO================================================#
+#=================================1 MODELO PASSAGENS DE SERVIÇO================================================
 class PassServ(models.Model):
     """Modelo para cadastro de Passagem de Serviço"""
 
@@ -79,7 +79,7 @@ class PassServ(models.Model):
     def __str__(self):
         return f"{self.numPS} - {self.BarcoPS} - {self.dataEmissaoPS}"
         
-#=================================1.1 =MODELO PORTO TROCA DE TURMA===============================================
+#=================================1.1 =MODELO PORTO TROCA DE TURMA=============================================
 class PortoTrocaTurma(models.Model):
     """Modelo para cadastro de Passagem de Serviço - Porto"""
 
@@ -99,7 +99,7 @@ class PortoTrocaTurma(models.Model):
     def __str__(self):
         return f"{self.idxPortoTT} - {self.Porto}"
     
-#================================1.2 MODELO PORTO MANUTENÇÃO PREVENTIVA===============================================
+#================================1.2 MODELO PORTO MANUTENÇÃO PREVENTIVA========================================
 class PortoManutPrev(models.Model):
     """Modelo para cadastro de Passagem de Serviço - Manutenção Preventiva - porto"""
 
@@ -165,7 +165,7 @@ class PortoInspNorm(models.Model):
     def __str__(self):
         return f"{self.idxPortoIN}"
     
-#=================================SUB TABELA INSPEÇÕES NORMATIVAS ===============================================
+#=================================SUB TABELA INSPEÇÕES NORMATIVAS ==============================================
 class subTabPortoInspNorm(models.Model):
     """Modelo para cadastro de Passagem de Serviço - Inspeções Normativas - porto"""
 
@@ -230,7 +230,7 @@ class subTabPortoInspPetr(models.Model):
     def __str__(self):
         return f"{self.idxsubTabPortoIP} - {self.DescInspPetr}"
 
-#=================================1.6 MODELO EMBARQUE EQUIPES===============================================
+#=================================1.6 MODELO EMBARQUE EQUIPES===================================================
 class PortoEmbEquip(models.Model):
     """Modelo para cadastro de Passagem de Serviço - Embarque Equipes - porto"""
 
@@ -246,8 +246,8 @@ class PortoEmbEquip(models.Model):
 
     def __str__(self):
         return f"{self.idxPortoEE} - {self.idxPortoEE.numPS}"
-    
-#=================================SUB TABELA EMBARQUE EQUIPES==============================
+
+#=================================SUB TABELA EMBARQUE EQUIPES===================================================
 class subTabPortoEmbEquip(models.Model):
     """Modelo para cadastro de Passagem de Serviço - Embarque Equipes - porto"""
 
@@ -277,7 +277,7 @@ class subTabPortoEmbEquip(models.Model):
         return f"{self.idxSubTabPortoEE} - {self.DescEmbEquip}"
 
 
-#=============================== =1.7 MODELO MOBILIZAÇÃO DESMOBILIZAÇÃO===============================================
+#=============================== =1.7 MODELO MOBILIZAÇÃO DESMOBILIZAÇÃO========================================
 class PortoMobD(models.Model):
     """Modelo para cadastro de Passagem de Serviço - Operações de Mobilização e desmobilização - Porto"""
 
@@ -293,7 +293,7 @@ class PortoMobD(models.Model):
     def __str__(self):
         return f"{self.idxPortoMobD} - {self.idxPortoMobD.numPS}"
     
-#=============================== SUB TABELA OS MOBILIZAÇÃO DESMOBILIZAÇÃO===============================================
+#=============================== SUB TABELA OS MOBILIZAÇÃO DESMOBILIZAÇÃO======================================
 class SubTabPortoMobD(models.Model):
     """Modelo para cadastro de Passagem de Serviço - Operações de Mobilização e desmobilização - Porto"""
 
@@ -311,7 +311,7 @@ class SubTabPortoMobD(models.Model):
         return f"{self.idxSubTabPortoMobD} - {self.OsMobD}"
 
 
-#=================================1.8 MODELO EMBARQUE MATERIAIS===============================================
+#=================================1.8 MODELO EMBARQUE MATERIAIS================================================
 class portoMatEmb(models.Model):
     """Modelo para  registro de Embarque de Materiais - porto"""
 
@@ -332,7 +332,6 @@ class portoMatEmb(models.Model):
     def __str__(self):
         return f"{self.idxPortoMatEmb} - {self.idxPortoMatEmb.numPS}"
     
-  
 
 #=================================1.9 MODELO DESEMBARQUE MATERIAIS===============================================
 class portoMatDesemb(models.Model):
@@ -357,10 +356,7 @@ class portoMatDesemb(models.Model):
         return f"{self.idxPortoMatDesemb} - {self.idxPortoMatDesemb.numPS}"
     
 
-#=============================== 2  ROTINAS - SMS =========================================
-
-
-
+#=============================== 2  ANOMALIAS E SMS =========================================
 
 #================================2.1 MODELO ANOMALIAS DE SMS===========================================
 
