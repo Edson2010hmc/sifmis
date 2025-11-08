@@ -354,11 +354,60 @@ class portoMatDesemb(models.Model):
 
     def __str__(self):
         return f"{self.idxPortoMatDesemb} - {self.idxPortoMatDesemb.numPS}"
+
+
+
+
+#================================2  ROTINAS =====================================================================
+
+#================================2.1 ASSUNTOS E PENDÊNCIAS CONTRATUAIS============================================
+class assunPendContr(models.Model):
+    """Modelo para  Assuntos e Penências Contratuaiso"""
+
+    CLASS_PEND_CHOICES = [
+                            ('PENDENCIA DE ACEITAÇÃO' ,'PENDENCIA DE ACEITAÇÃO'),
+                            ('ITENS CONTRATUAIS' ,'ITENS CONTRATUAIS'),
+                            ('OUTROS' ,'OUTROS'),
+                        ]
+   
+    dataRegistroInicial = models.DateField(blank=True,null=True, verbose_name='Data Regitro Inicial')
+    fiscRegistroInicial = models.CharField(max_length=30,blank=True,null=True, verbose_name='Fiscal Registro Inicial')
+    classeRegistroInicial = models.CharField(max_length=22,choices=CLASS_PEND_CHOICES,blank=True,null=True, verbose_name='Numero RT')
+    descrRegistroInicial = models.TextField(max_length=400, blank=True,verbose_name='Descrição')
+    mantRegistroInicial = models.BooleanField(default=False, verbose_name='Mantém ativo para proxima PS')
+   
+    
+    class Meta:
+        verbose_name = 'Assunto e Pendência Contratual - Rotina'
+        verbose_name_plural = 'Assuntos e Penências Contratuais- Rotina'
+        ordering = ['-dataRegistroInicial','classeRegistroInicial']  
+
+    def __str__(self):
+        return f"{self.dataRegistroInicial} - {self.classeRegistroInicial}"
+
+#================================SUB TABELA ASSUNTOS E PENDENCIAS CONTRATUAIS=====================================
+class subAssunPendContr(models.Model):
+    """Modelo subtabela Assuntos e Pendencias Contratuai"""
+
+    idxAssunPendContr = models.ForeignKey(assunPendContr, on_delete=models.CASCADE)
+    dataRegistroComent = models.DateField(blank=True,null=True, verbose_name='Data Comentario')
+    fiscRegistroComent = models.CharField(max_length=30,blank=True,null=True, verbose_name='Fiscal Registro Inicial')
+    descrRegistroComent = models.TextField(max_length=400, blank=True,verbose_name='Descrição')
+    
+    class Meta:
+        verbose_name = 'Comentario assunto e pendencia - Rotina'
+        verbose_name_plural = 'Comentários assuntos e pendências- Rotina'
+        ordering = ['-dataRegistroComent','idxAssunPendContr__classeRegistroInicial']  
+
+    def __str__(self):
+        return f"{self.dataRegistroComent} - {self.idxAssunPendContr}"
     
 
-#=============================== 2  ANOMALIAS E SMS =========================================
 
-#================================2.1 MODELO ANOMALIAS DE SMS===========================================
+
+#=============================== 3  ANOMALIAS E SMS =========================================
+
+#================================3.1 INFORMES DE ANOMALIA===========================================
 
 class anomSMS(models.Model):
     """Modelo para  Passagem de Serviço - Anomalias de SMS"""
@@ -376,7 +425,7 @@ class anomSMS(models.Model):
     def __str__(self):
         return f"{self.dataAnomSMS} - {self.horaAnomSMS} - {self.relacAnomSMS}" 
 
-#================================2.2 DESVIOS DE SMS A BORDO===========================================
+#================================3.2 DESVIOS DE SMS===========================================
 class desvSMS(models.Model):
     """Modelo para  Passagem de Serviço - Desvios de SMS A BORDO"""
 
@@ -395,7 +444,7 @@ class desvSMS(models.Model):
         return f"{self.dataDesvSMS} - {self.localDesvSMS}" 
 
 
-#================================2.3  LV de Mangueiras====================================
+#================================3.3  LV de Mangueiras====================================
 
 class smsLvMang(models.Model):
     """Modelo para cadastro de Passagem de Serviço - LV de Mangueiras - SMS"""
@@ -424,7 +473,7 @@ class smsLvMang(models.Model):
         
 
 
-#================================2.4 LV de Segurança====================================
+#================================3.4 LV de Segurança====================================
 class smsLvSeg(models.Model):
     """Modelo para cadastro de Passagem de Serviço - LV de Segurança - SMS"""
 

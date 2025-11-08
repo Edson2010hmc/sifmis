@@ -18,6 +18,7 @@ db.sqlite3
 flow/.vscode/
 
 sios models/
+util_sharepoint/
 run_admin.bat
 run_admin.py
 run_server.bat
@@ -26,3 +27,4 @@ analyze_app_flow.py
 instrucoes.md
 sirf.pdf
 DT.md
+Lista_LV.xlsx

@@ -6,8 +6,15 @@ from .models_ps import PassServ, PortoTrocaTurma,PortoManutPrev,PortoAbast,Porto
 from .models_ps import anomSMS,desvSMS 
 from .models_ps import inoPendContr 
 from .models_ps import iapo, smsLvMang,smsLvSeg
+from .models_ps import assunPendContr,subAssunPendContr
+
+
+
 
 from .models_anom import InformeAnomalia, SubTabPessoasAnomalia 
+
+
+
 from .models_invmat import materialEmb,  emailsSolicDesemb 
 
 
@@ -34,7 +41,8 @@ admin.site.register(PortoMobD)
 admin.site.register(subTabPortoInspNorm)
 admin.site.register(subTabPortoInspPetr)
 admin.site.register(subTabPortoEmbEquip)
-
+admin.site.register(assunPendContr)
+admin.site.register(subAssunPendContr)
 
 admin.site.register(anomSMS)
 admin.site.register(desvSMS)
