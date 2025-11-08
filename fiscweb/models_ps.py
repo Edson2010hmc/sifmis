@@ -367,14 +367,14 @@ class assunPendContr(models.Model):
     CLASS_PEND_CHOICES = [
                             ('PENDENCIA DE ACEITAÇÃO' ,'PENDENCIA DE ACEITAÇÃO'),
                             ('ITENS CONTRATUAIS' ,'ITENS CONTRATUAIS'),
-                            ('OUTROS' ,'OUTROS'),
+                            ('OUTROS' , 'OUTROS'),
                         ]
    
     dataRegistroInicial = models.DateField(blank=True,null=True, verbose_name='Data Regitro Inicial')
     fiscRegistroInicial = models.CharField(max_length=30,blank=True,null=True, verbose_name='Fiscal Registro Inicial')
-    classeRegistroInicial = models.CharField(max_length=22,choices=CLASS_PEND_CHOICES,blank=True,null=True, verbose_name='Numero RT')
+    classeRegistroInicial = models.CharField(max_length=30,choices=CLASS_PEND_CHOICES,blank=True,null=True, verbose_name='Numero RT')
     descrRegistroInicial = models.TextField(max_length=400, blank=True,verbose_name='Descrição')
-    mantRegistroInicial = models.BooleanField(default=False, verbose_name='Mantém ativo para proxima PS')
+    mantRegistroInicial = models.BooleanField(default=True, verbose_name='Mantém ativo para proxima PS')
    
     
     class Meta:
