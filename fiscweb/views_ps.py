@@ -14,7 +14,9 @@ from django.views.decorators.http import require_http_methods
 import json
 from django.http.multipartparser import MultiPartParser
 from django.core.files.uploadhandler import MemoryFileUploadHandler
-from django.db import models
+from django.db import models, transaction
+import time
+import random
 from .models_cad import FiscaisCad,BarcosCad,ModalBarco
 
 from .models_anom import InformeAnomalia
