@@ -488,21 +488,47 @@
         </div><!--Fim da subtab PORTO-->
 
 
+        <!-- templates/index_ps.html -->
+        <!-- TRECHO A SER INSERIDO APÓS O FECHAMENTO DA DIV sub-porto -->
+
+        <!-- ==================== SUB-ABA 2: PENDÊNCIAS, OCORRÊNCIAS E ORIENTAÇÕES ==================== -->
         <div class="subtab" id="sub-pendencias">
           <div class="card">
             <h2>2. PENDÊNCIAS, OCORRÊNCIAS E ORIENTAÇÕES</h2>
           </div>
-        </div>
 
-
-        <div class="subtab" id="sub-lvsms">
-          <div class="card">
-            <h2>3. LISTAS DE VERIFICAÇÃO-SMS</h2>
+          <!-- 2.1 Assuntos e Pendências Contratuais -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="assunpendcontr">
+              <span>2.1 Assuntos e Pendências Contratuais</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-assunpendcontr">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Gestão de assuntos e pendências contratuais.</p>
+                <!-- CONTEÚDO SERÁ IMPLEMENTADO NA TAREFA 2 -->
+              </div>
+            </div>
           </div>
-          <!-- 2.1 Anomalias de SMS -->
+
+          <!-- 2.2 Desvios e Não Conformidades -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="desvnaoconf">
+              <span>2.2 Desvios e Não Conformidades</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-desvnaoconf">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Registro de desvios e não conformidades.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.3 Informes de Anomalia Emitidos -->
           <div class="accordion-item">
             <div class="accordion-header" data-target="anomsms">
-              <span>3.1 Anomalias de SMS da Quinzena</span>
+              <span>2.3 Informes de Anomalia Emitidos</span>
               <span class="toggle">▼</span>
             </div>
             <div class="accordion-content" id="acc-anomsms">
@@ -528,172 +554,442 @@
               </div>
             </div>
           </div>
-        </div>
-      </div><!--Fim da subtab SMS-->
 
-      <div class="subtab" id="sub-os">
-        <div class="card">
-          <h2>4. ORDENS DE SERVIÇO</h2>
-        </div>
-      </div>
-      <div class="subtab" id="sub-gerais">
-        <div class="card">
-          <h2>5. ORIENTAÇÕES E INFORMAÇÕES GERAIS</h2>
-        </div>
-      </div>
-
-
-
-
-      <!-- MODAL DE VISUALIZAÇÃO DE INFORME -->
-      <div id="modalVisualizarInforme" class="modal-overlay">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2 style="margin:0;">Visualizar Informe de Anomalia</h2>
-            <button class="modal-close" onclick="AnomSMSModule.fecharModal()">&times;</button>
+          <!-- 2.4 FROs Emitidos -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="frosemitidos">
+              <span>2.4 FROs Emitidos</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-frosemitidos">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Formulários de Registro de Ocorrências emitidos.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
           </div>
-          <div class="modal-body" id="modalInformeConteudo">
-            <!-- Conteúdo será inserido via JavaScript -->
+
+          <!-- 2.5 Pendências BROA -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="pendbroa">
+              <span>2.5 Pendências BROA</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-pendbroa">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Pendências registradas no BROA.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.6 FRO Emitido -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="froemitido">
+              <span>2.6 FRO Emitido</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-froemitido">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Formulário de Registro de Ocorrência.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+        </div><!--Fim da subtab PENDÊNCIAS-->
+
+
+        <!-- ==================== SUB-ABA 3: LISTAS DE VERIFICAÇÃO-SMS ==================== -->
+        <div class="subtab" id="sub-lvsms">
+          <div class="card">
+            <h2>3. LISTAS DE VERIFICAÇÃO-SMS</h2>
+          </div>
+
+          <!-- 3.1 LV de Segurança -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="lvseguranca">
+              <span>3.1 LV de Segurança</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-lvseguranca">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Lista de Verificação de Segurança.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.2 LV de Mangueiras -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="lvmangueiras">
+              <span>3.2 LV de Mangueiras</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-lvmangueiras">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Lista de Verificação de Mangueiras.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.3 LV Segurança Durante Operações de Mergulho (CONDICIONAL) -->
+          <div class="accordion-item" data-tipo-barco="TUP,DSV,SDSV">
+            <div class="accordion-header" data-target="lvsegopmerg">
+              <span>3.3 LV Segurança Durante Operações de Mergulho</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-lvsegopmerg">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Lista de Verificação de Segurança Durante Operações de
+                  Mergulho.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.4 LV de Operações Críticas de Mergulho (CONDICIONAL) -->
+          <div class="accordion-item" data-tipo-barco="TUP,DSV,SDSV">
+            <div class="accordion-header" data-target="lvopcriticamerg">
+              <span>3.4 LV de Operações Críticas de Mergulho</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-lvopcriticamerg">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Lista de Verificação de Operações Críticas de Mergulho.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.5 LV de Conformidade com Requisitos de Mergulho (CONDICIONAL) -->
+          <div class="accordion-item" data-tipo-barco="TUP,DSV,SDSV">
+            <div class="accordion-header" data-target="lvconfreqmerg">
+              <span>3.5 LV de Conformidade com Requisitos de Mergulho</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-lvconfreqmerg">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Lista de Verificação de Conformidade com Requisitos de
+                  Mergulho.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.6 LV de LDB (CONDICIONAL) -->
+          <div class="accordion-item" data-tipo-barco="TUP,DSV,SDSV">
+            <div class="accordion-header" data-target="lvldb">
+              <span>3.6 LV de LDB</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-lvldb">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Lista de Verificação de LDB.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.7 LV de Enfermaria (CONDICIONAL) -->
+          <div class="accordion-item" data-tipo-barco="TUP,DSV,SDSV">
+            <div class="accordion-header" data-target="lvenfermaria">
+              <span>3.7 LV de Enfermaria</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-lvenfermaria">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Lista de Verificação de Enfermaria.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.8 LV Sob Demanda -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="lvsobdemanda">
+              <span>3.8 LV Sob Demanda</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-lvsobdemanda">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Listas de Verificação Sob Demanda.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.9 LV de Pré-Abastecimento -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="lvpreabast">
+              <span>3.9 LV de Pré-Abastecimento</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-lvpreabast">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Lista de Verificação de Pré-Abastecimento.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+        </div><!--Fim da subtab LISTAS DE VERIFICAÇÃO-->
+
+
+        <!-- ==================== SUB-ABA 4: ORDENS DE SERVIÇO ==================== -->
+        <div class="subtab" id="sub-os">
+          <div class="card">
+            <h2>4. ORDENS DE SERVIÇO</h2>
+          </div>
+
+          <!-- 4.1 OS Programadas -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="osprogramadas">
+              <span>4.1 OS Programadas</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-osprogramadas">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Ordens de Serviço Programadas.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 4.2 OS Interrompidas -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="osinterrompidas">
+              <span>4.2 OS Interrompidas</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-osinterrompidas">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Ordens de Serviço Interrompidas.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 4.3 IAPO -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="iapo">
+              <span>4.3 IAPO</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-iapo">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Informativo de Atualização do Plano Operacional.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+        </div><!--Fim da subtab ORDENS DE SERVIÇO-->
+
+
+        <!-- ==================== SUB-ABA 5: ORIENTAÇÕES E INFORMAÇÕES GERAIS ==================== -->
+        <div class="subtab" id="sub-gerais">
+          <div class="card">
+            <h2>5. ORIENTAÇÕES E INFORMAÇÕES GERAIS</h2>
+          </div>
+
+          <!-- 5.1 Novas Orientações -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="novasorient">
+              <span>5.1 Novas Orientações</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-novasorient">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Novas orientações para a equipe.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 5.2 Informações da Embarcação -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="infoemb">
+              <span>5.2 Informações da Embarcação</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-infoemb">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Informações específicas da embarcação.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 5.3 Informações Gerais -->
+          <div class="accordion-item">
+            <div class="accordion-header" data-target="infogerais">
+              <span>5.3 Informações Gerais</span>
+              <span class="toggle">▼</span>
+            </div>
+            <div class="accordion-content" id="acc-infogerais">
+              <div class="col">
+                <p style="margin-bottom:12px; color:#666;">Informações gerais relevantes.</p>
+                <!-- IMPLEMENTAÇÃO FUTURA -->
+              </div>
+            </div>
+          </div>
+
+        </div><!--Fim da subtab ORIENTAÇÕES E INFORMAÇÕES GERAIS-->
+
+
+
+
+        <!-- MODAL DE VISUALIZAÇÃO DE INFORME -->
+        <div id="modalVisualizarInforme" class="modal-overlay">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2 style="margin:0;">Visualizar Informe de Anomalia</h2>
+              <button class="modal-close" onclick="AnomSMSModule.fecharModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalInformeConteudo">
+              <!-- Conteúdo será inserido via JavaScript -->
+            </div>
           </div>
         </div>
-      </div>
 
 
-      <!-- ========== MODAL DETALHES MATERIAL - COMPLETO ========== -->
-      <div id="modalDetalhesMaterial" class="modal hidden"
-        style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:1000;">
-        <div class="modal-content"
-          style="max-width:900px; background:#fff; border-radius:10px; padding:20px; max-height:90vh; overflow-y:auto; position:relative;">
-          <span class="close" id="closeDetalhesMaterial">&times;</span>
-          <h2 style="color:#0b7a66;">DETALHES DO MATERIAL</h2>
+        <!-- ========== MODAL DETALHES MATERIAL - COMPLETO ========== -->
+        <div id="modalDetalhesMaterial" class="modal hidden"
+          style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:1000;">
+          <div class="modal-content"
+            style="max-width:900px; background:#fff; border-radius:10px; padding:20px; max-height:90vh; overflow-y:auto; position:relative;">
+            <span class="close" id="closeDetalhesMaterial">&times;</span>
+            <h2 style="color:#0b7a66;">DETALHES DO MATERIAL</h2>
 
-          <div class="modal-body">
+            <div class="modal-body">
 
-            <!-- Embarcação -->
-            <div class="col">
-              <label>Embarcação</label>
-              <input id="det_barco" type="text" readonly style="width:400px; background:#f5f5f5;">
-            </div>
-
-            <!-- Descrição e Identificação -->
-            <div style="display:flex; gap:15px; flex-wrap:wrap;">
-              <div class="col" style="flex:1 1 300px;">
-                <label>Descrição do Material</label>
-                <input id="det_desc" type="text" readonly style="width:100%; background:#f5f5f5;">
+              <!-- Embarcação -->
+              <div class="col">
+                <label>Embarcação</label>
+                <input id="det_barco" type="text" readonly style="width:400px; background:#f5f5f5;">
               </div>
-              <div class="col" style="flex:1 1 200px;">
-                <label>Identificação/N.Série</label>
-                <input id="det_ident" type="text" readonly style="width:100%; background:#f5f5f5;">
-              </div>
-            </div>
 
-            <!-- Peso e Dimensões -->
-            <div style="display:flex; gap:15px; flex-wrap:wrap;">
-              <div class="col" style="flex:1 1 150px;">
-                <label>Peso (kg)</label>
-                <input id="det_peso" type="text" readonly style="width:100%; background:#f5f5f5;">
+              <!-- Descrição e Identificação -->
+              <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                <div class="col" style="flex:1 1 300px;">
+                  <label>Descrição do Material</label>
+                  <input id="det_desc" type="text" readonly style="width:100%; background:#f5f5f5;">
+                </div>
+                <div class="col" style="flex:1 1 200px;">
+                  <label>Identificação/N.Série</label>
+                  <input id="det_ident" type="text" readonly style="width:100%; background:#f5f5f5;">
+                </div>
               </div>
-              <div class="col" style="flex:1 1 150px;">
-                <label>Altura (m)</label>
-                <input id="det_altura" type="text" readonly style="width:100%; background:#f5f5f5;">
-              </div>
-              <div class="col" style="flex:1 1 150px;">
-                <label>Largura (m)</label>
-                <input id="det_largura" type="text" readonly style="width:100%; background:#f5f5f5;">
-              </div>
-              <div class="col" style="flex:1 1 150px;">
-                <label>Comprimento (m)</label>
-                <input id="det_compr" type="text" readonly style="width:100%; background:#f5f5f5;">
-              </div>
-            </div>
 
-            <!-- Responsável -->
-            <div class="col">
-              <label>Responsável pelo Material</label>
-              <input id="det_resp" type="text" readonly style="width:300px; background:#f5f5f5;">
-            </div>
-
-            <!-- Dados de Embarque -->
-            <h3 style="color:#0b7a66; margin-top:20px; margin-bottom:10px;">Informações de Embarque</h3>
-
-            <div style="display:flex; gap:15px; flex-wrap:wrap;">
-              <div class="col" style="flex:1 1 200px;">
-                <label>Data Prevista Embarque</label>
-                <input id="det_data_prev" type="text" readonly style="width:100%; background:#f5f5f5;">
+              <!-- Peso e Dimensões -->
+              <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                <div class="col" style="flex:1 1 150px;">
+                  <label>Peso (kg)</label>
+                  <input id="det_peso" type="text" readonly style="width:100%; background:#f5f5f5;">
+                </div>
+                <div class="col" style="flex:1 1 150px;">
+                  <label>Altura (m)</label>
+                  <input id="det_altura" type="text" readonly style="width:100%; background:#f5f5f5;">
+                </div>
+                <div class="col" style="flex:1 1 150px;">
+                  <label>Largura (m)</label>
+                  <input id="det_largura" type="text" readonly style="width:100%; background:#f5f5f5;">
+                </div>
+                <div class="col" style="flex:1 1 150px;">
+                  <label>Comprimento (m)</label>
+                  <input id="det_compr" type="text" readonly style="width:100%; background:#f5f5f5;">
+                </div>
               </div>
-              <div class="col" style="flex:1 1 200px;">
-                <label>Nº RT</label>
-                <input id="det_rt" type="text" readonly style="width:100%; background:#f5f5f5;">
-              </div>
-              <div class="col" style="flex:1 1 200px;">
-                <label>Ordem de Serviço</label>
-                <input id="det_os" type="text" readonly style="width:100%; background:#f5f5f5;">
-              </div>
-              <div class="col" style="flex:1 1 200px;">
-                <label>Meio de Recebimento</label>
-                <input id="det_meio_rec" type="text" readonly style="width:100%; background:#f5f5f5;">
-              </div>
-            </div>
 
-            <!-- Material em Contentor -->
-            <div class="col" style="margin-top:15px;">
-              <label>Material em Contentor?</label>
-              <input id="det_cont_bordo" type="text" readonly style="width:200px; background:#f5f5f5;">
-            </div>
+              <!-- Responsável -->
+              <div class="col">
+                <label>Responsável pelo Material</label>
+                <input id="det_resp" type="text" readonly style="width:300px; background:#f5f5f5;">
+              </div>
 
-            <!-- Informações do Contentor (Condicional) -->
-            <div id="det_campos_contentor" style="display:none;">
-              <h3 style="color:#0b7a66; margin-top:20px; margin-bottom:10px;">Informações do Contentor</h3>
+              <!-- Dados de Embarque -->
+              <h3 style="color:#0b7a66; margin-top:20px; margin-bottom:10px;">Informações de Embarque</h3>
 
               <div style="display:flex; gap:15px; flex-wrap:wrap;">
                 <div class="col" style="flex:1 1 200px;">
-                  <label>Descrição do Contentor</label>
-                  <input id="det_desc_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
+                  <label>Data Prevista Embarque</label>
+                  <input id="det_data_prev" type="text" readonly style="width:100%; background:#f5f5f5;">
                 </div>
                 <div class="col" style="flex:1 1 200px;">
-                  <label>Identificação do Contentor</label>
-                  <input id="det_id_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
+                  <label>Nº RT</label>
+                  <input id="det_rt" type="text" readonly style="width:100%; background:#f5f5f5;">
+                </div>
+                <div class="col" style="flex:1 1 200px;">
+                  <label>Ordem de Serviço</label>
+                  <input id="det_os" type="text" readonly style="width:100%; background:#f5f5f5;">
+                </div>
+                <div class="col" style="flex:1 1 200px;">
+                  <label>Meio de Recebimento</label>
+                  <input id="det_meio_rec" type="text" readonly style="width:100%; background:#f5f5f5;">
                 </div>
               </div>
 
-              <div style="display:flex; gap:15px; flex-wrap:wrap;">
-                <div class="col" style="flex:1 1 200px;">
-                  <label>Responsável pelo Contentor</label>
-                  <input id="det_resp_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
+              <!-- Material em Contentor -->
+              <div class="col" style="margin-top:15px;">
+                <label>Material em Contentor?</label>
+                <input id="det_cont_bordo" type="text" readonly style="width:200px; background:#f5f5f5;">
+              </div>
+
+              <!-- Informações do Contentor (Condicional) -->
+              <div id="det_campos_contentor" style="display:none;">
+                <h3 style="color:#0b7a66; margin-top:20px; margin-bottom:10px;">Informações do Contentor</h3>
+
+                <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                  <div class="col" style="flex:1 1 200px;">
+                    <label>Descrição do Contentor</label>
+                    <input id="det_desc_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
+                  </div>
+                  <div class="col" style="flex:1 1 200px;">
+                    <label>Identificação do Contentor</label>
+                    <input id="det_id_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
+                  </div>
                 </div>
-                <div class="col" style="flex:1 1 200px;">
-                  <label>Nº Certificado</label>
-                  <input id="det_cert_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
-                </div>
-                <div class="col" style="flex:1 1 200px;">
-                  <label>Validade Certificado</label>
-                  <input id="det_val_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
+
+                <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                  <div class="col" style="flex:1 1 200px;">
+                    <label>Responsável pelo Contentor</label>
+                    <input id="det_resp_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
+                  </div>
+                  <div class="col" style="flex:1 1 200px;">
+                    <label>Nº Certificado</label>
+                    <input id="det_cert_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
+                  </div>
+                  <div class="col" style="flex:1 1 200px;">
+                    <label>Validade Certificado</label>
+                    <input id="det_val_cont" type="text" readonly style="width:100%; background:#f5f5f5;">
+                  </div>
                 </div>
               </div>
+
+              <!-- Observações -->
+              <div class="col" style="margin-top:15px;">
+                <label>Observações</label>
+                <textarea id="det_obs" readonly rows="3"
+                  style="width:100%; resize:vertical; background:#f5f5f5;"></textarea>
+              </div>
+
+              <!-- Status -->
+              <div class="col" style="margin-top:15px;">
+                <label>Status do Material</label>
+                <input id="det_status" type="text" readonly style="width:100%; max-width:400px; background:#f5f5f5;">
+              </div>
+
             </div>
 
-            <!-- Observações -->
-            <div class="col" style="margin-top:15px;">
-              <label>Observações</label>
-              <textarea id="det_obs" readonly rows="3"
-                style="width:100%; resize:vertical; background:#f5f5f5;"></textarea>
-            </div>
-
-            <!-- Status -->
-            <div class="col" style="margin-top:15px;">
-              <label>Status do Material</label>
-              <input id="det_status" type="text" readonly style="width:100%; max-width:400px; background:#f5f5f5;">
+            <!-- Botão Fechar -->
+            <div class="modal-footer" style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+              <button id="btnFecharDetalhes" class="btn ghost">Fechar</button>
             </div>
 
           </div>
-
-          <!-- Botão Fechar -->
-          <div class="modal-footer" style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
-            <button id="btnFecharDetalhes" class="btn ghost">Fechar</button>
-          </div>
-
         </div>
-      </div>
 
 
 
@@ -725,6 +1021,7 @@
   <script src="/static/js/anom-sms.js?v=2"></script>
   <script src="/static/js/passagens.js"></script>
   <script src="/static/js/troca-turma.js"></script>
+  <script src="/static/js/acordions-condicionais.js"></script>
   <script src="/static/js/manut-prev.js"></script>
   <script src="/static/js/abast.js"></script>
   <script src="/static/js/insp-norm.js"></script>
