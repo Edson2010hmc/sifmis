@@ -20,13 +20,17 @@
         // Buscar todos os acordions condicionais (que possuem data-tipo-barco)
         const acordionsCondicionais = document.querySelectorAll('.accordion-item[data-tipo-barco]');
 
+        console.log(`[ACORDIONS-COND] Total de acordions condicionais encontrados: ${acordionsCondicionais.length}`);
+
         acordionsCondicionais.forEach(accordion => {
             if (exibirMergulho) {
                 // Exibir accordion
                 accordion.style.display = '';
+                console.log(`[ACORDIONS-COND] Exibindo accordion`);
             } else {
                 // Ocultar accordion
                 accordion.style.display = 'none';
+                console.log(`[ACORDIONS-COND] Ocultando accordion`);
 
                 // Se estiver aberto, fechar
                 const content = accordion.querySelector('.accordion-content');
@@ -41,38 +45,14 @@
 
     //============INICIALIZAR CONTROLE DE ACORDIONS CONDICIONAIS==========
     function inicializarAcordionsCondicionais() {
-        // Verificar quando uma PS é carregada
-        // O tipo da embarcação será obtido do campo fEmb
-        const campoEmbarcacao = document.getElementById('fEmb');
+        console.log('[ACORDIONS-COND] Inicializando módulo...');
 
-        if (campoEmbarcacao) {
-            // Executar quando o valor do campo mudar
-            const observer = new MutationObserver(() => {
-                const valorEmb = campoEmbarcacao.value;
-                // Extrair o tipo (primeira palavra antes do hífen)
-                const tipo = valorEmb.split(' - ')[0] || '';
-                controlarAcordionsCondicionais(tipo);
-            });
-
-            observer.observe(campoEmbarcacao, {
-                attributes: true,
-                attributeFilter: ['value']
-            });
-
-            // Também verificar mudanças no value via JavaScript
-            campoEmbarcacao.addEventListener('change', function () {
-                const valorEmb = this.value;
-                const tipo = valorEmb.split(' - ')[0] || '';
-                controlarAcordionsCondicionais(tipo);
-            });
-
-            // Executar imediatamente se já houver valor
-            if (campoEmbarcacao.value) {
-                const valorEmb = campoEmbarcacao.value;
-                const tipo = valorEmb.split(' - ')[0] || '';
-                controlarAcordionsCondicionais(tipo);
-            }
-        }
+        // Ocultar TODOS os accordions condicionais por padrão ao carregar a página
+        const acordionsCondicionais = document.querySelectorAll('.accordion-item[data-tipo-barco]');
+        acordionsCondicionais.forEach(accordion => {
+            accordion.style.display = 'none';
+        });
+        console.log(`[ACORDIONS-COND] ${acordionsCondicionais.length} acordions ocultados por padrão`);
     }
 
     // Expor funções globalmente para uso por outros módulos
