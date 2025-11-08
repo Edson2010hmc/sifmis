@@ -1,3 +1,4 @@
+// static/js/app.js
 // ===== APLICAÇÃO PRINCIPAL - GERENCIADOR DE NAVEGAÇÃO ===============
 
 (function () {
@@ -15,6 +16,7 @@
     configurarNavegacaoTabs();
     configurarNavegacaoSubtabs();
     configurarAccordion();
+    ocultarAcordionsCondicionaisPorPadrao();
     // Fecha todos os accordions ao iniciar
     document.querySelectorAll('.accordion-content').forEach(c => {
       c.classList.remove('active');
@@ -124,6 +126,37 @@
         header.closest('.accordion-item').style.width = '100%';
 
       });
+    });
+  }
+
+  //============OCULTAR ACCORDIONS CONDICIONAIS POR PADRÃO==========
+  function ocultarAcordionsCondicionaisPorPadrao() {
+    const acordionsCondicionais = document.querySelectorAll('.accordion-item[data-tipo-barco]');
+    acordionsCondicionais.forEach(accordion => {
+      accordion.style.display = 'none';
+    });
+  }
+
+  //============CONTROLAR VISIBILIDADE DOS ACORDIONS CONDICIONAIS==========
+  function controlarAcordionsCondicionais(tipoEmbarcacao) {
+    const tiposPermitidos = ['TUP', 'DSV', 'SDSV'];
+    const tipoNormalizado = (tipoEmbarcacao || '').trim().toUpperCase();
+    const exibirMergulho = tiposPermitidos.includes(tipoNormalizado);
+
+    const acordionsCondicionais = document.querySelectorAll('.accordion-item[data-tipo-barco]');
+
+    acordionsCondicionais.forEach(accordion => {
+      if (exibirMergulho) {
+        accordion.style.display = '';
+      } else {
+        accordion.style.display = 'none';
+        const content = accordion.querySelector('.accordion-content');
+        const toggle = accordion.querySelector('.toggle');
+        if (content && content.classList.contains('active')) {
+          content.classList.remove('active');
+          if (toggle) toggle.textContent = '▼';
+        }
+      }
     });
   }
 
@@ -284,6 +317,11 @@
       t.textContent = '▼';
     });
   }
+
+  // ===== EXPOR FUNÇÃO GLOBALMENTE =====
+  window.AppModule = {
+    controlarAcordionsCondicionais: controlarAcordionsCondicionais
+  };
 
   // ===== EXECUTAR QUANDO DOM CARREGAR =======================================
   if (document.readyState === 'loading') {

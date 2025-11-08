@@ -286,54 +286,55 @@ const PassagensModule = (() => {
     }
 
     // Controlar visibilidade de acordions condicionais baseado no tipo de embarcação
-    if (typeof AcordionsCondicionaisModule !== 'undefined' && AcordionsCondicionaisModule.controlarAcordionsCondicionais) {
+    if (typeof AppModule !== 'undefined' && AppModule.controlarAcordionsCondicionais) {
       const tipoEmb = psData.BarcoPS.split(' - ')[0] || '';
-      AcordionsCondicionaisModule.controlarAcordionsCondicionais(tipoEmb);
+      AppModule.controlarAcordionsCondicionais(tipoEmb);
     }
-    // Verificar se PS está finalizada
-    verificarPSFinalizada(psData);
-
   }
+  // Verificar se PS está finalizada
+  verificarPSFinalizada(psData);
+
+}
 
   // ===== CARREGAR USUARIOS COM PERFIL FISCAL =====
   async function carregarFiscaisEmbarcando(fiscalEmbSelecionado = '') {
-    try {
-      const response = await fetch('/api/fiscais/perfil-fiscal/');
-      const result = await response.json();
+  try {
+    const response = await fetch('/api/fiscais/perfil-fiscal/');
+    const result = await response.json();
 
-      if (!result.success) {
-        throw new Error(result.error);
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+
+    const select = document.getElementById('fEmbC');
+    select.innerHTML = '<option value="">— selecione —</option>';
+
+    result.data.forEach(fiscal => {
+      const option = document.createElement('option');
+      option.value = fiscal.id;
+      const fiscalTexto = `${fiscal.chave} - ${fiscal.nome}`;
+      option.textContent = fiscalTexto;
+
+      // Pré-selecionar se corresponder
+      if (fiscalEmbSelecionado && fiscalTexto === fiscalEmbSelecionado) {
+        option.selected = true;
       }
 
-      const select = document.getElementById('fEmbC');
-      select.innerHTML = '<option value="">— selecione —</option>';
+      select.appendChild(option);
+    });
 
-      result.data.forEach(fiscal => {
-        const option = document.createElement('option');
-        option.value = fiscal.id;
-        const fiscalTexto = `${fiscal.chave} - ${fiscal.nome}`;
-        option.textContent = fiscalTexto;
-
-        // Pré-selecionar se corresponder
-        if (fiscalEmbSelecionado && fiscalTexto === fiscalEmbSelecionado) {
-          option.selected = true;
-        }
-
-        select.appendChild(option);
-      });
-
-    } catch (error) {
-      alert('Erro ao carregar Fiscal: ' + error.message);
-    }
+  } catch (error) {
+    alert('Erro ao carregar Fiscal: ' + error.message);
   }
+}
 
-  // ===== CRIAR CARD NA LISTA ==========================================================
-  function criarCardPS(psData) {
-    const lista = document.getElementById('listaPS');
-    const li = document.createElement('li');
-    li.dataset.psId = psData.id;
+// ===== CRIAR CARD NA LISTA ==========================================================
+function criarCardPS(psData) {
+  const lista = document.getElementById('listaPS');
+  const li = document.createElement('li');
+  li.dataset.psId = psData.id;
 
-    li.innerHTML = `
+  li.innerHTML = `
       <div class="ps-card-content">
         <div class="ps-linha1">N°${psData.numPS.toString().padStart(2, '0')}/${psData.anoPS} => ${psData.BarcoPS}</div>
         <div class="ps-linha2">PERÍODO: ${formatarData(psData.dataInicio)} a ${formatarData(psData.dataFim)}</div>
@@ -342,499 +343,499 @@ const PassagensModule = (() => {
       </div>
     `;
 
-    lista.appendChild(li);
-    li.addEventListener('click', function () {
-      abrirPS(psData.id);
-    });
-  }
+  lista.appendChild(li);
+  li.addEventListener('click', function () {
+    abrirPS(psData.id);
+  });
+}
 
-  // ===== FORMATAR DATA =====
-  function formatarData(dataISO) {
-    const [ano, mes, dia] = dataISO.split('-');
-    return `${dia}/${mes}/${ano}`;
-  }
+// ===== FORMATAR DATA =====
+function formatarData(dataISO) {
+  const [ano, mes, dia] = dataISO.split('-');
+  return `${dia}/${mes}/${ano}`;
+}
 
-  // ===== ABRIR PS EXISTENTE ============================================================
-  async function abrirPS(psId) {
-    try {
-      const response = await fetch(`/api/passagens/${psId}/`);
-      const result = await response.json();
+// ===== ABRIR PS EXISTENTE ============================================================
+async function abrirPS(psId) {
+  try {
+    const response = await fetch(`/api/passagens/${psId}/`);
+    const result = await response.json();
+    psAtualId = psId;
+
+    if (!result.success) {
       psAtualId = psId;
-
-      if (!result.success) {
-        psAtualId = psId;
-        throw new Error(result.error);
-      }
-
-      // Preencher formulário com dados da PS
-      preencherFormularioPS(result.data, null, null);
-
-      // Carregar dados Modulo Troca de Turma
-      if (typeof TrocaTurmaModule !== 'undefined' && TrocaTurmaModule.carregarDados) {
-        TrocaTurmaModule.carregarDados(psId);
-      }
-
-      // Carregar Manutenção Preventiva
-      if (typeof ManutPrevModule !== 'undefined' && ManutPrevModule.carregarDados) {
-        ManutPrevModule.carregarDados(psId);
-      }
-
-      // Carregar dados Modulo Inspeção Normativa
-      if (typeof InspNormModule !== 'undefined' && InspNormModule.carregarDados) {
-        InspNormModule.carregarDados(psId);
-      }
-
-      // Carregar Embarque de Equipes
-      if (typeof EmbEquipModule !== 'undefined' && EmbEquipModule.carregarDados) {
-        EmbEquipModule.carregarDados(psId);
-      }
-
-      // Carregar Embarque de Materiais
-      if (typeof EmbMatPsModule !== 'undefined' && EmbMatPsModule.carregarDados) {
-        EmbMatPsModule.carregarDados(psId);
-      }
-
-      // Carregar Desembarque de Materiais
-      if (typeof DesMatPsModule !== 'undefined' && DesMatPsModule.carregarDados) {
-        DesMatPsModule.carregarDados(psId);
-      }
-
-
-      if (typeof AnomSMSModule !== 'undefined' && AnomSMSModule.carregarDados) {
-        AnomSMSModule.carregarDados(psId);
-      }
-
-
-      // Ir para tela da PS
-      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-      document.getElementById('tab-passagem').classList.add('active');
-
-    } catch (error) {
-      alert('Erro ao abrir PS: ' + error.message);
-    }
-  }
-
-  // ===== EXCLUIR RASCUNHO =================================================================
-  async function excluirRascunho(psId) {
-    if (!confirm('Confirma a exclusão do rascunho?')) {
-      return;
+      throw new Error(result.error);
     }
 
-    try {
-      const response = await fetch(`/api/passagens/${psId}/`, {
-        method: 'DELETE'
-      });
+    // Preencher formulário com dados da PS
+    preencherFormularioPS(result.data, null, null);
 
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      alert('Rascunho excluído com sucesso!');
-
-      // Remover card da lista
-      const card = document.querySelector(`li[data-ps-id="${psId}"]`);
-      if (card) {
-        card.remove();
-      }
-
-      // Limpar formulários dos módulos
-      if (typeof TrocaTurmaModule !== 'undefined' && TrocaTurmaModule.limpar) {
-        TrocaTurmaModule.limpar();
-      }
-
-      if (typeof ManutPrevModule !== 'undefined' && ManutPrevModule.limpar) {
-        ManutPrevModule.limpar();
-      }
-
-      if (typeof InspNormModule !== 'undefined' && InspNormModule.limpar) {
-        InspNormModule.limpar();
-      }
-
-      // Limpar Embarque de Materiais
-      if (typeof EmbMatPsModule !== 'undefined' && EmbMatPsModule.limpar) {
-        EmbMatPsModule.limpar();
-      }
-      // Limpar Desembarque de Materiais
-      if (typeof DesMatPsModule !== 'undefined' && DesMatPsModule.limpar) {
-        DesMatPsModule.limpar();
-      }
-
-
-      psAtualId = null;
-
-      // Voltar para tela inicial
-      document.querySelector('[data-tab="consultas"]').click();
-
-    } catch (error) {
-      alert('Erro ao excluir rascunho: ' + error.message);
-    }
-  }
-
-  // ===== CONFIGURAR BOTÃO EXCLUIR =========================================================
-  function configurarBotaoExcluir() {
-    const btnExcluir = document.getElementById('btnExcluirRasc');
-
-    btnExcluir.addEventListener('click', function () {
-      if (psAtualId) {
-        excluirRascunho(psAtualId);
-      } else {
-        alert('Nenhuma PS carregada');
-      }
-    });
-  }
-
-  // ===== SALVAR RASCUNHO ==================================================================
-  async function salvarRascunho(psId, silencioso = false) {
-    try {
-      const dados = {
-        dataEmissaoPS: document.getElementById('fData').value,
-        dataInicio: document.getElementById('fInicioPS').value,
-        dataFim: document.getElementById('fFimPS').value,
-        fiscalEmb: document.getElementById('fEmbC').value
-      };
-      // Salvar dados Modulo Troca de Turma
-      if (typeof TrocaTurmaModule !== 'undefined' && TrocaTurmaModule.salvar) {
-        await TrocaTurmaModule.salvar();
-      }
-
-      // Salvar Manutenção Preventiva
-      if (typeof ManutPrevModule !== 'undefined' && ManutPrevModule.salvar) {
-        await ManutPrevModule.salvar();
-      }
-
-      // Salvar modulo Abastecimento
-      if (typeof AbastModule !== 'undefined' && AbastModule.salvar) {
-        await AbastModule.salvar();
-      }
-
-      // Salvar dados Modulo Inspeção Normativa
-      if (typeof InspNormModule !== 'undefined' && InspNormModule.salvar) {
-        await InspNormModule.salvar();
-      }
-
-      // Salvar Inspeção Petrobras
-      if (typeof InspPetrModule !== 'undefined' && InspPetrModule.salvar) {
-        await InspPetrModule.salvar();
-      }
-
-      // Salvar Embarque de Equipes
-      if (typeof EmbEquipModule !== 'undefined' && EmbEquipModule.salvar) {
-        await EmbEquipModule.salvar();
-      }
-
-      // Salvar módulo Mobilização/Desmobilização
-      if (typeof MobDesmModule !== 'undefined' && MobDesmModule.salvar) {
-        await MobDesmModule.salvar();
-      }
-
-      // Salvar Embarque de Materiais
-      if (typeof EmbMatPsModule !== 'undefined' && EmbMatPsModule.salvar) {
-        await EmbMatPsModule.salvar();
-      }
-
-      // Salvar Desembarque de Materiais
-      if (typeof DesMatPsModule !== 'undefined' && DesMatPsModule.salvar) {
-        await DesMatPsModule.salvar();
-      }
-      const response = await fetch(`/api/passagens/${psId}/`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados)
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      if (!silencioso) {
-        alert('Rascunho salvo com sucesso!');
-      }
-
-    } catch (error) {
-      if (!silencioso) {
-        alert('Erro ao salvar rascunho: ' + error.message);
-      }
-    }
-  }
-
-  // ===== SALVAMENTO AO TROCAR DE ABA ============================================
-  async function salvarAntesDeSair() {
-    if (!psAtualId) return;
-    await salvarRascunho(psAtualId, true);
-  }
-
-  // ===== CONFIGURAR BOTÃO SALVAR ==========================================================
-  function configurarBotaoSalvar() {
-    const btnSalvar = document.getElementById('btnSalvar');
-
-    btnSalvar.addEventListener('click', function () {
-      if (psAtualId) {
-        salvarRascunho(psAtualId);
-      } else {
-        alert('Nenhuma PS carregada');
-      }
-    });
-  }
-
-  // ===== CARREGAR PASSAGENS DO USUÁRIO ====================================================
-  async function carregarPassagensUsuario() {
-    const usuario = AuthModule.getUsuarioLogado();
-    if (!usuario) return;
-
-    try {
-      const fiscalNome = `${usuario.chave} - ${usuario.nome}`;
-      const response = await fetch(`/api/passagens/usuario/?fiscalNome=${encodeURIComponent(fiscalNome)}`);
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      const lista = document.getElementById('listaPS');
-      lista.innerHTML = '';
-
-      result.data.forEach(ps => {
-        criarCardPS(ps);
-      });
-
-    } catch (error) {
-      //console.error('Erro ao carregar passagens:', error);
-    }
-  }
-
-  function desabilitarInterface() {
-
-
-    // Desabilitar campos do cabeçalho
-    document.getElementById('fData').disabled = true;
-    document.getElementById('fInicioPS').disabled = true;
-    document.getElementById('fFimPS').disabled = true;
-    document.getElementById('fEmbC').disabled = true;
-
-    // Desabilitar todos os inputs, selects e textareas das seções
-    document.querySelectorAll('#sub-porto input, #sub-porto select, #sub-porto textarea, #sub-porto button').forEach(el => {
-      if (!el.classList.contains('btn')) {
-        el.disabled = true;
-      }
-    });
-
-    // Desabilitar botões de adicionar/remover das tabelas
-    document.querySelectorAll('#sub-porto button').forEach(btn => {
-      if (btn.textContent.includes('Adicionar') || btn.textContent.includes('Remover')) {
-        btn.disabled = true;
-      }
-    });
-
-    // Desabilitar checkboxes "Não previsto"
-    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-      cb.disabled = true;
-    });
-
-    // Desabilitar inputs de arquivo
-    document.querySelectorAll('input[type="file"]').forEach(file => {
-      file.disabled = true;
-    });
-
-    // Desabilitar botões principais
-    document.getElementById('btnSalvar').disabled = true;
-    document.getElementById('btnFinalizar').disabled = true;
-    document.getElementById('btnExcluirRasc').disabled = true;
-
-
-  }
-
-  function habilitarInterface() {
-    // Habilitar campos do cabeçalho (exceto os que devem permanecer desabilitados)
-    document.getElementById('fData').disabled = false;
-    document.getElementById('fInicioPS').disabled = false;
-    document.getElementById('fFimPS').disabled = false;
-    document.getElementById('fEmbC').disabled = false;
-
-    // Habilitar todos os inputs, selects e textareas das seções Porto
-    document.querySelectorAll('#sub-porto input, #sub-porto select, #sub-porto textarea').forEach(el => {
-      el.disabled = false;
-    });
-
-    // Habilitar todos os botões das seções Porto
-    document.querySelectorAll('#sub-porto button').forEach(btn => {
-      btn.disabled = false;
-    });
-
-    // Habilitar checkboxes
-    document.querySelectorAll('#sub-porto input[type="checkbox"]').forEach(cb => {
-      cb.disabled = false;
-    });
-
-    // Habilitar inputs de arquivo
-    document.querySelectorAll('#sub-porto input[type="file"]').forEach(file => {
-      file.disabled = false;
-    });
-
-    // Habilitar botões principais
-    document.getElementById('btnSalvar').disabled = false;
-    document.getElementById('btnFinalizar').disabled = false;
-    document.getElementById('btnExcluirRasc').disabled = false;
-
-    // Remover link do PDF se existir
-    const linkPDF = document.getElementById('linkPDFFinalizado');
-    if (linkPDF) {
-      linkPDF.remove();
-    }
-  }
-
-
-
-  // ===== EXIBIR LINK DO PDF =====
-  function exibirLinkPDF(pdfPath) {
-    //console.log('[FINALIZAR] Exibindo link do PDF:', pdfPath);
-
-    const btnFinalizar = document.getElementById('btnFinalizar');
-    const btnsContainer = btnFinalizar.parentElement;
-
-    // Remover link antigo se existir
-    const linkAntigo = document.getElementById('linkPDFFinalizado');
-    if (linkAntigo) {
-      linkAntigo.remove();
+    // Carregar dados Modulo Troca de Turma
+    if (typeof TrocaTurmaModule !== 'undefined' && TrocaTurmaModule.carregarDados) {
+      TrocaTurmaModule.carregarDados(psId);
     }
 
-    // Extrair nome do arquivo do caminho
-    const nomeArquivo = pdfPath.split('/').pop();
+    // Carregar Manutenção Preventiva
+    if (typeof ManutPrevModule !== 'undefined' && ManutPrevModule.carregarDados) {
+      ManutPrevModule.carregarDados(psId);
+    }
 
-    // Criar novo link
-    const linkPDF = document.createElement('a');
-    linkPDF.id = 'linkPDFFinalizado';
-    linkPDF.href = `/storage/${pdfPath}`;
-    linkPDF.target = '_blank';
-    linkPDF.style.cssText = 'color:#0b7a66; text-decoration:underline; margin-left:16px; font-weight:bold;';
-    linkPDF.textContent = `📄 ${nomeArquivo}`;
+    // Carregar dados Modulo Inspeção Normativa
+    if (typeof InspNormModule !== 'undefined' && InspNormModule.carregarDados) {
+      InspNormModule.carregarDados(psId);
+    }
 
-    btnsContainer.appendChild(linkPDF);
+    // Carregar Embarque de Equipes
+    if (typeof EmbEquipModule !== 'undefined' && EmbEquipModule.carregarDados) {
+      EmbEquipModule.carregarDados(psId);
+    }
 
-    //console.log('[FINALIZAR] Link do PDF exibido com sucesso');
+    // Carregar Embarque de Materiais
+    if (typeof EmbMatPsModule !== 'undefined' && EmbMatPsModule.carregarDados) {
+      EmbMatPsModule.carregarDados(psId);
+    }
+
+    // Carregar Desembarque de Materiais
+    if (typeof DesMatPsModule !== 'undefined' && DesMatPsModule.carregarDados) {
+      DesMatPsModule.carregarDados(psId);
+    }
+
+
+    if (typeof AnomSMSModule !== 'undefined' && AnomSMSModule.carregarDados) {
+      AnomSMSModule.carregarDados(psId);
+    }
+
+
+    // Ir para tela da PS
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    document.getElementById('tab-passagem').classList.add('active');
+
+  } catch (error) {
+    alert('Erro ao abrir PS: ' + error.message);
+  }
+}
+
+// ===== EXCLUIR RASCUNHO =================================================================
+async function excluirRascunho(psId) {
+  if (!confirm('Confirma a exclusão do rascunho?')) {
+    return;
   }
 
-  // ===== FINALIZAR PASSAGEM DE SERVIÇO =====
-  async function finalizarPS() {
-    if (!psAtualId) {
+  try {
+    const response = await fetch(`/api/passagens/${psId}/`, {
+      method: 'DELETE'
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+
+    alert('Rascunho excluído com sucesso!');
+
+    // Remover card da lista
+    const card = document.querySelector(`li[data-ps-id="${psId}"]`);
+    if (card) {
+      card.remove();
+    }
+
+    // Limpar formulários dos módulos
+    if (typeof TrocaTurmaModule !== 'undefined' && TrocaTurmaModule.limpar) {
+      TrocaTurmaModule.limpar();
+    }
+
+    if (typeof ManutPrevModule !== 'undefined' && ManutPrevModule.limpar) {
+      ManutPrevModule.limpar();
+    }
+
+    if (typeof InspNormModule !== 'undefined' && InspNormModule.limpar) {
+      InspNormModule.limpar();
+    }
+
+    // Limpar Embarque de Materiais
+    if (typeof EmbMatPsModule !== 'undefined' && EmbMatPsModule.limpar) {
+      EmbMatPsModule.limpar();
+    }
+    // Limpar Desembarque de Materiais
+    if (typeof DesMatPsModule !== 'undefined' && DesMatPsModule.limpar) {
+      DesMatPsModule.limpar();
+    }
+
+
+    psAtualId = null;
+
+    // Voltar para tela inicial
+    document.querySelector('[data-tab="consultas"]').click();
+
+  } catch (error) {
+    alert('Erro ao excluir rascunho: ' + error.message);
+  }
+}
+
+// ===== CONFIGURAR BOTÃO EXCLUIR =========================================================
+function configurarBotaoExcluir() {
+  const btnExcluir = document.getElementById('btnExcluirRasc');
+
+  btnExcluir.addEventListener('click', function () {
+    if (psAtualId) {
+      excluirRascunho(psAtualId);
+    } else {
       alert('Nenhuma PS carregada');
+    }
+  });
+}
+
+// ===== SALVAR RASCUNHO ==================================================================
+async function salvarRascunho(psId, silencioso = false) {
+  try {
+    const dados = {
+      dataEmissaoPS: document.getElementById('fData').value,
+      dataInicio: document.getElementById('fInicioPS').value,
+      dataFim: document.getElementById('fFimPS').value,
+      fiscalEmb: document.getElementById('fEmbC').value
+    };
+    // Salvar dados Modulo Troca de Turma
+    if (typeof TrocaTurmaModule !== 'undefined' && TrocaTurmaModule.salvar) {
+      await TrocaTurmaModule.salvar();
+    }
+
+    // Salvar Manutenção Preventiva
+    if (typeof ManutPrevModule !== 'undefined' && ManutPrevModule.salvar) {
+      await ManutPrevModule.salvar();
+    }
+
+    // Salvar modulo Abastecimento
+    if (typeof AbastModule !== 'undefined' && AbastModule.salvar) {
+      await AbastModule.salvar();
+    }
+
+    // Salvar dados Modulo Inspeção Normativa
+    if (typeof InspNormModule !== 'undefined' && InspNormModule.salvar) {
+      await InspNormModule.salvar();
+    }
+
+    // Salvar Inspeção Petrobras
+    if (typeof InspPetrModule !== 'undefined' && InspPetrModule.salvar) {
+      await InspPetrModule.salvar();
+    }
+
+    // Salvar Embarque de Equipes
+    if (typeof EmbEquipModule !== 'undefined' && EmbEquipModule.salvar) {
+      await EmbEquipModule.salvar();
+    }
+
+    // Salvar módulo Mobilização/Desmobilização
+    if (typeof MobDesmModule !== 'undefined' && MobDesmModule.salvar) {
+      await MobDesmModule.salvar();
+    }
+
+    // Salvar Embarque de Materiais
+    if (typeof EmbMatPsModule !== 'undefined' && EmbMatPsModule.salvar) {
+      await EmbMatPsModule.salvar();
+    }
+
+    // Salvar Desembarque de Materiais
+    if (typeof DesMatPsModule !== 'undefined' && DesMatPsModule.salvar) {
+      await DesMatPsModule.salvar();
+    }
+    const response = await fetch(`/api/passagens/${psId}/`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados)
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+
+    if (!silencioso) {
+      alert('Rascunho salvo com sucesso!');
+    }
+
+  } catch (error) {
+    if (!silencioso) {
+      alert('Erro ao salvar rascunho: ' + error.message);
+    }
+  }
+}
+
+// ===== SALVAMENTO AO TROCAR DE ABA ============================================
+async function salvarAntesDeSair() {
+  if (!psAtualId) return;
+  await salvarRascunho(psAtualId, true);
+}
+
+// ===== CONFIGURAR BOTÃO SALVAR ==========================================================
+function configurarBotaoSalvar() {
+  const btnSalvar = document.getElementById('btnSalvar');
+
+  btnSalvar.addEventListener('click', function () {
+    if (psAtualId) {
+      salvarRascunho(psAtualId);
+    } else {
+      alert('Nenhuma PS carregada');
+    }
+  });
+}
+
+// ===== CARREGAR PASSAGENS DO USUÁRIO ====================================================
+async function carregarPassagensUsuario() {
+  const usuario = AuthModule.getUsuarioLogado();
+  if (!usuario) return;
+
+  try {
+    const fiscalNome = `${usuario.chave} - ${usuario.nome}`;
+    const response = await fetch(`/api/passagens/usuario/?fiscalNome=${encodeURIComponent(fiscalNome)}`);
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+
+    const lista = document.getElementById('listaPS');
+    lista.innerHTML = '';
+
+    result.data.forEach(ps => {
+      criarCardPS(ps);
+    });
+
+  } catch (error) {
+    //console.error('Erro ao carregar passagens:', error);
+  }
+}
+
+function desabilitarInterface() {
+
+
+  // Desabilitar campos do cabeçalho
+  document.getElementById('fData').disabled = true;
+  document.getElementById('fInicioPS').disabled = true;
+  document.getElementById('fFimPS').disabled = true;
+  document.getElementById('fEmbC').disabled = true;
+
+  // Desabilitar todos os inputs, selects e textareas das seções
+  document.querySelectorAll('#sub-porto input, #sub-porto select, #sub-porto textarea, #sub-porto button').forEach(el => {
+    if (!el.classList.contains('btn')) {
+      el.disabled = true;
+    }
+  });
+
+  // Desabilitar botões de adicionar/remover das tabelas
+  document.querySelectorAll('#sub-porto button').forEach(btn => {
+    if (btn.textContent.includes('Adicionar') || btn.textContent.includes('Remover')) {
+      btn.disabled = true;
+    }
+  });
+
+  // Desabilitar checkboxes "Não previsto"
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.disabled = true;
+  });
+
+  // Desabilitar inputs de arquivo
+  document.querySelectorAll('input[type="file"]').forEach(file => {
+    file.disabled = true;
+  });
+
+  // Desabilitar botões principais
+  document.getElementById('btnSalvar').disabled = true;
+  document.getElementById('btnFinalizar').disabled = true;
+  document.getElementById('btnExcluirRasc').disabled = true;
+
+
+}
+
+function habilitarInterface() {
+  // Habilitar campos do cabeçalho (exceto os que devem permanecer desabilitados)
+  document.getElementById('fData').disabled = false;
+  document.getElementById('fInicioPS').disabled = false;
+  document.getElementById('fFimPS').disabled = false;
+  document.getElementById('fEmbC').disabled = false;
+
+  // Habilitar todos os inputs, selects e textareas das seções Porto
+  document.querySelectorAll('#sub-porto input, #sub-porto select, #sub-porto textarea').forEach(el => {
+    el.disabled = false;
+  });
+
+  // Habilitar todos os botões das seções Porto
+  document.querySelectorAll('#sub-porto button').forEach(btn => {
+    btn.disabled = false;
+  });
+
+  // Habilitar checkboxes
+  document.querySelectorAll('#sub-porto input[type="checkbox"]').forEach(cb => {
+    cb.disabled = false;
+  });
+
+  // Habilitar inputs de arquivo
+  document.querySelectorAll('#sub-porto input[type="file"]').forEach(file => {
+    file.disabled = false;
+  });
+
+  // Habilitar botões principais
+  document.getElementById('btnSalvar').disabled = false;
+  document.getElementById('btnFinalizar').disabled = false;
+  document.getElementById('btnExcluirRasc').disabled = false;
+
+  // Remover link do PDF se existir
+  const linkPDF = document.getElementById('linkPDFFinalizado');
+  if (linkPDF) {
+    linkPDF.remove();
+  }
+}
+
+
+
+// ===== EXIBIR LINK DO PDF =====
+function exibirLinkPDF(pdfPath) {
+  //console.log('[FINALIZAR] Exibindo link do PDF:', pdfPath);
+
+  const btnFinalizar = document.getElementById('btnFinalizar');
+  const btnsContainer = btnFinalizar.parentElement;
+
+  // Remover link antigo se existir
+  const linkAntigo = document.getElementById('linkPDFFinalizado');
+  if (linkAntigo) {
+    linkAntigo.remove();
+  }
+
+  // Extrair nome do arquivo do caminho
+  const nomeArquivo = pdfPath.split('/').pop();
+
+  // Criar novo link
+  const linkPDF = document.createElement('a');
+  linkPDF.id = 'linkPDFFinalizado';
+  linkPDF.href = `/storage/${pdfPath}`;
+  linkPDF.target = '_blank';
+  linkPDF.style.cssText = 'color:#0b7a66; text-decoration:underline; margin-left:16px; font-weight:bold;';
+  linkPDF.textContent = `📄 ${nomeArquivo}`;
+
+  btnsContainer.appendChild(linkPDF);
+
+  //console.log('[FINALIZAR] Link do PDF exibido com sucesso');
+}
+
+// ===== FINALIZAR PASSAGEM DE SERVIÇO =====
+async function finalizarPS() {
+  if (!psAtualId) {
+    alert('Nenhuma PS carregada');
+    return;
+  }
+
+  try {
+    // Obter dados da PS atual
+    const numPS = document.getElementById('fNumero').value;
+    const dataEmissaoPS = document.getElementById('fData').value;
+
+    // VALIDAÇÃO: Verificar se data atual >= data emissão
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const dataEmissao = new Date(dataEmissaoPS);
+    dataEmissao.setHours(0, 0, 0, 0);
+
+    if (hoje < dataEmissao) {
+      const dataFormatada = dataEmissao.toLocaleDateString('pt-BR');
+      alert(`Não é possível finalizar a PS ${numPS}antes da data de emissão prevista.`);
       return;
     }
 
-    try {
-      // Obter dados da PS atual
-      const numPS = document.getElementById('fNumero').value;
-      const dataEmissaoPS = document.getElementById('fData').value;
+    // 1. Salvar rascunho silenciosamente antes de finalizar
+    await salvarRascunho(psAtualId, true);
 
-      // VALIDAÇÃO: Verificar se data atual >= data emissão
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
+    // 2. Exibir confirmação
+    const confirmar = confirm(`Tem certeza que deseja finalizar a PS ${numPS}? Essa ação é irreversível!`);
 
-      const dataEmissao = new Date(dataEmissaoPS);
-      dataEmissao.setHours(0, 0, 0, 0);
+    if (!confirmar) {
+      return;
+    }
 
-      if (hoje < dataEmissao) {
-        const dataFormatada = dataEmissao.toLocaleDateString('pt-BR');
-        alert(`Não é possível finalizar a PS ${numPS}antes da data de emissão prevista.`);
-        return;
+    // 3. Chamar endpoint de finalização
+    const responseFinalizar = await fetch(`/api/passagens/${psAtualId}/finalizar/`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    const resultFinalizar = await responseFinalizar.json();
+
+    if (!resultFinalizar.success) {
+      throw new Error(resultFinalizar.error);
+    }
+
+    // 4. Atualizar status no formulário
+    document.getElementById('fStatus').value = 'FINALIZADA';
+
+    // 5. Desabilitar toda a interface
+    desabilitarInterface();
+
+    // 6. Gerar PDF
+    const responsePDF = await fetch(`/api/passagens/${psAtualId}/gerar-pdf/`);
+
+    const resultPDF = await responsePDF.json();
+
+    if (!resultPDF.success) {
+      throw new Error('Erro ao gerar PDF: ' + resultPDF.error);
+    }
+
+    // 7. Exibir link do PDF
+    exibirLinkPDF(resultPDF.pdfPath);
+
+    // 8. Atualizar card na lista
+    const card = document.querySelector(`li[data-ps-id="${psAtualId}"]`);
+    if (card) {
+      const statusElement = card.querySelector('.ps-linha3');
+      if (statusElement) {
+        statusElement.textContent = 'FINALIZADA';
+        statusElement.className = 'ps-linha3 status-FINALIZADA';
       }
+    }
 
-      // 1. Salvar rascunho silenciosamente antes de finalizar
-      await salvarRascunho(psAtualId, true);
+    alert(`PS ${numPS} finalizada com sucesso! O PDF foi gerado e está disponível para download.`);
 
-      // 2. Exibir confirmação
-      const confirmar = confirm(`Tem certeza que deseja finalizar a PS ${numPS}? Essa ação é irreversível!`);
+  } catch (error) {
+    alert('Erro ao finalizar PS: ' + error.message);
+  }
+}
 
-      if (!confirmar) {
-        return;
-      }
-
-      // 3. Chamar endpoint de finalização
-      const responseFinalizar = await fetch(`/api/passagens/${psAtualId}/finalizar/`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      const resultFinalizar = await responseFinalizar.json();
-
-      if (!resultFinalizar.success) {
-        throw new Error(resultFinalizar.error);
-      }
-
-      // 4. Atualizar status no formulário
-      document.getElementById('fStatus').value = 'FINALIZADA';
-
-      // 5. Desabilitar toda a interface
+// ===== VERIFICAR SE PS É FINALIZADA AO CARREGAR =====
+function verificarPSFinalizada(psData) {
+  setTimeout(() => {
+    if (psData.statusPS === 'FINALIZADA') {
       desabilitarInterface();
 
-      // 6. Gerar PDF
-      const responsePDF = await fetch(`/api/passagens/${psAtualId}/gerar-pdf/`);
-
-      const resultPDF = await responsePDF.json();
-
-      if (!resultPDF.success) {
-        throw new Error('Erro ao gerar PDF: ' + resultPDF.error);
+      if (psData.pdfPath) {
+        exibirLinkPDF(psData.pdfPath);
       }
-
-      // 7. Exibir link do PDF
-      exibirLinkPDF(resultPDF.pdfPath);
-
-      // 8. Atualizar card na lista
-      const card = document.querySelector(`li[data-ps-id="${psAtualId}"]`);
-      if (card) {
-        const statusElement = card.querySelector('.ps-linha3');
-        if (statusElement) {
-          statusElement.textContent = 'FINALIZADA';
-          statusElement.className = 'ps-linha3 status-FINALIZADA';
-        }
-      }
-
-      alert(`PS ${numPS} finalizada com sucesso! O PDF foi gerado e está disponível para download.`);
-
-    } catch (error) {
-      alert('Erro ao finalizar PS: ' + error.message);
+    } else {
+      habilitarInterface();
     }
-  }
+  }, 100);
+}
 
-  // ===== VERIFICAR SE PS É FINALIZADA AO CARREGAR =====
-  function verificarPSFinalizada(psData) {
-    setTimeout(() => {
-      if (psData.statusPS === 'FINALIZADA') {
-        desabilitarInterface();
+// ===== CONFIGURAR BOTÃO FINALIZAR ==========================================================
+function configurarBotaoFinalizar() {
+  const btnFinalizar = document.getElementById('btnFinalizar');
 
-        if (psData.pdfPath) {
-          exibirLinkPDF(psData.pdfPath);
-        }
-      } else {
-        habilitarInterface();
-      }
-    }, 100);
-  }
-
-  // ===== CONFIGURAR BOTÃO FINALIZAR ==========================================================
-  function configurarBotaoFinalizar() {
-    const btnFinalizar = document.getElementById('btnFinalizar');
-
-    btnFinalizar.addEventListener('click', function () {
-      if (psAtualId) {
-        finalizarPS();
-      } else {
-        alert('Nenhuma PS carregada');
-      }
-    });
-  }
-  // Formatar texto exibido no select admin_ps_hint =====
-  function textoPSExibicao(ps) {
-    // Garante numPS com 2 dígitos
-    const num = (ps.numPS !== undefined && ps.numPS !== null) ? ps.numPS.toString().padStart(2, '0') : '??';
-    const ano = ps.anoPS || '????';
-    const tipo = ps.TipoBarco || '';
-    const barco = ps.BarcoPS || '';
-    return `${num}/${ano} - ${tipo} ${barco}`.trim();
-  }
+  btnFinalizar.addEventListener('click', function () {
+    if (psAtualId) {
+      finalizarPS();
+    } else {
+      alert('Nenhuma PS carregada');
+    }
+  });
+}
+// Formatar texto exibido no select admin_ps_hint =====
+function textoPSExibicao(ps) {
+  // Garante numPS com 2 dígitos
+  const num = (ps.numPS !== undefined && ps.numPS !== null) ? ps.numPS.toString().padStart(2, '0') : '??';
+  const ano = ps.anoPS || '????';
+  const tipo = ps.TipoBarco || '';
+  const barco = ps.BarcoPS || '';
+  return `${num}/${ano} - ${tipo} ${barco}`.trim();
+}
 
 
 
@@ -842,13 +843,13 @@ const PassagensModule = (() => {
 
 
 
-  // ===== EXPORTAR FUNÇÕES ================================================================
-  return {
-    criarNovaPS,
-    carregarPassagensUsuario,
-    salvarRascunho,
-    salvarAntesDeSair,
-    finalizarPS
-  };
+// ===== EXPORTAR FUNÇÕES ================================================================
+return {
+  criarNovaPS,
+  carregarPassagensUsuario,
+  salvarRascunho,
+  salvarAntesDeSair,
+  finalizarPS
+};
 
-})();
+}) ();
