@@ -285,11 +285,7 @@ const PassagensModule = (() => {
       //console.log('[DEBUG] AnomSMSModule não disponível');
     }
 
-    // Controlar visibilidade de acordions condicionais baseado no tipo de embarcação
-    if (typeof AppModule !== 'undefined' && AppModule.controlarAcordionsCondicionais) {
-      const tipoEmb = psData.BarcoPS.split(' - ')[0] || '';
-      AppModule.controlarAcordionsCondicionais(tipoEmb);
-    }
+
   }
   // Verificar se PS está finalizada
   verificarPSFinalizada(psData);
