@@ -121,6 +121,26 @@ urlpatterns = [
     #API Informes de anomalias da Quinzena
     path('api/ps/<int:ps_id>/anom-sms/', views_ps.anom_sms_list, name='anom_sms_list'),
 
+    # API Assuntos e Pendências Contratuais (Principal e subtabela)
+    path('api/assun-pend-contr/', views_ps.assun_pend_contr_list, name='assun_pend_contr_list'),
+    path('api/assun-pend-contr/<int:assun_id>/', views_ps.assun_pend_contr_detail, name='assun_pend_contr_detail'),
+    path('api/assun-pend-contr/<int:assun_id>/subtab/', views_ps.subtab_assun_pend_contr_list, name='subtab_assun_pend_contr_list'),
+    path('api/assun-pend-contr-coment/<int:coment_id>/', views_ps.subtab_assun_pend_contr_detail, name='subtab_assun_pend_contr_detail'),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     #=================================MODULO INFORME DE ANOMALIA==============================
     path('api/informes/', views_anom.informe_anomalia_list, name='informe_anomalia_list'),

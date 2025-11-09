@@ -1,0 +1,487 @@
+// static/js/assun-pend-contr.js
+// Módulo para Assuntos e Pendências Contratuais
+
+const AssunPendContrModule = (() => {
+    const API_URL = '/api/assun-pend-contr/';
+    let registroEditandoId = null;
+    let registroComentarioId = null;
+    let modoEdicao = false;
+
+    //============REFERENCIAS DOM============
+    const elementos = {
+        btnCadastro: document.getElementById('btnCadastroAssunPend'),
+        tabelaBody: document.querySelector('#tblAssunPendContr tbody'),
+        msgSemRegistros: document.getElementById('msgSemRegistros'),
+        modalCadastro: document.getElementById('modalCadastroAssunPend'),
+        modalComentario: document.getElementById('modalComentarioAssunPend'),
+        selectCrud: document.getElementById('apcSelectCrud'),
+        data: document.getElementById('apcData'),
+        fiscal: document.getElementById('apcFiscal'),
+        classe: document.getElementById('apcClasse'),
+        descricao: document.getElementById('apcDescricao'),
+        btnSalvar: document.getElementById('btnApcSalvar'),
+        btnEditar: document.getElementById('btnApcEditar'),
+        btnExcluir: document.getElementById('btnApcExcluir'),
+        comentData: document.getElementById('apcComentData'),
+        comentFiscal: document.getElementById('apcComentFiscal'),
+        comentDescricao: document.getElementById('apcComentDescricao'),
+        btnComentSalvar: document.getElementById('btnApcComentSalvar')
+    };
+
+    //============INICIALIZAR============
+    function init() {
+        configurarEventos();
+        carregarFiscais();
+        carregarLista();
+    }
+
+    //============CONFIGURAR EVENTOS============
+    function configurarEventos() {
+
+
+        elementos.btnCadastro.addEventListener('click', abrirModalCadastro);
+        elementos.btnSalvar.addEventListener('click', salvarNovo);
+        elementos.btnEditar.addEventListener('click', confirmarEdicao);
+        elementos.btnExcluir.addEventListener('click', excluirRegistro);
+        elementos.selectCrud.addEventListener('change', selecionarRegistro);
+        elementos.btnComentSalvar.addEventListener('click', salvarComentario);
+    }
+
+    //============CARREGAR FISCAIS============
+    async function carregarFiscais() {
+        try {
+            const response = await fetch('/api/fiscais/perfil-fiscal/');
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+
+            const opcaoVazia = '<option value="">— selecione —</option>';
+            let options = '';
+
+            result.data.forEach(fiscal => {
+                const texto = `${fiscal.chave} - ${fiscal.nome}`;
+                options += `<option value="${texto}">${texto}</option>`;
+            });
+
+            elementos.fiscal.innerHTML = opcaoVazia + options;
+            elementos.comentFiscal.innerHTML = opcaoVazia + options;
+
+        } catch (error) {
+            alert('Erro ao carregar fiscais: ' + error.message);
+        }
+    }
+
+    //============CARREGAR LISTA DE REGISTROS============
+    async function carregarLista() {
+        try {
+            const response = await fetch(API_URL);
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+
+            renderizarTabela(result.data);
+
+            elementos.selectCrud.innerHTML = '<option value="">— selecione —</option>';
+
+            result.data.forEach(reg => {
+                const option = document.createElement('option');
+                option.value = reg.id;
+                option.textContent = `${reg.ano}/${reg.id}`;
+                option.dataset.registro = JSON.stringify(reg);
+                elementos.selectCrud.appendChild(option);
+            });
+
+        } catch (error) {
+            alert('Erro ao carregar registros: ' + error.message);
+        }
+    }
+
+    //============RENDERIZAR TABELA============
+    function renderizarTabela(registros) {
+        elementos.tabelaBody.innerHTML = '';
+
+        if (!registros || registros.length === 0) {
+            elementos.msgSemRegistros.style.display = 'block';
+            return;
+        }
+
+        elementos.msgSemRegistros.style.display = 'none';
+
+        registros.forEach(reg => {
+            const tr = document.createElement('tr');
+
+            const item = `${reg.ano}/${reg.id}`;
+
+            tr.innerHTML = `
+        <td style="border:1px solid #ddd; padding:8px;">${item}</td>
+        <td style="border:1px solid #ddd; padding:8px;">
+          <textarea readonly style="width:100%; min-height:80px; border:none; background:transparent; resize:vertical;">${reg.descricaoCompleta || ''}</textarea>
+        </td>
+        <td style="border:1px solid #ddd; padding:8px; text-align:center;">
+          <button class="btn small" onclick="AssunPendContrModule.abrirModalComentario(${reg.id})">Adicionar Comentário</button>
+          <button class="btn small ghost" onclick="AssunPendContrModule.finalizarItem(${reg.id})">Finalizar Item</button>
+        </td>
+      `;
+
+            elementos.tabelaBody.appendChild(tr);
+        });
+    }
+
+    //============ABRIR MODAL CADASTRO============
+    function abrirModalCadastro() {
+        limparFormulario();
+        elementos.modalCadastro.style.display = 'flex';
+        elementos.data.value = obterDataAtual();
+    }
+
+    //============FECHAR MODAL CADASTRO============
+    function fecharModalCadastro() {
+        elementos.modalCadastro.style.display = 'none';
+        limparFormulario();
+    }
+
+    //============SELECIONAR REGISTRO============
+    function selecionarRegistro() {
+        const option = elementos.selectCrud.options[elementos.selectCrud.selectedIndex];
+
+        if (!option.value) {
+            limparFormulario();
+            return;
+        }
+
+        const registro = JSON.parse(option.dataset.registro);
+
+        elementos.data.value = registro.dataRegistroInicial || '';
+        elementos.fiscal.value = registro.fiscRegistroInicial || '';
+        elementos.classe.value = registro.classeRegistroInicial || '';
+        elementos.descricao.value = registro.descrRegistroInicial || '';
+
+        registroEditandoId = registro.id;
+        elementos.btnSalvar.disabled = true;
+        elementos.btnEditar.disabled = false;
+        elementos.btnExcluir.disabled = false;
+        modoEdicao = true;
+        desabilitarCampos(true);
+    }
+
+    //============SALVAR NOVO REGISTRO============
+    async function salvarNovo() {
+        if (!validarCampos()) {
+            return;
+        }
+
+        try {
+            const dados = obterDadosFormulario();
+
+            const dataHora = obterDataHoraFormatada();
+            const textoFormatado = `Registro Inicial-${dataHora} ${dados.fiscRegistroInicial} - ${dados.descrRegistroInicial}`;
+
+            dados.descrRegistroInicial = textoFormatado;
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+
+            alert('Registro criado com sucesso!');
+            fecharModalCadastro();
+            carregarLista();
+
+        } catch (error) {
+            alert('Erro ao salvar: ' + error.message);
+        }
+    }
+
+    //============CONFIRMAR EDIÇÃO============
+    async function confirmarEdicao() {
+        if (!registroEditandoId) return;
+
+        desabilitarCampos(false);
+        elementos.btnEditar.textContent = 'Confirmar';
+        elementos.btnEditar.removeEventListener('click', confirmarEdicao);
+        elementos.btnEditar.addEventListener('click', salvarEdicao);
+    }
+
+    //============SALVAR EDIÇÃO============
+    async function salvarEdicao() {
+        if (!validarCampos()) {
+            return;
+        }
+
+        try {
+            const dados = obterDadosFormulario();
+
+            const response = await fetch(`${API_URL}${registroEditandoId}/`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+
+            alert('Registro atualizado com sucesso!');
+            fecharModalCadastro();
+            carregarLista();
+
+        } catch (error) {
+            alert('Erro ao atualizar: ' + error.message);
+        }
+    }
+
+    //============EXCLUIR REGISTRO============
+    async function excluirRegistro() {
+        if (!registroEditandoId) return;
+
+        if (!confirm('Deseja realmente excluir este registro? Todos os comentários também serão removidos.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}${registroEditandoId}/`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+
+            alert('Registro excluído com sucesso!');
+            fecharModalCadastro();
+            carregarLista();
+
+        } catch (error) {
+            alert('Erro ao excluir: ' + error.message);
+        }
+    }
+
+    //============ABRIR MODAL COMENTÁRIO============
+    function abrirModalComentario(registroId) {
+        registroComentarioId = registroId;
+        elementos.modalComentario.style.display = 'flex';
+        elementos.comentData.value = obterDataAtual();
+        elementos.comentFiscal.value = '';
+        elementos.comentDescricao.value = '';
+    }
+
+    //============FECHAR MODAL COMENTÁRIO============
+    function fecharModalComentario() {
+        elementos.modalComentario.style.display = 'none';
+        registroComentarioId = null;
+    }
+
+    //============SALVAR COMENTÁRIO============
+    async function salvarComentario() {
+        if (!registroComentarioId) return;
+
+        const data = elementos.comentData.value;
+        const fiscal = elementos.comentFiscal.value;
+        const descricao = elementos.comentDescricao.value.trim();
+
+        if (!data) {
+            alert('Informe a data');
+            elementos.comentData.focus();
+            return;
+        }
+
+        if (!fiscal) {
+            alert('Selecione o fiscal');
+            elementos.comentFiscal.focus();
+            return;
+        }
+
+        if (!descricao) {
+            alert('Informe a descrição do comentário');
+            elementos.comentDescricao.focus();
+            return;
+        }
+
+        try {
+            const dataHora = obterDataHoraFormatada();
+            const textoFormatado = `Comentário-${dataHora} ${fiscal} - ${descricao}`;
+
+            const dados = {
+                dataRegistroComent: data,
+                fiscRegistroComent: fiscal,
+                descrRegistroComent: textoFormatado
+            };
+
+            const response = await fetch(`${API_URL}${registroComentarioId}/subtab/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+
+            alert('Comentário adicionado com sucesso!');
+            fecharModalComentario();
+            carregarLista();
+
+        } catch (error) {
+            alert('Erro ao adicionar comentário: ' + error.message);
+        }
+    }
+
+    //============FINALIZAR ITEM============
+    async function finalizarItem(registroId) {
+        if (!confirm('Deseja finalizar este item? Ele não aparecerá mais na lista.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}${registroId}/`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mantRegistroInicial: false })
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+
+            alert('Item finalizado com sucesso!');
+            carregarLista();
+
+        } catch (error) {
+            alert('Erro ao finalizar: ' + error.message);
+        }
+    }
+
+    //============OBTER DADOS FORMULÁRIO============
+    function obterDadosFormulario() {
+        return {
+            dataRegistroInicial: elementos.data.value,
+            fiscRegistroInicial: elementos.fiscal.value,
+            classeRegistroInicial: elementos.classe.value,
+            descrRegistroInicial: elementos.descricao.value.trim()
+        };
+    }
+
+    //============VALIDAR CAMPOS============
+    function validarCampos() {
+        if (!elementos.data.value) {
+            alert('Informe a data');
+            elementos.data.focus();
+            return false;
+        }
+
+        if (!elementos.fiscal.value) {
+            alert('Selecione o fiscal');
+            elementos.fiscal.focus();
+            return false;
+        }
+
+        if (!elementos.classe.value) {
+            alert('Selecione a classificação');
+            elementos.classe.focus();
+            return false;
+        }
+
+        if (!elementos.descricao.value.trim()) {
+            alert('Informe a descrição');
+            elementos.descricao.focus();
+            return false;
+        }
+
+        return true;
+    }
+
+    //============LIMPAR FORMULÁRIO============
+    function limparFormulario() {
+        elementos.selectCrud.value = '';
+        elementos.data.value = '';
+        elementos.fiscal.value = '';
+        elementos.classe.value = '';
+        elementos.descricao.value = '';
+        elementos.btnSalvar.disabled = false;
+        elementos.btnEditar.disabled = true;
+        elementos.btnExcluir.disabled = true;
+        registroEditandoId = null;
+        modoEdicao = false;
+        desabilitarCampos(false);
+        elementos.btnEditar.textContent = 'Editar';
+        elementos.btnEditar.removeEventListener('click', salvarEdicao);
+        elementos.btnEditar.addEventListener('click', confirmarEdicao);
+    }
+
+    //============DESABILITAR CAMPOS============
+    function desabilitarCampos(desabilitar) {
+        elementos.data.disabled = desabilitar;
+        elementos.fiscal.disabled = desabilitar;
+        elementos.classe.disabled = desabilitar;
+        elementos.descricao.disabled = desabilitar;
+    }
+
+    //============OBTER DATA ATUAL============
+    function obterDataAtual() {
+        const hoje = new Date();
+        const ano = hoje.getFullYear();
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoje.getDate()).padStart(2, '0');
+        return `${ano}-${mes}-${dia}`;
+    }
+
+    //============OBTER DATA/HORA FORMATADA============
+    function obterDataHoraFormatada() {
+        const agora = new Date();
+        const dia = String(agora.getDate()).padStart(2, '0');
+        const mes = String(agora.getMonth() + 1).padStart(2, '0');
+        const ano = agora.getFullYear();
+        const hora = String(agora.getHours()).padStart(2, '0');
+        const min = String(agora.getMinutes()).padStart(2, '0');
+        return `${dia}/${mes}/${ano} - ${hora}:${min}`;
+    }
+
+    //============CARREGAR DADOS============
+    async function carregarDados() {
+        await carregarLista();
+    }
+
+    //============LIMPAR============
+    function limpar() {
+        elementos.tabelaBody.innerHTML = '';
+        elementos.msgSemRegistros.style.display = 'none';
+    }
+
+    //============EXPORTAR FUNÇÕES PÚBLICAS============
+    return {
+        init,
+        carregarDados,
+        limpar,
+        abrirModalComentario,
+        finalizarItem,
+        fecharModalCadastro,
+        fecharModalComentario
+    };
+
+})();
+
+//============INICIALIZAR QUANDO DOM CARREGAR============
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', AssunPendContrModule.init);
+} else {
+    AssunPendContrModule.init();
+}

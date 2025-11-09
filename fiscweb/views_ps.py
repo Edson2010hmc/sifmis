@@ -30,7 +30,7 @@ from .models_ps import PortoInspPetr,subTabPortoInspPetr
 from .models_ps import PortoEmbEquip,subTabPortoEmbEquip
 from .models_ps import PortoMobD,SubTabPortoMobD
 from .models_ps import anomSMS,desvSMS
-
+from .models_ps import assunPendContr, subAssunPendContr
 
 #================================================PASSAGEM DE SERVIÇO - API REST - VERIFICA RASCUNHO USUARIO=================================================
 @csrf_exempt
@@ -2475,8 +2475,6 @@ def sincronizar_materiais_embarque_ps(request, ps_id):
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
-
-
 @csrf_exempt
 @require_http_methods(["GET"])
 def listar_materiais_embarque_ps(request, ps_id):
@@ -2659,7 +2657,6 @@ def sincronizar_materiais_desembarque_ps(request, ps_id):
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
-
 @csrf_exempt
 @require_http_methods(["GET"])
 def listar_materiais_desembarque_ps(request, ps_id):
@@ -2735,24 +2732,6 @@ def listar_materiais_desembarque_ps(request, ps_id):
         import traceback
         traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #===========================================BUSCAR INFORMES DE ANOMALIAS EMITIDOS NA QUINZENA=====================
 #================================================ANOMALIAS SMS - API REST=================================================
@@ -2854,36 +2833,6 @@ def anom_sms_list(request, ps_id):
             'success': False,
             'error': str(e)
         }, status=500)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #================================================FINALIZAR PASSAGEM DE SERVIÇO=================================================
@@ -3082,7 +3031,7 @@ def gerar_pdf_passagem(request, ps_id):
         # Adicionar logo (se existir)
         logo_path = os.path.join(settings.BASE_DIR, 'static', 'assets', 'logo.png')
         if os.path.exists(logo_path):
-            logo = Image(logo_path, width=60*mm, height=20*mm)
+            logo = Image(logo_path, width=60*mm, height=30*mm)
             elements.append(logo)
             elements.append(Spacer(1, 10))
         
@@ -3344,40 +3293,345 @@ def gerar_pdf_passagem(request, ps_id):
 
 
 
+#===============================================2. PENDENCIAS OCORRÊNCIAS ORIENTAÇÕES
+#================================================2.1 - ASSUNTOS E PENDÊNCIAS CONTRATUAIS - API REST=================================================
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def assun_pend_contr_list(request):
+    """
+    GET: Lista todos os registros ativos (mantRegistroInicial=True)
+    POST: Cria novo registro
+    """
+    
+    if request.method == 'GET':
+        try:
+            registros = assunPendContr.objects.filter(mantRegistroInicial=True).order_by('-dataRegistroInicial')
+            
+            registros_list = []
+            for reg in registros:
+                # Buscar todos os comentários
+                comentarios = subAssunPendContr.objects.filter(idxAssunPendContr=reg).order_by('dataRegistroComent')
+                
+                # Montar descrição completa (registro inicial + comentários)
+                descricao_completa = reg.descrRegistroInicial or ''
+                
+                for coment in comentarios:
+                    if descricao_completa:
+                        descricao_completa += '\n\n'
+                    descricao_completa += coment.descrRegistroComent or ''
+                
+                registros_list.append({
+                    'id': reg.id,
+                    'dataRegistroInicial': str(reg.dataRegistroInicial) if reg.dataRegistroInicial else '',
+                    'fiscRegistroInicial': reg.fiscRegistroInicial or '',
+                    'classeRegistroInicial': reg.classeRegistroInicial or '',
+                    'descrRegistroInicial': reg.descrRegistroInicial or '',
+                    'descricaoCompleta': descricao_completa,
+                    'mantRegistroInicial': reg.mantRegistroInicial,
+                    'ano': reg.dataRegistroInicial.year if reg.dataRegistroInicial else ''
+                })
+            
+            print(f"[API] GET /assun-pend-contr/ - Retornando {len(registros_list)} registros")
+            
+            return JsonResponse({
+                'success': True,
+                'data': registros_list
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] GET /assun-pend-contr/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+    
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            print(f"[API] POST /assun-pend-contr/ - Criando registro")
+            
+            registro = assunPendContr.objects.create(
+                dataRegistroInicial=data.get('dataRegistroInicial'),
+                fiscRegistroInicial=data.get('fiscRegistroInicial'),
+                classeRegistroInicial=data.get('classeRegistroInicial'),
+                descrRegistroInicial=data.get('descrRegistroInicial'),
+                mantRegistroInicial=True
+            )
+            
+            print(f"[API] POST /assun-pend-contr/ - Registro criado com ID: {registro.id}")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Registro criado com sucesso',
+                'data': {
+                    'id': registro.id,
+                    'dataRegistroInicial': str(registro.dataRegistroInicial) if registro.dataRegistroInicial else '',
+                    'fiscRegistroInicial': registro.fiscRegistroInicial,
+                    'classeRegistroInicial': registro.classeRegistroInicial,
+                    'descrRegistroInicial': registro.descrRegistroInicial,
+                    'mantRegistroInicial': registro.mantRegistroInicial,
+                    'ano': registro.dataRegistroInicial.year if registro.dataRegistroInicial else ''
+                }
+            }, status=201)
+            
+        except Exception as e:
+            print(f"[API ERROR] POST /assun-pend-contr/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
 
+@csrf_exempt
+@require_http_methods(["GET", "PUT", "DELETE"])
+def assun_pend_contr_detail(request, assun_id):
+    """
+    GET: Retorna um registro específico
+    PUT: Atualiza um registro
+    DELETE: Remove um registro
+    """
+    
+    try:
+        registro = assunPendContr.objects.get(id=assun_id)
+    except assunPendContr.DoesNotExist:
+        print(f"[API ERROR] Registro ID {assun_id} não encontrado")
+        return JsonResponse({
+            'success': False,
+            'error': 'Registro não encontrado'
+        }, status=404)
+    
+    if request.method == 'GET':
+        try:
+            print(f"[API] GET /assun-pend-contr/{assun_id}/ - Retornando registro")
+            
+            # Buscar comentários
+            comentarios = subAssunPendContr.objects.filter(idxAssunPendContr=registro).order_by('dataRegistroComent')
+            
+            comentarios_list = []
+            for coment in comentarios:
+                comentarios_list.append({
+                    'id': coment.id,
+                    'dataRegistroComent': str(coment.dataRegistroComent) if coment.dataRegistroComent else '',
+                    'fiscRegistroComent': coment.fiscRegistroComent or '',
+                    'descrRegistroComent': coment.descrRegistroComent or ''
+                })
+            
+            return JsonResponse({
+                'success': True,
+                'data': {
+                    'id': registro.id,
+                    'dataRegistroInicial': str(registro.dataRegistroInicial) if registro.dataRegistroInicial else '',
+                    'fiscRegistroInicial': registro.fiscRegistroInicial or '',
+                    'classeRegistroInicial': registro.classeRegistroInicial or '',
+                    'descrRegistroInicial': registro.descrRegistroInicial or '',
+                    'mantRegistroInicial': registro.mantRegistroInicial,
+                    'ano': registro.dataRegistroInicial.year if registro.dataRegistroInicial else '',
+                    'comentarios': comentarios_list
+                }
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] GET /assun-pend-contr/{assun_id}/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+    
+    elif request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            
+            print(f"[API] PUT /assun-pend-contr/{assun_id}/ - Atualizando registro")
+            
+            if 'dataRegistroInicial' in data:
+                registro.dataRegistroInicial = data['dataRegistroInicial']
+            if 'fiscRegistroInicial' in data:
+                registro.fiscRegistroInicial = data['fiscRegistroInicial']
+            if 'classeRegistroInicial' in data:
+                registro.classeRegistroInicial = data['classeRegistroInicial']
+            if 'descrRegistroInicial' in data:
+                registro.descrRegistroInicial = data['descrRegistroInicial']
+            if 'mantRegistroInicial' in data:
+                registro.mantRegistroInicial = data['mantRegistroInicial']
+            
+            registro.save()
+            
+            print(f"[API] PUT /assun-pend-contr/{assun_id}/ - Registro atualizado")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Registro atualizado com sucesso',
+                'data': {
+                    'id': registro.id,
+                    'mantRegistroInicial': registro.mantRegistroInicial
+                }
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] PUT /assun-pend-contr/{assun_id}/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    elif request.method == 'DELETE':
+        try:
+            # Ao deletar, remove também todos os comentários (CASCADE)
+            registro.delete()
+            
+            print(f"[API] DELETE /assun-pend-contr/{assun_id}/ - Registro removido")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Registro removido com sucesso'
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] DELETE /assun-pend-contr/{assun_id}/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
 
+#================================================ASSUNTOS E PENDÊNCIAS - SUBTABELA (COMENTÁRIOS) - API REST=================================================
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def subtab_assun_pend_contr_list(request, assun_id):
+    """
+    GET: Lista comentários de um registro
+    POST: Adiciona novo comentário
+    """
+    
+    # Verificar se registro existe
+    try:
+        registro = assunPendContr.objects.get(id=assun_id)
+    except assunPendContr.DoesNotExist:
+        print(f"[API ERROR] Registro ID {assun_id} não encontrado")
+        return JsonResponse({
+            'success': False,
+            'error': 'Registro não encontrado'
+        }, status=404)
+    
+    if request.method == 'GET':
+        try:
+            comentarios = subAssunPendContr.objects.filter(
+                idxAssunPendContr=registro
+            ).order_by('dataRegistroComent').values('id', 'dataRegistroComent', 'fiscRegistroComent', 'descrRegistroComent')
+            
+            comentarios_list = list(comentarios)
+            
+            print(f"[API] GET /assun-pend-contr/{assun_id}/subtab/ - Retornando {len(comentarios_list)} comentários")
+            
+            return JsonResponse({
+                'success': True,
+                'data': comentarios_list
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] GET /assun-pend-contr/{assun_id}/subtab/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+    
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            print(f"[API] POST /assun-pend-contr/{assun_id}/subtab/ - Criando comentário")
+            
+            comentario = subAssunPendContr.objects.create(
+                idxAssunPendContr=registro,
+                dataRegistroComent=data.get('dataRegistroComent'),
+                fiscRegistroComent=data.get('fiscRegistroComent'),
+                descrRegistroComent=data.get('descrRegistroComent')
+            )
+            
+            print(f"[API] POST /assun-pend-contr/{assun_id}/subtab/ - Comentário criado com ID: {comentario.id}")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Comentário adicionado com sucesso',
+                'data': {
+                    'id': comentario.id,
+                    'dataRegistroComent': str(comentario.dataRegistroComent) if comentario.dataRegistroComent else '',
+                    'fiscRegistroComent': comentario.fiscRegistroComent,
+                    'descrRegistroComent': comentario.descrRegistroComent
+                }
+            }, status=201)
+            
+        except Exception as e:
+            print(f"[API ERROR] POST /assun-pend-contr/{assun_id}/subtab/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+@csrf_exempt
+@require_http_methods(["PUT", "DELETE"])
+def subtab_assun_pend_contr_detail(request, coment_id):
+    """
+    PUT: Atualiza um comentário
+    DELETE: Remove um comentário
+    """
+    
+    try:
+        comentario = subAssunPendContr.objects.get(id=coment_id)
+    except subAssunPendContr.DoesNotExist:
+        print(f"[API ERROR] Comentário ID {coment_id} não encontrado")
+        return JsonResponse({
+            'success': False,
+            'error': 'Comentário não encontrado'
+        }, status=404)
+    
+    if request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            
+            print(f"[API] PUT /assun-pend-contr-coment/{coment_id}/ - Atualizando comentário")
+            
+            comentario.dataRegistroComent = data.get('dataRegistroComent', comentario.dataRegistroComent)
+            comentario.fiscRegistroComent = data.get('fiscRegistroComent', comentario.fiscRegistroComent)
+            comentario.descrRegistroComent = data.get('descrRegistroComent', comentario.descrRegistroComent)
+            comentario.save()
+            
+            print(f"[API] PUT /assun-pend-contr-coment/{coment_id}/ - Comentário atualizado")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Comentário atualizado com sucesso',
+                'data': {
+                    'id': comentario.id,
+                    'dataRegistroComent': str(comentario.dataRegistroComent) if comentario.dataRegistroComent else '',
+                    'fiscRegistroComent': comentario.fiscRegistroComent,
+                    'descrRegistroComent': comentario.descrRegistroComent
+                }
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] PUT /assun-pend-contr-coment/{coment_id}/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    elif request.method == 'DELETE':
+        try:
+            comentario.delete()
+            
+            print(f"[API] DELETE /assun-pend-contr-coment/{coment_id}/ - Comentário removido")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Comentário removido com sucesso'
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] DELETE /assun-pend-contr-coment/{coment_id}/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
 
 
 
