@@ -42,7 +42,7 @@ const TrocaTurmaModule = (() => {
       elementos.porto.value = result.data.Porto || '';
       elementos.terminal.value = result.data.Terminal || '';
       elementos.os.value = result.data.OrdSerPorto || '';
-      elementos.atracacao.value = result.data.AtracPorto || '';
+      elementos.atracacao.value = result.data.AtracPorto || '08:00';
       elementos.duracao.value = result.data.DuracPorto || '';
       elementos.obs.value = result.data.ObservPorto || '';
 
@@ -61,7 +61,7 @@ const TrocaTurmaModule = (() => {
           Porto: '',
           Terminal: '',
           OrdSerPorto: '',
-          AtracPorto: '00:00',
+          AtracPorto: '08:00',
           DuracPorto: '',
           ObservPorto: ''
         })
@@ -89,7 +89,7 @@ const TrocaTurmaModule = (() => {
         Porto: elementos.porto.value.trim(),
         Terminal: elementos.terminal.value.trim(),
         OrdSerPorto: elementos.os.value.trim(),
-        AtracPorto: elementos.atracacao.value,
+        AtracPorto: elementos.atracacao.value || '08:00'
         DuracPorto: elementos.duracao.value.trim(),
         ObservPorto: elementos.obs.value.trim()
       };
