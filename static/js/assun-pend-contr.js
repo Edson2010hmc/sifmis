@@ -134,13 +134,13 @@ const AssunPendContrModule = (() => {
     //============ABRIR MODAL CADASTRO============
     function abrirModalCadastro() {
         limparFormulario();
-        elementos.modalCadastro.style.display = 'flex';
+        elementos.modalCadastro.classList.add('active');
         elementos.data.value = obterDataAtual();
     }
 
     //============FECHAR MODAL CADASTRO============
     function fecharModalCadastro() {
-        elementos.modalCadastro.style.display = 'none';
+        elementos.modalCadastro.classList.remove('active');
         limparFormulario();
     }
 
@@ -274,7 +274,7 @@ const AssunPendContrModule = (() => {
     //============ABRIR MODAL COMENTÁRIO============
     function abrirModalComentario(registroId) {
         registroComentarioId = registroId;
-        elementos.modalComentario.style.display = 'flex';
+        elementos.modalComentario.classList.add('active');
         elementos.comentData.value = obterDataAtual();
         elementos.comentFiscal.value = '';
         elementos.comentDescricao.value = '';
@@ -282,7 +282,7 @@ const AssunPendContrModule = (() => {
 
     //============FECHAR MODAL COMENTÁRIO============
     function fecharModalComentario() {
-        elementos.modalComentario.style.display = 'none';
+        elementos.modalComentario.classList.remove('active');
         registroComentarioId = null;
     }
 
