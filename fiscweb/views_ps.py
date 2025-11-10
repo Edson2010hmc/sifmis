@@ -3293,8 +3293,9 @@ def gerar_pdf_passagem(request, ps_id):
 
 
 
-#===============================================2. PENDENCIAS OCORRÊNCIAS ORIENTAÇÕES
-#================================================2.1 - ASSUNTOS E PENDÊNCIAS CONTRATUAIS - API REST=================================================
+#===============================================2. PENDENCIAS OCORRÊNCIAS ORIENTAÇÕES===============================================
+
+#================================================2.1 ASSUNTOS E PENDÊNCIAS CONTRATUAIS - API REST=================================================
 @csrf_exempt
 @require_http_methods(["GET", "POST"])
 def assun_pend_contr_list(request):
@@ -3351,8 +3352,12 @@ def assun_pend_contr_list(request):
             
             print(f"[API] POST /assun-pend-contr/ - Criando registro")
             
+            # Parse da data
+            from django.utils.dateparse import parse_date
+            data_registro = parse_date(data.get('dataRegistroInicial')) if data.get('dataRegistroInicial') else None
+            
             registro = assunPendContr.objects.create(
-                dataRegistroInicial=data.get('dataRegistroInicial'),
+                dataRegistroInicial=data_registro,
                 fiscRegistroInicial=data.get('fiscRegistroInicial'),
                 classeRegistroInicial=data.get('classeRegistroInicial'),
                 descrRegistroInicial=data.get('descrRegistroInicial'),
@@ -3443,8 +3448,10 @@ def assun_pend_contr_detail(request, assun_id):
             
             print(f"[API] PUT /assun-pend-contr/{assun_id}/ - Atualizando registro")
             
+            # Parse da data se fornecida
             if 'dataRegistroInicial' in data:
-                registro.dataRegistroInicial = data['dataRegistroInicial']
+                from django.utils.dateparse import parse_date
+                registro.dataRegistroInicial = parse_date(data['dataRegistroInicial']) if data['dataRegistroInicial'] else None
             if 'fiscRegistroInicial' in data:
                 registro.fiscRegistroInicial = data['fiscRegistroInicial']
             if 'classeRegistroInicial' in data:
@@ -3540,9 +3547,13 @@ def subtab_assun_pend_contr_list(request, assun_id):
             
             print(f"[API] POST /assun-pend-contr/{assun_id}/subtab/ - Criando comentário")
             
+            # Parse da data
+            from django.utils.dateparse import parse_date
+            data_coment = parse_date(data.get('dataRegistroComent')) if data.get('dataRegistroComent') else None
+            
             comentario = subAssunPendContr.objects.create(
                 idxAssunPendContr=registro,
-                dataRegistroComent=data.get('dataRegistroComent'),
+                dataRegistroComent=data_coment,
                 fiscRegistroComent=data.get('fiscRegistroComent'),
                 descrRegistroComent=data.get('descrRegistroComent')
             )
@@ -3632,8 +3643,6 @@ def subtab_assun_pend_contr_detail(request, coment_id):
                 'success': False,
                 'error': str(e)
             }, status=400)
-
-
 
 
 
