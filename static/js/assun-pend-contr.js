@@ -25,20 +25,21 @@ const AssunPendContrModule = (() => {
         comentData: document.getElementById('apcComentData'),
         comentFiscal: document.getElementById('apcComentFiscal'),
         comentDescricao: document.getElementById('apcComentDescricao'),
-        btnComentSalvar: document.getElementById('btnApcComentSalvar')
+        btnComentSalvar: document.getElementById('btnApcComentSalvar'),
+        fDesCNome: document.getElementById('fDesCNome')
     };
+
+    let psAtualId = null;
+    let fiscalDesembarcando = '';
 
     //============INICIALIZAR============
     function init() {
         configurarEventos();
         carregarFiscais();
-        carregarLista();
     }
 
     //============CONFIGURAR EVENTOS============
     function configurarEventos() {
-
-
         elementos.btnCadastro.addEventListener('click', abrirModalCadastro);
         elementos.btnSalvar.addEventListener('click', salvarNovo);
         elementos.btnEditar.addEventListener('click', confirmarEdicao);
@@ -63,6 +64,7 @@ const AssunPendContrModule = (() => {
             result.data.forEach(fiscal => {
                 const texto = `${fiscal.chave} - ${fiscal.nome}`;
                 options += `<option value="${texto}">${texto}</option>`;
+                //alert(fiscal.nome);
             });
 
             elementos.fiscal.innerHTML = opcaoVazia + options;
@@ -70,6 +72,31 @@ const AssunPendContrModule = (() => {
 
         } catch (error) {
             alert('Erro ao carregar fiscais: ' + error.message);
+        }
+    }
+
+    //============CARREGAR DADOS DA PS============
+    async function carregarDados(psId) {
+        if (!psId) return;
+
+        psAtualId = psId;
+
+        try {
+            // Buscar dados da PS
+            const response = await fetch(`/api/passagens/${psId}/`);
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.error);
+            }
+
+            fiscalDesembarcando = result.data.fiscalDes;
+
+            // Carregar lista de registros
+            await carregarLista();
+
+        } catch (error) {
+            alert('Erro ao carregar dados da PS: ' + error.message);
         }
     }
 
@@ -136,6 +163,10 @@ const AssunPendContrModule = (() => {
         limparFormulario();
         elementos.modalCadastro.classList.add('active');
         elementos.data.value = obterDataAtual();
+
+        // Preencher e desabilitar campo fiscal com o fiscal desembarcando
+        elementos.fiscal.value = fiscalDesembarcando;
+        elementos.fiscal.disabled = true;
     }
 
     //============FECHAR MODAL CADASTRO============
@@ -276,7 +307,11 @@ const AssunPendContrModule = (() => {
         registroComentarioId = registroId;
         elementos.modalComentario.classList.add('active');
         elementos.comentData.value = obterDataAtual();
-        elementos.comentFiscal.value = '';
+
+        // Preencher e desabilitar campo fiscal com o fiscal desembarcando
+        elementos.comentFiscal.value = fiscalDesembarcando;
+        elementos.comentFiscal.disabled = true;
+
         elementos.comentDescricao.value = '';
     }
 
@@ -422,6 +457,7 @@ const AssunPendContrModule = (() => {
         registroEditandoId = null;
         modoEdicao = false;
         desabilitarCampos(false);
+        elementos.fiscal.disabled = false; // Reabilitar campo fiscal
         elementos.btnEditar.textContent = 'Editar';
         elementos.btnEditar.removeEventListener('click', salvarEdicao);
         elementos.btnEditar.addEventListener('click', confirmarEdicao);
@@ -455,15 +491,12 @@ const AssunPendContrModule = (() => {
         return `${dia}/${mes}/${ano} - ${hora}:${min}`;
     }
 
-    //============CARREGAR DADOS============
-    async function carregarDados() {
-        await carregarLista();
-    }
-
     //============LIMPAR============
     function limpar() {
         elementos.tabelaBody.innerHTML = '';
         elementos.msgSemRegistros.style.display = 'none';
+        psAtualId = null;
+        fiscalDesembarcando = '';
     }
 
     //============EXPORTAR FUNÇÕES PÚBLICAS============

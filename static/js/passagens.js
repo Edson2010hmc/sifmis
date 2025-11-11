@@ -285,6 +285,11 @@ const PassagensModule = (() => {
       //console.log('[DEBUG] AnomSMSModule não disponível');
     }
 
+    // Carregar Assuntos e Pendências Contratuais
+    if (typeof AssunPendContrModule !== 'undefined' && AssunPendContrModule.carregarDados) {
+      AssunPendContrModule.carregarDados(psData.id);
+    }
+
     // Controlar visibilidade de acordions condicionais baseado no tipo de embarcação
     const tipoEmb = psData.BarcoPS.split(' - ')[0].trim().toUpperCase();
     const tiposPermitidos = ['TUP', 'DSV', 'SDSV'];
