@@ -375,7 +375,7 @@ class assunPendContr(models.Model):
     classeRegistroInicial = models.CharField(max_length=30,choices=CLASS_PEND_CHOICES,blank=True,null=True, verbose_name='Numero RT')
     descrRegistroInicial = models.TextField(max_length=400, blank=True,verbose_name='Descrição')
     abertoBroa = models.BooleanField(default=False, verbose_name='Abertura de BROA?')   
-    numeroBroa = models.CharField(blank=True,null=True, verbose_name='Numero do BROA')   
+    numeroBroa = models.CharField(max_length=30,blank=True,null=True, verbose_name='Numero do BROA')   
     mantRegistroInicial = models.BooleanField(default=True, verbose_name='Mantém ativo para proxima PS')
    
     

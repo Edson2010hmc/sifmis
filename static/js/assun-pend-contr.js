@@ -19,6 +19,9 @@ const AssunPendContrModule = (() => {
         fiscal: document.getElementById('apcFiscal'),
         classe: document.getElementById('apcClasse'),
         descricao: document.getElementById('apcDescricao'),
+        abertoBroa: document.getElementById('apcAbertoBroa'),
+        numeroBroa: document.getElementById('apcNumeroBroa'),
+        divNumeroBroa: document.getElementById('divNumeroBroa'),
         btnSalvar: document.getElementById('btnApcSalvar'),
         btnEditar: document.getElementById('btnApcEditar'),
         btnExcluir: document.getElementById('btnApcExcluir'),
@@ -46,6 +49,19 @@ const AssunPendContrModule = (() => {
         elementos.btnExcluir.addEventListener('click', excluirRegistro);
         elementos.selectCrud.addEventListener('change', selecionarRegistro);
         elementos.btnComentSalvar.addEventListener('click', salvarComentario);
+        elementos.abertoBroa.addEventListener('change', toggleNumeroBroa);
+    }
+
+    //============TOGGLE NUMERO BROA============
+    function toggleNumeroBroa() {
+        if (elementos.abertoBroa.checked) {
+            elementos.divNumeroBroa.style.display = 'block';
+            elementos.numeroBroa.required = true;
+        } else {
+            elementos.divNumeroBroa.style.display = 'none';
+            elementos.numeroBroa.value = '';
+            elementos.numeroBroa.required = false;
+        }
     }
 
     //============CARREGAR FISCAIS============
@@ -190,7 +206,9 @@ const AssunPendContrModule = (() => {
         elementos.fiscal.value = registro.fiscRegistroInicial || '';
         elementos.classe.value = registro.classeRegistroInicial || '';
         elementos.descricao.value = registro.descrRegistroInicial || '';
-
+        elementos.abertoBroa.checked = registro.abertoBroa || false;
+        elementos.numeroBroa.value = registro.numeroBroa || '';
+        toggleNumeroBroa();
         registroEditandoId = registro.id;
         elementos.btnSalvar.disabled = true;
         elementos.btnEditar.disabled = false;
@@ -208,8 +226,11 @@ const AssunPendContrModule = (() => {
         try {
             const dados = obterDadosFormulario();
 
-            const dataHora = obterDataHoraFormatada();
-            const textoFormatado = `Registro Inicial-${dataHora} ${dados.fiscRegistroInicial} - ${dados.descrRegistroInicial}`;
+            const parteBroa = dados.abertoBroa && dados.numeroBroa
+                ? `BROA N.${dados.numeroBroa}`
+                : 'Sem registro no BROA';
+
+            const textoFormatado = `${dados.fiscRegistroInicial} - ${dados.dataRegistroInicial} - ${dados.classeRegistroInicial} - ${parteBroa} - ${dados.descrRegistroInicial}`;
 
             dados.descrRegistroInicial = textoFormatado;
 
@@ -411,7 +432,9 @@ const AssunPendContrModule = (() => {
             dataRegistroInicial: elementos.data.value,
             fiscRegistroInicial: elementos.fiscal.value,
             classeRegistroInicial: elementos.classe.value,
-            descrRegistroInicial: elementos.descricao.value.trim()
+            descrRegistroInicial: elementos.descricao.value.trim(),
+            abertoBroa: elementos.abertoBroa.checked,                      // NOVO
+            numeroBroa: elementos.numeroBroa.value.trim() || null          // NOVO
         };
     }
 
@@ -441,6 +464,12 @@ const AssunPendContrModule = (() => {
             return false;
         }
 
+        if (elementos.abertoBroa.checked && !elementos.numeroBroa.value.trim()) {
+            alert('Informe o número do BROA');
+            elementos.numeroBroa.focus();
+            return false;
+        }
+
         return true;
     }
 
@@ -451,6 +480,9 @@ const AssunPendContrModule = (() => {
         elementos.fiscal.value = '';
         elementos.classe.value = '';
         elementos.descricao.value = '';
+        elementos.abertoBroa.checked = false;
+        elementos.numeroBroa.value = '';
+        elementos.divNumeroBroa.style.display = 'none';
         elementos.btnSalvar.disabled = false;
         elementos.btnEditar.disabled = true;
         elementos.btnExcluir.disabled = true;

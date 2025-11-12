@@ -4,7 +4,6 @@ from .models_cad import FiscaisCad,BarcosCad,ModalBarco,contatoUep,subTabcontato
 
 from .models_ps import PassServ, PortoTrocaTurma,PortoManutPrev,PortoAbast,PortoInspNorm,subTabPortoInspNorm,PortoInspPetr,subTabPortoInspPetr,PortoEmbEquip,subTabPortoEmbEquip,portoMatEmb,portoMatDesemb,PortoMobD # Seção 1
 from .models_ps import anomSMS,desvSMS 
-from .models_ps import inoPendContr 
 from .models_ps import iapo, smsLvMang,smsLvSeg
 from .models_ps import assunPendContr,subAssunPendContr
 
@@ -46,7 +45,6 @@ admin.site.register(subAssunPendContr)
 
 admin.site.register(anomSMS)
 admin.site.register(desvSMS)
-admin.site.register(inoPendContr)
 admin.site.register(iapo)
 admin.site.register(smsLvMang)
 admin.site.register(smsLvSeg)
