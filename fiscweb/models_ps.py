@@ -549,47 +549,6 @@ class smsLvSeg(models.Model):
         super().save(*args, **kwargs)
         
 
-
-
-
-
-
-
-
-
-
-
-#================================3 ROTINAS ADMINISTRATIVAS===========================================
-
-#==================================3.1 INOPERANCIAS,PENDENCIAS E ASSUNTOS CONTRATUAIS======================
-
-class inoPendContr(models.Model):
-    """Modelo para cadastro de Passagem de Serviço - Inoperâncias Pendências e assuntos Contratuais"""
-
-    
-    inoPendContrConfChoices=[
-                            ('sim' ,'SIM'),
-                            ('nao' ,'NÃO'),
-                            ('N/A','N/A'),
-                            ]
-    
-     
-    idxInoPendContr = models.ForeignKey(PassServ, on_delete=models.CASCADE)
-
-    prevInoPendContr = models.BooleanField(default=False, verbose_name='Anomalias?')
-    dataInoPendContr = models.DateField(verbose_name='Data da Anomalia')
-    descInoPendContr = models.TextField(max_length=500, verbose_name='Descrição', blank=True)
-    broaInoPendContr = models.CharField(max_length=4, choices=inoPendContrConfChoices, verbose_name='Abertura de BROA?')
-    numBroainoPendContr = models.CharField(max_length=12, verbose_name='Num BROA', blank=True)
-    infGerContinoPendContr = models.CharField(max_length=4, choices=inoPendContrConfChoices, verbose_name='Houve Informe a Gerência de Contrato?')
-    
-    class Meta:
-        verbose_name = 'Inoperância,Pendencia e Assunto Contratual'
-        verbose_name_plural = 'Inoperâncias,Pendencias e Assuntos Contratuais'
-        ordering = ['idxInoPendContr__BarcoPS','-idxInoPendContr__numPS']  
-
-    def __str__(self):
-        return f"{self.idxInoPendContr}" 
     
   #-==========================================================4.1 IAPO===================================================
 class iapo(models.Model):
