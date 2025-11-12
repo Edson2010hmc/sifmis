@@ -3329,6 +3329,8 @@ def assun_pend_contr_list(request):
                     'descrRegistroInicial': reg.descrRegistroInicial or '',
                     'descricaoCompleta': descricao_completa,
                     'mantRegistroInicial': reg.mantRegistroInicial,
+                    'abertoBroa': reg.abertoBroa,                          
+                    'numeroBroa': reg.numeroBroa or '',                   
                     'ano': reg.dataRegistroInicial.year if reg.dataRegistroInicial else ''
                 })
             
@@ -3361,6 +3363,8 @@ def assun_pend_contr_list(request):
                 fiscRegistroInicial=data.get('fiscRegistroInicial'),
                 classeRegistroInicial=data.get('classeRegistroInicial'),
                 descrRegistroInicial=data.get('descrRegistroInicial'),
+                abertoBroa=data.get('abertoBroa', False),                  
+                numeroBroa=data.get('numeroBroa'),                         
                 mantRegistroInicial=True
             )
             
@@ -3375,6 +3379,8 @@ def assun_pend_contr_list(request):
                     'fiscRegistroInicial': registro.fiscRegistroInicial,
                     'classeRegistroInicial': registro.classeRegistroInicial,
                     'descrRegistroInicial': registro.descrRegistroInicial,
+                    'abertoBroa': registro.abertoBroa,                     
+                    'numeroBroa': registro.numeroBroa or '',               
                     'mantRegistroInicial': registro.mantRegistroInicial,
                     'ano': registro.dataRegistroInicial.year if registro.dataRegistroInicial else ''
                 }
@@ -3429,6 +3435,8 @@ def assun_pend_contr_detail(request, assun_id):
                     'fiscRegistroInicial': registro.fiscRegistroInicial or '',
                     'classeRegistroInicial': registro.classeRegistroInicial or '',
                     'descrRegistroInicial': registro.descrRegistroInicial or '',
+                    'abertoBroa': registro.abertoBroa,                     
+                    'numeroBroa': registro.numeroBroa or '',               
                     'mantRegistroInicial': registro.mantRegistroInicial,
                     'ano': registro.dataRegistroInicial.year if registro.dataRegistroInicial else '',
                     'comentarios': comentarios_list
@@ -3458,6 +3466,10 @@ def assun_pend_contr_detail(request, assun_id):
                 registro.classeRegistroInicial = data['classeRegistroInicial']
             if 'descrRegistroInicial' in data:
                 registro.descrRegistroInicial = data['descrRegistroInicial']
+            if 'abertoBroa' in data:                                       
+                registro.abertoBroa = data['abertoBroa']                  
+            if 'numeroBroa' in data:                                       
+                registro.numeroBroa = data['numeroBroa']                   
             if 'mantRegistroInicial' in data:
                 registro.mantRegistroInicial = data['mantRegistroInicial']
             
