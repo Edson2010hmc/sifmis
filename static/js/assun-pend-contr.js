@@ -229,7 +229,6 @@ const AssunPendContrModule = (() => {
 
 
             const [ano, mes, dia] = dados.dataRegistroInicial.split('-');
-            alert(ano, mes, dia)
             const dataFormatada = `${dia}-${mes}-${ano}`;
             const textoFormatado = `${dados.fiscRegistroInicial} - ${dataFormatada} - ${dados.classeRegistroInicial} - ${parteBroa} - ${dados.descrRegistroInicial}`;
 
