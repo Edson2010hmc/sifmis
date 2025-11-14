@@ -54,14 +54,9 @@ const AssunPendContrModule = (() => {
 
     //============TOGGLE NUMERO BROA============
     function toggleNumeroBroa() {
-        if (elementos.abertoBroa.checked) {
-            elementos.divNumeroBroa.style.display = 'block';
-            elementos.numeroBroa.required = true;
-        } else {
-            elementos.divNumeroBroa.style.display = 'none';
-            elementos.numeroBroa.value = '';
-            elementos.numeroBroa.required = false;
-        }
+
+        const abBroa = !elementos.abertoBroa.checked;
+        elementos.divNumeroBroa.style.display = abBroa ? 'none' : 'block';
     }
 
     //============CARREGAR FISCAIS============
@@ -180,9 +175,11 @@ const AssunPendContrModule = (() => {
         elementos.modalCadastro.classList.add('active');
         elementos.data.value = obterDataAtual();
 
-        // Preencher e desabilitar campo fiscal com o fiscal desembarcando
-        elementos.fiscal.value = fiscalDesembarcando;
-        elementos.fiscal.disabled = true;
+        // Aguardar um tick para garantir que o select está populado
+        setTimeout(() => {
+            elementos.fiscal.value = fiscalDesembarcando;
+            elementos.fiscal.disabled = true;
+        }, 0);
     }
 
     //============FECHAR MODAL CADASTRO============
@@ -230,7 +227,12 @@ const AssunPendContrModule = (() => {
                 ? `BROA N.${dados.numeroBroa}`
                 : 'Sem registro no BROA';
 
-            const textoFormatado = `${dados.fiscRegistroInicial} - ${dados.dataRegistroInicial} - ${dados.classeRegistroInicial} - ${parteBroa} - ${dados.descrRegistroInicial}`;
+
+            const [ano, mes, dia] = dados.dataRegistroInicial.split('-');
+            alert(ano, mes, dia)
+            const dataFormatada = `${dia}-${mes}-${ano}`;
+            const textoFormatado = `${dados.fiscRegistroInicial} - ${dataFormatada} - ${dados.classeRegistroInicial} - ${parteBroa} - ${dados.descrRegistroInicial}`;
+
 
             dados.descrRegistroInicial = textoFormatado;
 
@@ -370,7 +372,7 @@ const AssunPendContrModule = (() => {
 
         try {
             const dataHora = obterDataHoraFormatada();
-            const textoFormatado = `Comentário-${dataHora} ${fiscal} - ${descricao}`;
+            const textoFormatado = `${fiscal} ${dataHora} - ${descricao}`;
 
             const dados = {
                 dataRegistroComent: data,
@@ -433,8 +435,8 @@ const AssunPendContrModule = (() => {
             fiscRegistroInicial: elementos.fiscal.value,
             classeRegistroInicial: elementos.classe.value,
             descrRegistroInicial: elementos.descricao.value.trim(),
-            abertoBroa: elementos.abertoBroa.checked,                      // NOVO
-            numeroBroa: elementos.numeroBroa.value.trim() || null          // NOVO
+            abertoBroa: elementos.abertoBroa.checked,
+            numeroBroa: elementos.numeroBroa.value.trim() || null
         };
     }
 
@@ -477,7 +479,7 @@ const AssunPendContrModule = (() => {
     function limparFormulario() {
         elementos.selectCrud.value = '';
         elementos.data.value = '';
-        elementos.fiscal.value = '';
+        //elementos.fiscal.value = '';
         elementos.classe.value = '';
         elementos.descricao.value = '';
         elementos.abertoBroa.checked = false;
@@ -489,7 +491,8 @@ const AssunPendContrModule = (() => {
         registroEditandoId = null;
         modoEdicao = false;
         desabilitarCampos(false);
-        elementos.fiscal.disabled = false; // Reabilitar campo fiscal
+        elementos.fiscal.value = fiscalDesembarcando;
+        elementos.fiscal.disabled = true;
         elementos.btnEditar.textContent = 'Editar';
         elementos.btnEditar.removeEventListener('click', salvarEdicao);
         elementos.btnEditar.addEventListener('click', confirmarEdicao);
@@ -520,7 +523,7 @@ const AssunPendContrModule = (() => {
         const ano = agora.getFullYear();
         const hora = String(agora.getHours()).padStart(2, '0');
         const min = String(agora.getMinutes()).padStart(2, '0');
-        return `${dia}/${mes}/${ano} - ${hora}:${min}`;
+        return `${dia}/${mes}/${ano}`
     }
 
     //============LIMPAR============
