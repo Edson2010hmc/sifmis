@@ -229,7 +229,7 @@ const AssunPendContrModule = (() => {
 
 
             const [ano, mes, dia] = dados.dataRegistroInicial.split('-');
-            const dataFormatada = `${dia}-${mes}-${ano}`;
+            const dataFormatada = `${dia}/${mes}/${ano}`;
             const textoFormatado = `${dados.fiscRegistroInicial} - ${dataFormatada} - ${dados.classeRegistroInicial} - ${parteBroa} - ${dados.descrRegistroInicial}`;
 
 
@@ -329,11 +329,11 @@ const AssunPendContrModule = (() => {
         registroComentarioId = registroId;
         elementos.modalComentario.classList.add('active');
         elementos.comentData.value = obterDataAtual();
+        elementos.comentData.disabled = true;
 
         // Preencher e desabilitar campo fiscal com o fiscal desembarcando
         elementos.comentFiscal.value = fiscalDesembarcando;
         elementos.comentFiscal.disabled = true;
-
         elementos.comentDescricao.value = '';
     }
 

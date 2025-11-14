@@ -3309,17 +3309,19 @@ def assun_pend_contr_list(request):
             registros = assunPendContr.objects.filter(mantRegistroInicial=True).order_by('-dataRegistroInicial')
             
             registros_list = []
+            import re
             for reg in registros:
-                # Buscar todos os comentários
                 comentarios = subAssunPendContr.objects.filter(idxAssunPendContr=reg).order_by('dataRegistroComent')
                 
-                # Montar descrição completa (registro inicial + comentários)
                 descricao_completa = reg.descrRegistroInicial or ''
+                descricao_completa = re.sub(r'(\d{4})-(\d{2})-(\d{2})', r'\3/\2/\1', descricao_completa)
                 
                 for coment in comentarios:
                     if descricao_completa:
                         descricao_completa += '\n\n'
-                    descricao_completa += coment.descrRegistroComent or ''
+                    comentario_texto = coment.descrRegistroComent or ''
+                    comentario_texto = re.sub(r'(\d{4})-(\d{2})-(\d{2})', r'\3/\2/\1', comentario_texto)
+                    descricao_completa += comentario_texto
                 
                 registros_list.append({
                     'id': reg.id,
