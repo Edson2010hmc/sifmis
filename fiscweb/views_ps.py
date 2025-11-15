@@ -3367,7 +3367,7 @@ def assun_pend_contr_list(request):
             ps = PassServ.objects.get(id=ps_id)
 
             registro = assunPendContr.objects.create(
-                idxPS=ps,
+                idxAssunPendContr=ps,
                 dataRegistroInicial=data_registro,
                 fiscRegistroInicial=data.get('fiscRegistroInicial'),
                 classeRegistroInicial=data.get('classeRegistroInicial'),
@@ -3476,7 +3476,7 @@ def assun_pend_contr_detail(request, assun_id):
             # Validar se está no período da PS
             from datetime import date
             hoje = date.today()
-            ps = registro.idxPS
+            ps = registro.idxAssunPendContr
             if not (ps.dataInicio <= hoje <= ps.dataFim):
                 return JsonResponse({
                     'success': False,
