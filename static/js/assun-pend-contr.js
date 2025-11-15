@@ -29,7 +29,10 @@ const AssunPendContrModule = (() => {
         comentFiscal: document.getElementById('apcComentFiscal'),
         comentDescricao: document.getElementById('apcComentDescricao'),
         btnComentSalvar: document.getElementById('btnApcComentSalvar'),
-        fDesCNome: document.getElementById('fDesCNome')
+        fDesCNome: document.getElementById('fDesCNome'),
+        contrato: document.getElementById('apcContrato'),
+        itemContr: document.getElementById('apcItemContr'),
+        anexoContr: document.getElementById('apcAnexoContr')
     };
 
     let psAtualId = null;
@@ -102,6 +105,16 @@ const AssunPendContrModule = (() => {
             }
 
             fiscalDesembarcando = result.data.fiscalDes;
+            // Carregar contratos do barco
+            const contratosResp = await fetch(`/api/ps/${psId}/contratos-barco/`);
+            const contratosResult = await contratosResp.json();
+
+            elementos.contrato.innerHTML = '<option value="">— selecione —</option>';
+            if (contratosResult.success && contratosResult.data) {
+                contratosResult.data.forEach(contr => {
+                    elementos.contrato.innerHTML += `<option value="${contr}">${contr}</option>`;
+                });
+            }
 
             // Carregar lista de registros
             await carregarLista();
@@ -274,6 +287,7 @@ const AssunPendContrModule = (() => {
 
         try {
             const dados = obterDadosFormulario();
+            dados.fiscalEditor = fiscalDesembarcando;
 
             const response = await fetch(`${API_URL}${registroEditandoId}/`, {
                 method: 'PUT',
@@ -430,9 +444,13 @@ const AssunPendContrModule = (() => {
     //============OBTER DADOS FORMULÁRIO============
     function obterDadosFormulario() {
         return {
+            psId: psAtualId,
             dataRegistroInicial: elementos.data.value,
             fiscRegistroInicial: elementos.fiscal.value,
             classeRegistroInicial: elementos.classe.value,
+            contrato: elementos.contrato.value,
+            itemContr: elementos.itemContr.value.trim(),
+            anexoContr: elementos.anexoContr.value.trim(),
             descrRegistroInicial: elementos.descricao.value.trim(),
             abertoBroa: elementos.abertoBroa.checked,
             numeroBroa: elementos.numeroBroa.value.trim() || null
@@ -471,6 +489,24 @@ const AssunPendContrModule = (() => {
             return false;
         }
 
+        if (!elementos.contrato.value) {
+            alert('Selecione o contrato');
+            elementos.contrato.focus();
+            return false;
+        }
+
+        if (elementos.classe.value !== 'OUTROS' && !elementos.itemContr.value.trim()) {
+            alert('Item contratual é obrigatório para esta classificação');
+            elementos.itemContr.focus();
+            return false;
+        }
+
+        if (!elementos.anexoContr.value.trim()) {
+            alert('Informe o anexo contratual');
+            elementos.anexoContr.focus();
+            return false;
+        }
+
         return true;
     }
 
@@ -495,6 +531,9 @@ const AssunPendContrModule = (() => {
         elementos.btnEditar.textContent = 'Editar';
         elementos.btnEditar.removeEventListener('click', salvarEdicao);
         elementos.btnEditar.addEventListener('click', confirmarEdicao);
+        elementos.contrato.value = '';
+        elementos.itemContr.value = '';
+        elementos.anexoContr.value = '';
     }
 
     //============DESABILITAR CAMPOS============

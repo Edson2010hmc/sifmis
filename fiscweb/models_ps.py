@@ -362,20 +362,21 @@ class portoMatDesemb(models.Model):
 
 #================================2.1 ASSUNTOS E PENDÊNCIAS CONTRATUAIS============================================
 class assunPendContr(models.Model):
-    """Modelo para  Assuntos e Penências Contratuaiso"""
+    """Modelo para  Assuntos e Pendências Contratuais"""
 
     CLASS_PEND_CHOICES = [
                             ('PENDENCIA DE ACEITAÇÃO' ,'PENDENCIA DE ACEITAÇÃO'),
                             ('ITENS CONTRATUAIS' ,'ITENS CONTRATUAIS'),
                             ('OUTROS' , 'OUTROS'),
                         ]
-   
+    
+    idxAssunPendContr = models.ForeignKey(PassServ, on_delete=models.CASCADE)
     dataRegistroInicial = models.DateField(blank=True,null=True, verbose_name='Data Regitro Inicial')
     fiscRegistroInicial = models.CharField(max_length=30,blank=True,null=True, verbose_name='Fiscal Registro Inicial')
     classeRegistroInicial = models.CharField(max_length=30,choices=CLASS_PEND_CHOICES,blank=True,null=True, verbose_name='Numero RT')
-    itemContr=models.CharField(max_length=20,blank=False,null=False, verbose_name='Item Contratual')
-    anexoContr=models.CharField(max_length=30,blank=False,null=False, verbose_name='Anexo Contratual')
-    contrato=models.CharField(max_length=50,blank=False,null=False, verbose_name='Contrato')
+    itemContr=models.CharField(max_length=20,blank=True,null=True, verbose_name='Item Contratual')
+    anexoContr=models.CharField(max_length=30,blank=True,null=True, verbose_name='Anexo Contratual')
+    contrato=models.CharField(max_length=50,blank=True,null=True, verbose_name='Contrato')
     descrRegistroInicial = models.TextField(max_length=400, blank=True,verbose_name='Descrição')
     abertoBroa = models.BooleanField(default=False, verbose_name='Abertura de BROA?')   
     numeroBroa = models.CharField(max_length=30,blank=True,null=True, verbose_name='Numero do BROA')   

@@ -3360,13 +3360,23 @@ def assun_pend_contr_list(request):
             from django.utils.dateparse import parse_date
             data_registro = parse_date(data.get('dataRegistroInicial')) if data.get('dataRegistroInicial') else None
             
+            ps_id = data.get('psId')
+            if not ps_id:
+                return JsonResponse({'success': False, 'error': 'PS não informada'}, status=400)
+
+            ps = PassServ.objects.get(id=ps_id)
+
             registro = assunPendContr.objects.create(
+                idxPS=ps,
                 dataRegistroInicial=data_registro,
                 fiscRegistroInicial=data.get('fiscRegistroInicial'),
                 classeRegistroInicial=data.get('classeRegistroInicial'),
+                itemContr=data.get('itemContr'),
+                anexoContr=data.get('anexoContr'),
+                contrato=data.get('contrato'),
                 descrRegistroInicial=data.get('descrRegistroInicial'),
-                abertoBroa=data.get('abertoBroa', False),                  
-                numeroBroa=data.get('numeroBroa'),                         
+                abertoBroa=data.get('abertoBroa', False),
+                numeroBroa=data.get('numeroBroa'),
                 mantRegistroInicial=True
             )
             
@@ -3455,6 +3465,23 @@ def assun_pend_contr_detail(request, assun_id):
     elif request.method == 'PUT':
         try:
             data = json.loads(request.body)
+            # Validar se fiscal pode editar
+            fiscal_editor = data.get('fiscalEditor')
+            if registro.fiscRegistroInicial != fiscal_editor:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Apenas o fiscal que criou pode editar'
+                }, status=403)
+
+            # Validar se está no período da PS
+            from datetime import date
+            hoje = date.today()
+            ps = registro.idxPS
+            if not (ps.dataInicio <= hoje <= ps.dataFim):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Edição permitida apenas durante o período da PS'
+                }, status=403)
             
             print(f"[API] PUT /assun-pend-contr/{assun_id}/ - Atualizando registro")
             
@@ -3658,7 +3685,24 @@ def subtab_assun_pend_contr_detail(request, coment_id):
                 'error': str(e)
             }, status=400)
 
-
+@csrf_exempt
+@require_http_methods(["GET"])
+def buscar_contratos_barco(request, ps_id):
+    """Retorna contratos do barco da PS"""
+    try:
+        ps = PassServ.objects.get(id=ps_id)
+        barco_nome = ps.BarcoPS.split(' - ')[1] if ' - ' in ps.BarcoPS else ps.BarcoPS
+        barco = BarcosCad.objects.get(nomeBarco=barco_nome)
+        
+        contratos = []
+        if barco.icjEmprNav:
+            contratos.append(f"Contrato de Afretamento - {barco.icjEmprNav}")
+        if barco.icjEmprServ:
+            contratos.append(f"Contrato de Serviços Técnicos - {barco.icjEmprServ}")
+        
+        return JsonResponse({'success': True, 'data': contratos})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
 
