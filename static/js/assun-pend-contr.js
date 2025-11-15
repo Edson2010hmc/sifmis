@@ -292,6 +292,17 @@ const AssunPendContrModule = (() => {
             const dados = obterDadosFormulario();
             dados.fiscalEditor = fiscalDesembarcando;
 
+            // Reformatar o texto com os dados atualizados
+            const parteBroa = dados.abertoBroa && dados.numeroBroa
+                ? `BROA N.${dados.numeroBroa}`
+                : 'Sem registro no BROA';
+
+            const [ano, mes, dia] = dados.dataRegistroInicial.split('-');
+            const dataFormatada = `${dia}/${mes}/${ano}`;
+            const textoFormatado = `${dados.fiscRegistroInicial} - ${dataFormatada} - ${dados.classeRegistroInicial} - ${parteBroa} - ${dados.descrRegistroInicial}`;
+
+            dados.descrRegistroInicial = textoFormatado;
+
             const response = await fetch(`${API_URL}${registroEditandoId}/`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
