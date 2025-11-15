@@ -353,22 +353,31 @@ const AssunPendContrModule = (() => {
     }
 
     //============ABRIR MODAL COMENTÁRIO============
-    function abrirModalComentario(registroId) {
+    function abrirModalComentario(registroId, finalizacao = false) {
         registroComentarioId = registroId;
+        modoFinalizacao = finalizacao;
+
         elementos.modalComentario.classList.add('active');
         elementos.comentData.value = obterDataAtual();
         elementos.comentData.disabled = true;
 
-        // Preencher e desabilitar campo fiscal com o fiscal desembarcando
         elementos.comentFiscal.value = fiscalDesembarcando;
         elementos.comentFiscal.disabled = true;
         elementos.comentDescricao.value = '';
+
+        if (finalizacao) {
+            elementos.btnComentSalvar.textContent = 'Finalizar Item';
+        } else {
+            elementos.btnComentSalvar.textContent = 'Salvar Comentário';
+        }
     }
 
     //============FECHAR MODAL COMENTÁRIO============
     function fecharModalComentario() {
         elementos.modalComentario.classList.remove('active');
         registroComentarioId = null;
+        modoFinalizacao = false;
+        elementos.btnComentSalvar.textContent = 'Salvar Comentário';
     }
 
     //============SALVAR COMENTÁRIO============
@@ -397,6 +406,13 @@ const AssunPendContrModule = (() => {
             return;
         }
 
+        if (modoFinalizacao) {
+            if (!confirm('Confirma a finalização desse item de pendência, removendo da próxima Passagem de Serviço?')) {
+                fecharModalComentario();
+                return;
+            }
+        }
+
         try {
             const dataHora = obterDataHoraFormatada();
             const textoFormatado = `${fiscal} ${dataHora} - ${descricao}`;
@@ -419,21 +435,23 @@ const AssunPendContrModule = (() => {
                 throw new Error(result.error);
             }
 
-            alert('Comentário adicionado com sucesso!');
+            if (modoFinalizacao) {
+                await finalizarRegistro(registroComentarioId);
+                alert('Item finalizado com sucesso!');
+            } else {
+                alert('Comentário adicionado com sucesso!');
+            }
+
             fecharModalComentario();
             carregarLista();
 
         } catch (error) {
-            alert('Erro ao adicionar comentário: ' + error.message);
+            alert('Erro ao salvar: ' + error.message);
         }
     }
 
-    //============FINALIZAR ITEM============
-    async function finalizarItem(registroId) {
-        if (!confirm('Deseja finalizar este item? Ele não aparecerá mais na lista.')) {
-            return;
-        }
-
+    //============FINALIZAR REGISTRO============
+    async function finalizarRegistro(registroId) {
         try {
             const response = await fetch(`${API_URL}${registroId}/`, {
                 method: 'PUT',
@@ -447,12 +465,16 @@ const AssunPendContrModule = (() => {
                 throw new Error(result.error);
             }
 
-            alert('Item finalizado com sucesso!');
-            carregarLista();
-
         } catch (error) {
             alert('Erro ao finalizar: ' + error.message);
+            throw error;
         }
+    }
+
+
+    //============FINALIZAR ITEM============
+    function finalizarItem(registroId) {
+        abrirModalComentario(registroId, true);
     }
 
     //============OBTER DADOS FORMULÁRIO============
