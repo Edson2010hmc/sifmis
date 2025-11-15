@@ -215,6 +215,9 @@ const AssunPendContrModule = (() => {
         elementos.data.value = registro.dataRegistroInicial || '';
         elementos.fiscal.value = registro.fiscRegistroInicial || '';
         elementos.classe.value = registro.classeRegistroInicial || '';
+        elementos.contrato.value = registro.contrato || '';
+        elementos.itemContr.value = registro.itemContr || '';
+        elementos.anexoContr.value = registro.anexoContr || '';
         elementos.descricao.value = registro.descrRegistroInicial || '';
         elementos.abertoBroa.checked = registro.abertoBroa || false;
         elementos.numeroBroa.value = registro.numeroBroa || '';
