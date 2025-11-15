@@ -3474,23 +3474,43 @@ def assun_pend_contr_detail(request, assun_id):
     elif request.method == 'PUT':
         try:
             data = json.loads(request.body)
-            # Validar se fiscal pode editar
-            fiscal_editor = data.get('fiscalEditor')
-            if registro.fiscRegistroInicial != fiscal_editor:
+            
+            # Verificar se é apenas finalização (só tem mantRegistroInicial)
+            campos_enviados = [k for k in data.keys() if k != 'fiscalEditor']
+            eh_apenas_finalizacao = (len(campos_enviados) == 1 and 'mantRegistroInicial' in campos_enviados)
+            
+            if eh_apenas_finalizacao:
+                # Finalização pode ser feita por qualquer fiscal
+                print(f"[API] PUT /assun-pend-contr/{assun_id}/ - Finalizando registro (qualquer fiscal pode finalizar)")
+                registro.mantRegistroInicial = data['mantRegistroInicial']
+                registro.save()
+                
                 return JsonResponse({
-                    'success': False,
-                    'error': 'Apenas o fiscal que criou pode editar'
-                }, status=403)
+                    'success': True,
+                    'message': 'Registro finalizado com sucesso',
+                    'data': {
+                        'id': registro.id,
+                        'mantRegistroInicial': registro.mantRegistroInicial
+                    }
+                })
+            else:
+                # Edição de outros campos - validar fiscal e período
+                fiscal_editor = data.get('fiscalEditor')
+                if registro.fiscRegistroInicial != fiscal_editor:
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Apenas o fiscal que criou pode editar'
+                    }, status=403)
 
-            # Validar se está no período da PS
-            from datetime import date
-            hoje = date.today()
-            ps = registro.idxAssunPendContr
-            if not (ps.dataInicio <= hoje <= ps.dataFim):
-                return JsonResponse({
-                    'success': False,
-                    'error': 'Edição permitida apenas durante o período da PS'
-                }, status=403)
+                # Validar se está no período da PS
+                from datetime import date
+                hoje = date.today()
+                ps = registro.idxAssunPendContr
+                if not (ps.dataInicio <= hoje <= ps.dataFim):
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Edição permitida apenas durante o período da PS'
+                    }, status=403)
             
             print(f"[API] PUT /assun-pend-contr/{assun_id}/ - Atualizando registro")
             
@@ -3529,7 +3549,7 @@ def assun_pend_contr_detail(request, assun_id):
                     'mantRegistroInicial': registro.mantRegistroInicial
                 }
             })
-            
+        
         except Exception as e:
             print(f"[API ERROR] PUT /assun-pend-contr/{assun_id}/ - {str(e)}")
             return JsonResponse({

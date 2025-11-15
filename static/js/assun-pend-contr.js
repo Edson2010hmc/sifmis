@@ -76,7 +76,7 @@ const AssunPendContrModule = (() => {
             let options = '';
 
             result.data.forEach(fiscal => {
-                const texto = `${fiscal.chave} - ${fiscal.nome}`;
+                const texto = `${fiscal.chave}-${fiscal.nome}`;
                 options += `<option value="${texto}">${texto}</option>`;
                 //alert(fiscal.nome);
             });
@@ -246,7 +246,8 @@ const AssunPendContrModule = (() => {
 
             const [ano, mes, dia] = dados.dataRegistroInicial.split('-');
             const dataFormatada = `${dia}/${mes}/${ano}`;
-            const textoFormatado = `${dados.fiscRegistroInicial} - ${dataFormatada} - ${dados.classeRegistroInicial} - ${parteBroa} - ${dados.descrRegistroInicial}`;
+            const textoFormatado = `${dados.classeRegistroInicial}-${dados.contrato}-${dados.anexoContr}-:${dados.itemContr}-${dados.fiscRegistroInicial} em ${dataFormatada} - ${parteBroa} - DESCRIÇÃO:${dados.descrRegistroInicial}`;
+
 
 
             dados.descrRegistroInicial = textoFormatado;
@@ -299,7 +300,7 @@ const AssunPendContrModule = (() => {
 
             const [ano, mes, dia] = dados.dataRegistroInicial.split('-');
             const dataFormatada = `${dia}/${mes}/${ano}`;
-            const textoFormatado = `${dados.fiscRegistroInicial} - ${dataFormatada} - ${dados.classeRegistroInicial} - ${parteBroa} - ${dados.descrRegistroInicial}`;
+            const textoFormatado = `${dados.classeRegistroInicial}-${dados.contrato}-${dados.anexoContr}-:${dados.itemContr}-${dados.fiscRegistroInicial} em ${dataFormatada} - ${parteBroa} - DESCRIÇÃO:${dados.descrRegistroInicial}`;
 
             dados.descrRegistroInicial = textoFormatado;
 
