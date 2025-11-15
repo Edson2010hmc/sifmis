@@ -3328,6 +3328,9 @@ def assun_pend_contr_list(request):
                     'dataRegistroInicial': str(reg.dataRegistroInicial) if reg.dataRegistroInicial else '',
                     'fiscRegistroInicial': reg.fiscRegistroInicial or '',
                     'classeRegistroInicial': reg.classeRegistroInicial or '',
+                    'itemContr': reg.itemContr or '',
+                    'anexoContr': reg.anexoContr or '',
+                    'contrato': reg.contrato or '',    
                     'descrRegistroInicial': reg.descrRegistroInicial or '',
                     'descricaoCompleta': descricao_completa,
                     'mantRegistroInicial': reg.mantRegistroInicial,
@@ -3390,6 +3393,9 @@ def assun_pend_contr_list(request):
                     'dataRegistroInicial': str(registro.dataRegistroInicial) if registro.dataRegistroInicial else '',
                     'fiscRegistroInicial': registro.fiscRegistroInicial,
                     'classeRegistroInicial': registro.classeRegistroInicial,
+                    'itemContr': registro.itemContr,
+                    'anexoContr': registro.anexoContr,  
+                    'contrato': registro.contrato,    
                     'descrRegistroInicial': registro.descrRegistroInicial,
                     'abertoBroa': registro.abertoBroa,                     
                     'numeroBroa': registro.numeroBroa or '',               
@@ -3446,6 +3452,9 @@ def assun_pend_contr_detail(request, assun_id):
                     'dataRegistroInicial': str(registro.dataRegistroInicial) if registro.dataRegistroInicial else '',
                     'fiscRegistroInicial': registro.fiscRegistroInicial or '',
                     'classeRegistroInicial': registro.classeRegistroInicial or '',
+                    'itemContr': registro.itemContr or '',
+                    'anexoContr': registro.anexoContr or '',
+                    'contrato': registro.contrato or '',    
                     'descrRegistroInicial': registro.descrRegistroInicial or '',
                     'abertoBroa': registro.abertoBroa,                     
                     'numeroBroa': registro.numeroBroa or '',               
@@ -3493,6 +3502,12 @@ def assun_pend_contr_detail(request, assun_id):
                 registro.fiscRegistroInicial = data['fiscRegistroInicial']
             if 'classeRegistroInicial' in data:
                 registro.classeRegistroInicial = data['classeRegistroInicial']
+            if 'itemContr' in data:
+                registro.itemContr = data['itemContr']
+            if 'anexoContr' in data:
+                registro.anexoContr = data['anexoContr']
+            if 'contrato' in data:
+                registro.contrato = data['contrato']    
             if 'descrRegistroInicial' in data:
                 registro.descrRegistroInicial = data['descrRegistroInicial']
             if 'abertoBroa' in data:                                       
