@@ -514,7 +514,6 @@ const AssunPendContrModule = (() => {
     function limparFormulario() {
         elementos.selectCrud.value = '';
         elementos.data.value = '';
-        //elementos.fiscal.value = '';
         elementos.classe.value = '';
         elementos.descricao.value = '';
         elementos.abertoBroa.checked = false;
@@ -542,6 +541,12 @@ const AssunPendContrModule = (() => {
         elementos.fiscal.disabled = desabilitar;
         elementos.classe.disabled = desabilitar;
         elementos.descricao.disabled = desabilitar;
+        elementos.contrato.disabled = desabilitar;
+        elementos.itemContr.disabled = desabilitar;
+        elementos.anexoContr.disabled = desabilitar;
+        elementos.abertoBroa.disabled = desabilitar;
+        elementos.numeroBroa.disabled = desabilitar;
+
     }
 
     //============OBTER DATA ATUAL============

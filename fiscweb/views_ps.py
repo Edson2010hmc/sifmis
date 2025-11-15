@@ -3696,9 +3696,9 @@ def buscar_contratos_barco(request, ps_id):
         
         contratos = []
         if barco.icjEmprNav:
-            contratos.append(f"Contrato de Afretamento - {barco.icjEmprNav}")
+            contratos.append(f"Afretamento - ICJ:{barco.icjEmprNav}")
         if barco.icjEmprServ:
-            contratos.append(f"Contrato de Serviços Técnicos - {barco.icjEmprServ}")
+            contratos.append(f"Serviços -ICJ:{barco.icjEmprServ}")
         
         return JsonResponse({'success': True, 'data': contratos})
     except Exception as e:
