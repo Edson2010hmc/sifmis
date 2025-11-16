@@ -7,7 +7,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
-
+from . import models_cad
 
 #================== SIGNAL PARA DELETAR ANEXOS DE REGISTROS EXCLUIDOS==========================================
 @receiver(post_delete)
@@ -19,6 +19,9 @@ def deletar_arquivos_anexos(sender, instance, **kwargs):
             if arquivo:
                 if os.path.isfile(arquivo.path):
                     os.remove(arquivo.path)
+
+
+
 
 #=================================FUNÇÃO DE TRATAMENTO DOS ARQUIVOS ANEXOS=====================================
 def caminho_PS(instance, filename):
@@ -164,8 +167,6 @@ class PortoInspNorm(models.Model):
 
     def __str__(self):
         return f"{self.idxPortoIN}"
-    
-#=================================SUB TABELA INSPEÇÕES NORMATIVAS ==============================================
 class subTabPortoInspNorm(models.Model):
     """Modelo para cadastro de Passagem de Serviço - Inspeções Normativas - porto"""
 
@@ -203,8 +204,6 @@ class PortoInspPetr(models.Model):
 
     def __str__(self):
         return f"{self.idxPortoIP} - {self.idxPortoIP.numPS}"
-    
-#=================================SUB TABELA INSPEÇÕES PETROBRAS ===============================================
 class subTabPortoInspPetr(models.Model):
     """Modelo para cadastro de Passagem de Serviço - Inspeções Petrobras - porto"""
 
@@ -246,8 +245,6 @@ class PortoEmbEquip(models.Model):
 
     def __str__(self):
         return f"{self.idxPortoEE} - {self.idxPortoEE.numPS}"
-
-#=================================SUB TABELA EMBARQUE EQUIPES===================================================
 class subTabPortoEmbEquip(models.Model):
     """Modelo para cadastro de Passagem de Serviço - Embarque Equipes - porto"""
 
@@ -276,8 +273,7 @@ class subTabPortoEmbEquip(models.Model):
     def __str__(self):
         return f"{self.idxSubTabPortoEE} - {self.DescEmbEquip}"
 
-
-#=============================== =1.7 MODELO MOBILIZAÇÃO DESMOBILIZAÇÃO========================================
+#================================1.7 MODELO MOBILIZAÇÃO DESMOBILIZAÇÃO========================================
 class PortoMobD(models.Model):
     """Modelo para cadastro de Passagem de Serviço - Operações de Mobilização e desmobilização - Porto"""
 
@@ -292,8 +288,6 @@ class PortoMobD(models.Model):
 
     def __str__(self):
         return f"{self.idxPortoMobD} - {self.idxPortoMobD.numPS}"
-    
-#=============================== SUB TABELA OS MOBILIZAÇÃO DESMOBILIZAÇÃO======================================
 class SubTabPortoMobD(models.Model):
     """Modelo para cadastro de Passagem de Serviço - Operações de Mobilização e desmobilização - Porto"""
 
@@ -309,7 +303,6 @@ class SubTabPortoMobD(models.Model):
 
     def __str__(self):
         return f"{self.idxSubTabPortoMobD} - {self.OsMobD}"
-
 
 #=================================1.8 MODELO EMBARQUE MATERIAIS================================================
 class portoMatEmb(models.Model):
@@ -332,7 +325,6 @@ class portoMatEmb(models.Model):
     def __str__(self):
         return f"{self.idxPortoMatEmb} - {self.idxPortoMatEmb.numPS}"
     
-
 #=================================1.9 MODELO DESEMBARQUE MATERIAIS===============================================
 class portoMatDesemb(models.Model):
     """Modelo para  registro de Desemmbarque de Materiais - porto"""
@@ -356,13 +348,10 @@ class portoMatDesemb(models.Model):
         return f"{self.idxPortoMatDesemb} - {self.idxPortoMatDesemb.numPS}"
 
 
-
-
-#================================2  ROTINAS =====================================================================
-
-#================================2.1 ASSUNTOS E PENDÊNCIAS CONTRATUAIS============================================
+#================================2  PENDENCIAS OCORRENCIAS E ORIENTAÇÕES =================================================================
+#================================2.1 ASSUNTOS E PENDÊNCIAS CONTRATUAIS=======================================
 class assunPendContr(models.Model):
-    """Modelo para  Assuntos e Pendências Contratuais"""
+    """Modelo para  PASSAGEM DE SERVIÇOAssuntos e Pendências Contratuais"""
 
     CLASS_PEND_CHOICES = [
                             ('PENDENCIA DE ACEITAÇÃO' ,'PENDENCIA DE ACEITAÇÃO'),
@@ -374,8 +363,8 @@ class assunPendContr(models.Model):
     dataRegistroInicial = models.DateField(blank=True,null=True, verbose_name='Data Regitro Inicial')
     fiscRegistroInicial = models.CharField(max_length=30,blank=True,null=True, verbose_name='Fiscal Registro Inicial')
     classeRegistroInicial = models.CharField(max_length=30,choices=CLASS_PEND_CHOICES,blank=True,null=True, verbose_name='Numero RT')
-    itemContr=models.CharField(max_length=20,blank=True,null=True, verbose_name='Item Contratual')
-    anexoContr=models.CharField(max_length=30,blank=True,null=True, verbose_name='Anexo Contratual')
+    itemContr=models.CharField(max_length=30,blank=True,null=True, verbose_name='Item Contratual')
+    anexoContr=models.CharField(max_length=50,blank=True,null=True, verbose_name='Anexo Contratual')
     contrato=models.CharField(max_length=50,blank=True,null=True, verbose_name='Contrato')
     descrRegistroInicial = models.TextField(max_length=400, blank=True,verbose_name='Descrição')
     abertoBroa = models.BooleanField(default=False, verbose_name='Abertura de BROA?')   
@@ -390,8 +379,6 @@ class assunPendContr(models.Model):
 
     def __str__(self):
         return f"{self.dataRegistroInicial} - {self.classeRegistroInicial}"
-
-#================================SUB TABELA ASSUNTOS E PENDENCIAS CONTRATUAIS=====================================
 class subAssunPendContr(models.Model):
     """Modelo subtabela Assuntos e Pendencias Contratuai"""
 
@@ -407,14 +394,12 @@ class subAssunPendContr(models.Model):
 
     def __str__(self):
         return f"{self.dataRegistroComent} - {self.idxAssunPendContr}"
-    
 
+#================================2.2 DESVIOS E NÃO CONFORMIDADES=============================================
+#class desvNaoConf(models.Model):
+    # A implementar
 
-
-#=============================== 3  ANOMALIAS E SMS =========================================
-
-#================================3.1 INFORMES DE ANOMALIA===========================================
-
+#================================2.3 INFORMES DE ANOMALIA EMITIDOS============================================
 class anomSMS(models.Model):
     """Modelo para  Passagem de Serviço - Anomalias de SMS"""
 
@@ -431,60 +416,55 @@ class anomSMS(models.Model):
     def __str__(self):
         return f"{self.dataAnomSMS} - {self.horaAnomSMS} - {self.relacAnomSMS}" 
 
-#================================3.2 DESVIOS DE SMS===========================================
-class desvSMS(models.Model):
-    """Modelo para  Passagem de Serviço - Desvios de SMS A BORDO"""
+#================================2.4 EMISSÃO DE FRO=============================================
+#class emissFro(models.Model):
+    #A implementar - depende de dados de outra aplicação
 
-    idxDesvSMS = models.ForeignKey(PassServ, on_delete=models.CASCADE)
-    ocorDesvSMS = models.BooleanField(default=False, verbose_name='Ocorreram Desvios?')
-    dataDesvSMS = models.DateField(verbose_name='Data do desvio')
-    localDesvSMS = models.CharField(max_length=80, verbose_name='Local do desvio')
-    obsDesvSMS = models.TextField(max_length=500, verbose_name='Informações Gerais')
+#================================2.5 PENDENCIAS BROA =============================================
+#class pendBroa(models.Model):
+    #A implementar - depende de dados de outra aplicação
+
+#=============================== 3  LISTAS DE VERIFICAÇÃO-SMS =========================================
+#================================3.1 LV SOB DEMANDA===========================================
+class lvSobDemanda(models.Model):
+    """Modelo para  Passagem de Serviço - LV SOB DEMANDA"""
+    
+    STATUS_ENVIO_LV_SOB_DEMANDA_CHOICES = [('ENVIADA', 'ENVIADA'),
+                                           ('A ENVIAR', 'A ENVIAR')]
+
+    ORIGEM_LV_SOB_DEMANDA_CHOICES = [('AIS','AIS'),
+                                     ('AÇÕES DE ABRANGENCIA','AÇÕES DE ABRANGENCIA'),
+                                     ('VERIFICAR EFICÁCIA DE PLANO DE ACAO','VERIFICAR EFICÁCIA DE PLANO DE ACAO')]    
+
+    idxLvSobDemanda = models.ForeignKey(PassServ, on_delete=models.CASCADE)
+    dataRecebLvSobDemanda = models.DateField(verbose_name='Data do Recebimento')
+    origemLvSobDemanda = models.CharField(max_length=45,choices=ORIGEM_LV_SOB_DEMANDA_CHOICES, verbose_name='Origem')
+    numLvSobDemanda = models.CharField(max_length=15,verbose_name='Numero/Código da LV')
+    descrLvSobDemanda = models.TextField(max_length=300, verbose_name='Descrição')
+    linkFormsLvSobDemanda = models.CharField(max_length=100, verbose_name='Link Forms')
+    prazoEnvLvSobDemanda = models.DateField(verbose_name='Prazo de Envio')
+    statusEnvLvSobDemanda = models.CharField(max_length=10,choices=STATUS_ENVIO_LV_SOB_DEMANDA_CHOICES,verbose_name='Status')
+    dataEnvioLvSobDemanda = models.DateField(verbose_name='Data do Envio')# Exibir campo apenas se status=ENVIADA, CASO CONTRARIO SERÁ NULL E OCULTO
+    removeDaPsLvSobDemanda = models.BooleanField(default=False,verbose_name='Remover da PS?')# Essa opção só aparecerá nas PSs seguintes à PS cuja data de envio ocorreu dentro da quinzena. 
     
     class Meta:
-        verbose_name = 'Desvio de SMS'
-        verbose_name_plural = 'Desvios de SMS'
-        ordering = ['-dataDesvSMS','-localDesvSMS']  
+        verbose_name = 'LV sob Demanda'
+        verbose_name_plural = 'LVs sob Demanda'
+        ordering = ['-idxLvSobDemanda__numPS','origemLvSobDemanda','-numLvSobDemanda']  
 
     def __str__(self):
-        return f"{self.dataDesvSMS} - {self.localDesvSMS}" 
+        return f"{self.idxLvSobDemanda.numPS} - {self.origemLvSobDemanda} - {self.numLvSobDemanda}" 
 
+#================================3.2 LV DE SEGURANÇA =============================================
+class LvSeg(models.Model):
+    """Modelo para PASSAGEM DE SERVIÇO - LV de Segurança - SMS"""
 
-#================================3.3  LV de Mangueiras====================================
-
-class smsLvMang(models.Model):
-    """Modelo para cadastro de Passagem de Serviço - LV de Mangueiras - SMS"""
-
-    idxsmsLvMang = models.ForeignKey(PassServ, on_delete=models.CASCADE)
-
-    dataUltLvMang = models.DateField(verbose_name='Data da Última LV')
-    dataProxLvMang = models.DateField(verbose_name='Data da Próxima LV')
-    obsLvMang = models.TextField(max_length=500, verbose_name='Observações', blank=True)
-
-    class Meta:
-        verbose_name = 'LV de Mangueiras'
-        verbose_name_plural = 'LVs de Mangueiras'
-        ordering = ['idxsmsLvMang__BarcoPS','-idxsmsLvMang__numPS']  
-
-    def __str__(self):
-        return f"{self.idxsmsLvMang} - {self.dataProxLvMang}"
-    
-    def save(self, *args, **kwargs):
-        """Calcula automaticamente a próxima LV (60 dias após a última)"""
-        if self.dataUltLvMang:
-            self.dataProxLvMang = self.dataUltLvMang + timedelta(days=60)
-            
-        
-        super().save(*args, **kwargs)
-        
-
-
-#================================3.4 LV de Segurança====================================
-class smsLvSeg(models.Model):
-    """Modelo para cadastro de Passagem de Serviço - LV de Segurança - SMS"""
-
-    idxsmsLvSeg = models.ForeignKey(PassServ, on_delete=models.CASCADE)
-
+    FAROIS_LV_SEG_CHOICES = [('VERMELHO','VERMELHO'),
+                             ('LARANJA','LARANJA'),
+                             ('VERDE','VERDE')]
+                            
+    idxFreqLvSeg= models.ForeignKey(models_cad.freqLvSeg, on_delete=models.PROTECT)
+    idxPsLvSeg = models.ForeignKey(PassServ, on_delete=models.CASCADE)
     LvSegCamoAsogUlt = models.DateField(verbose_name='Data da Última LV CAMO/ASOG')
     LvSegCamoAsogProx = models.DateField(verbose_name='Data da Próxima LV CAMO/ASOG')
     LvlSegCamoAsogFarol = models.CharField(max_length=3,verbose_name='Farol LV CAMO/ASOG')
@@ -537,20 +517,56 @@ class smsLvSeg(models.Model):
     LvSegTrabEletrProx = models.DateField(verbose_name='Data da Próxima LV de Trabalho em eletricidade')
     LvSegTrabEletrFarol = models.CharField(max_length=3,verbose_name='Farol LV de Trabalho em eletricidade')
     
-    obsLvSeg = models.TextField(max_length=500, verbose_name='Observações', blank=True)
+    obsLvSeg = models.TextField(max_length=300, verbose_name='Observações', blank=True)
 
     class Meta:
         verbose_name = 'LV de Segurança'
         verbose_name_plural = 'LVs de Segurança'
-        ordering = ['idxsmsLvSeg__BarcoPS','-idxsmsLvSeg__numPS']  
+        ordering = ['idxPsLvSeg__BarcoPS','-idxPsLvSeg__numPS']  
 
     def __str__(self):
-        return f"{self.idxsmsLvSeg}"
+        return f"{self.idxPsLvSeg} - {self.idxPsLvSeg.numPS}"
+    
+
+#================================3.3 LV DE MANGUEIRAS=========================================
+class lvMangueiras(models.Model):
+    """Modelo Passagem de Serviço - LV de Mangueiras - SMS"""
+
+    idxLvMangueiras = models.ForeignKey(PassServ, on_delete=models.CASCADE)
+    dataUltLvMang = models.DateField(verbose_name='Data da Última LV') #unico campo editável valor do registro da PS anterior sempre carregado como default, se não houver passagem anterior , será vazio, mas para salvar é obrigatorio o preenchimento
+    dataProxLvMang = models.DateField(verbose_name='Data da Próxima LV') #Campo calculado pela função save dentro dessa classe, deverá ser somente leitura  
+    obsLvMang = models.TextField(max_length=500, verbose_name='Observações', blank=True)
+
+    class Meta:
+        verbose_name = 'LV de Mangueiras'
+        verbose_name_plural = 'LVs de Mangueiras'
+        ordering = ['idxLvMangueiras__BarcoPS','-idxLvMangueiras__numPS']  
+
+    def __str__(self):
+        return f"{self.idxLvMangueiras} - {self.idxLvMangueiras.BarcoPS}"
     
     def save(self, *args, **kwargs):
-        """Irá capturar os dados de uma outra aplicação futuramente"""
-        pass
+        """Calcula automaticamente a próxima LV (60 dias após a última)"""
+        if self.dataUltLvMang:
+            self.dataProxLvMang = self.dataUltLvMang + timedelta(days=60)
+        
         super().save(*args, **kwargs)
+
+
+
+
+
+#================================3.2 DESVIOS DE SMS===========================================
+
+
+#================================3.3  LV de Mangueiras====================================
+
+
+        
+
+
+#================================3.4 LV de Segurança====================================
+
         
 
     

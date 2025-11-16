@@ -1,11 +1,10 @@
 from django.contrib import admin
 
-from .models_cad import FiscaisCad,BarcosCad,ModalBarco,contatoUep,subTabcontatosUeps,materiaisOperacao 
-
+from .models_cad import FiscaisCad,BarcosCad,ModalBarco,contatoUep,subTabcontatosUeps,materiaisOperacao,freqLvSeg
 from .models_ps import PassServ, PortoTrocaTurma,PortoManutPrev,PortoAbast,PortoInspNorm,subTabPortoInspNorm,PortoInspPetr,subTabPortoInspPetr,PortoEmbEquip,subTabPortoEmbEquip,portoMatEmb,portoMatDesemb,PortoMobD # Seção 1
-from .models_ps import anomSMS,desvSMS 
-from .models_ps import iapo, smsLvMang,smsLvSeg
-from .models_ps import assunPendContr,subAssunPendContr
+from .models_ps import anomSMS,assunPendContr,subAssunPendContr
+from .models_ps import lvSobDemanda
+
 
 
 
@@ -25,7 +24,8 @@ admin.site.register(ModalBarco)
 admin.site.register(contatoUep)
 admin.site.register(subTabcontatosUeps)
 admin.site.register(materiaisOperacao)
-  
+admin.site.register(freqLvSeg)
+    
 #============================MODULO PASSAGEM DE SERVIÇO=================
 admin.site.register(PassServ)
 admin.site.register(PortoTrocaTurma)
@@ -42,12 +42,8 @@ admin.site.register(subTabPortoInspPetr)
 admin.site.register(subTabPortoEmbEquip)
 admin.site.register(assunPendContr)
 admin.site.register(subAssunPendContr)
-
 admin.site.register(anomSMS)
-admin.site.register(desvSMS)
-admin.site.register(iapo)
-admin.site.register(smsLvMang)
-admin.site.register(smsLvSeg)
+admin.site.register(lvSobDemanda)
 
 
 

@@ -76,7 +76,7 @@ const AssunPendContrModule = (() => {
             let options = '';
 
             result.data.forEach(fiscal => {
-                const texto = `${fiscal.chave}-${fiscal.nome}`;
+                const texto = `${fiscal.chave} - ${fiscal.nome}`;
                 options += `<option value="${texto}">${texto}</option>`;
                 //alert(fiscal.nome);
             });
@@ -104,8 +104,12 @@ const AssunPendContrModule = (() => {
                 throw new Error(result.error);
             }
 
-            fiscalDesembarcando = result.data.fiscalDes;
-            // Carregar contratos do barco
+            fiscalDesembarcando = result.data.fiscalDes; //Armazenar o fiscal editor da PS
+            psStatus = result.data.statusPS; // Armazenar status da PS
+
+            controlarBotoes();
+
+            // Carregar os contratos do barco para exibição na tabela
             const contratosResp = await fetch(`/api/ps/${psId}/contratos-barco/`);
             const contratosResult = await contratosResp.json();
 
@@ -124,10 +128,22 @@ const AssunPendContrModule = (() => {
         }
     }
 
+    //============CONTROLAR BOTÕES DA TABELA - STATUS DA PS============
+    function controlarBotoes() {
+        const ehRascunho = psStatus === 'RASCUNHO';
+
+        // Desabilitar botão de cadastro
+        elementos.btnCadastro.disabled = !ehRascunho;
+
+        // Desabilitar botões na tabela (adicionar/finalizar)
+
+    }
+
+
     //============CARREGAR LISTA DE REGISTROS============
     async function carregarLista() {
         try {
-            const response = await fetch(API_URL);
+            const response = await fetch(`${API_URL}?ps_id=${psAtualId}`);
             const result = await response.json();
 
             if (!result.success) {
@@ -164,8 +180,8 @@ const AssunPendContrModule = (() => {
 
         registros.forEach(reg => {
             const tr = document.createElement('tr');
-
             const item = `${reg.ano}/${reg.id}`;
+            const disabledAttr = ehRascunho ? '' : 'disabled';
 
             tr.innerHTML = `
         <td style="border:1px solid #ddd; padding:8px;">${item}</td>
@@ -218,7 +234,12 @@ const AssunPendContrModule = (() => {
         elementos.contrato.value = registro.contrato || '';
         elementos.itemContr.value = registro.itemContr || '';
         elementos.anexoContr.value = registro.anexoContr || '';
-        elementos.descricao.value = registro.descrRegistroInicial || '';
+        let descricaoSplit = '';
+        if (registro.descrRegistroInicial) {
+            const match = registro.descrRegistroInicial.match(/DESCRIÇÃO:(.+)$/);
+            descricaoSplit = match ? match[1].trim() : '';
+        }
+        elementos.descricao.value = descricaoSplit;
         elementos.abertoBroa.checked = registro.abertoBroa || false;
         elementos.numeroBroa.value = registro.numeroBroa || '';
         toggleNumeroBroa();
@@ -246,7 +267,7 @@ const AssunPendContrModule = (() => {
 
             const [ano, mes, dia] = dados.dataRegistroInicial.split('-');
             const dataFormatada = `${dia}/${mes}/${ano}`;
-            const textoFormatado = `${dados.classeRegistroInicial}-${dados.contrato}-${dados.anexoContr}-:${dados.itemContr}-${dados.fiscRegistroInicial} em ${dataFormatada} - ${parteBroa} - DESCRIÇÃO:${dados.descrRegistroInicial}`;
+            const textoFormatado = `${dados.classeRegistroInicial}  (${dados.contrato}-${dados.anexoContr} Item:${dados.itemContr})   ${dados.fiscRegistroInicial} em ${dataFormatada}   ${parteBroa}      DESCRIÇÃO:${dados.descrRegistroInicial}`;
 
 
 
@@ -300,7 +321,7 @@ const AssunPendContrModule = (() => {
 
             const [ano, mes, dia] = dados.dataRegistroInicial.split('-');
             const dataFormatada = `${dia}/${mes}/${ano}`;
-            const textoFormatado = `${dados.classeRegistroInicial}-${dados.contrato}-${dados.anexoContr}-:${dados.itemContr}-${dados.fiscRegistroInicial} em ${dataFormatada} - ${parteBroa} - DESCRIÇÃO:${dados.descrRegistroInicial}`;
+            const textoFormatado = `${dados.classeRegistroInicial} (${dados.contrato}-${dados.anexoContr} Item:${dados.itemContr})   ${dados.fiscRegistroInicial} em ${dataFormatada}   ${parteBroa}      DESCRIÇÃO:${dados.descrRegistroInicial}`;
 
             dados.descrRegistroInicial = textoFormatado;
 
@@ -612,6 +633,7 @@ const AssunPendContrModule = (() => {
         elementos.msgSemRegistros.style.display = 'none';
         psAtualId = null;
         fiscalDesembarcando = '';
+        psStatus = '';
     }
 
     //============EXPORTAR FUNÇÕES PÚBLICAS============

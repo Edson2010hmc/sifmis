@@ -183,3 +183,18 @@ class materiaisOperacao(models.Model):
     
     def __str__(self):
         return self.descMat
+    
+#===========================================FREQUENCIA LV SEGURANÇA==================
+class freqLvSeg(models.Model):
+    """Cadastro de frequencia de LV de Segurança"""
+    # Campos
+    temaLvSeg = models.CharField(max_length=50, verbose_name='Tema da LV',blank=False, null=False,unique=True)
+    freqLvSeg = models.IntegerField(verbose_name='Frequencia da LV (meses)', blank=False, null=False)
+    
+   
+    class Meta:
+        verbose_name = 'Frequencia de LV de Segurança'
+        ordering = ['temaLvSeg']
+    
+    def __str__(self):
+        return self.temaLvSeg

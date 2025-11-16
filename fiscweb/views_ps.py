@@ -17,7 +17,7 @@ from django.core.files.uploadhandler import MemoryFileUploadHandler
 from django.db import models, transaction
 import time
 import random
-from .models_cad import FiscaisCad,BarcosCad,ModalBarco
+from .models_cad import FiscaisCad,BarcosCad,ModalBarco,freqLvSeg
 
 from .models_anom import InformeAnomalia
 
@@ -29,9 +29,9 @@ from .models_ps import PortoInspNorm,subTabPortoInspNorm
 from .models_ps import PortoInspPetr,subTabPortoInspPetr
 from .models_ps import PortoEmbEquip,subTabPortoEmbEquip
 from .models_ps import PortoMobD,SubTabPortoMobD
-from .models_ps import anomSMS,desvSMS
+from .models_ps import anomSMS
 from .models_ps import assunPendContr, subAssunPendContr
-
+from .models_ps import lvSobDemanda
 #================================================PASSAGEM DE SERVIÇO - API REST - VERIFICA RASCUNHO USUARIO=================================================
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -3306,7 +3306,28 @@ def assun_pend_contr_list(request):
     
     if request.method == 'GET':
         try:
-            registros = assunPendContr.objects.filter(mantRegistroInicial=True).order_by('-dataRegistroInicial')
+            # Obter ps_id do parâmetro da query
+            ps_id = request.GET.get('ps_id')
+            
+            if ps_id:
+                # Filtrar por embarcação da PS
+                try:
+                    ps_atual = PassServ.objects.get(id=ps_id)
+                    barco_ps = ps_atual.BarcoPS
+                    
+                    # Buscar todos os registros ativos da mesma embarcação
+                    registros = assunPendContr.objects.filter(
+                        mantRegistroInicial=True,
+                        idxAssunPendContr__BarcoPS=barco_ps
+                    ).order_by('-dataRegistroInicial')
+                    
+                    print(f"[API] GET /assun-pend-contr/ - Filtrando por embarcação: {barco_ps}")
+                except PassServ.DoesNotExist:
+                    print(f"[API] GET /assun-pend-contr/ - PS {ps_id} não encontrada")
+                    registros = assunPendContr.objects.none()
+            else:
+                # Sem filtro - retorna todos (caso geral)
+                registros = assunPendContr.objects.filter(mantRegistroInicial=True).order_by('-dataRegistroInicial')
             
             registros_list = []
             import re
@@ -3740,7 +3761,7 @@ def buscar_contratos_barco(request, ps_id):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
-
+#====================================== LV SOB DEMANDA ===============================
 
 
 

@@ -15,7 +15,7 @@ import json
 from django.http.multipartparser import MultiPartParser
 from django.core.files.uploadhandler import MemoryFileUploadHandler
 
-from .models_cad import FiscaisCad, BarcosCad, ModalBarco, contatoUep, subTabcontatosUeps,materiaisOperacao
+from .models_cad import FiscaisCad, BarcosCad, ModalBarco, contatoUep, subTabcontatosUeps,materiaisOperacao,freqLvSeg
 
 from .models_ps import PassServ
 from .models_ps import PortoTrocaTurma
