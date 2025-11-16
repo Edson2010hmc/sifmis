@@ -37,6 +37,7 @@ const AssunPendContrModule = (() => {
 
     let psAtualId = null;
     let fiscalDesembarcando = '';
+    let psStatus = '';
 
     //============INICIALIZAR============
     function init() {
@@ -177,6 +178,8 @@ const AssunPendContrModule = (() => {
         }
 
         elementos.msgSemRegistros.style.display = 'none';
+
+        const ehRascunho = (psStatus === 'RASCUNHO');
 
         registros.forEach(reg => {
             const tr = document.createElement('tr');
