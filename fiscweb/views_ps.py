@@ -1,4 +1,5 @@
 import os
+from datetime import datetime,date
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.units import mm
@@ -303,6 +304,7 @@ def passagem_detail(request, ps_id):
 def criar_nova_ps(request):
     """
     Cria uma nova PS em modo RASCUNHO
+    COPIAR pendências ativas da embarcação
     """
     try:
         data = json.loads(request.body)
@@ -339,6 +341,55 @@ def criar_nova_ps(request):
             fiscalDes=fiscal_des_nome
         )
         
+        print(f"[CRIAR PS] PS criada: ID={ps.id}, Barco={ps.BarcoPS}")
+        
+        # ========== COPIAR PENDÊNCIAS ATIVAS PARA A NOVA PS ==========
+        barco_nome = ps.BarcoPS
+        
+        # Buscar pendências ativas da mesma embarcação
+        pendencias_ativas = assunPendContr.objects.filter(
+            mantRegistroInicial=True,
+            idxAssunPendContr__BarcoPS=barco_nome
+        )
+        
+        print(f"[CRIAR PS] Encontradas {pendencias_ativas.count()} pendências ativas para copiar")
+        
+        for pendencia_original in pendencias_ativas:
+            # Copiar pendência para nova PS
+            nova_pendencia = assunPendContr.objects.create(
+                idxAssunPendContr=ps,
+                dataRegistroInicial=pendencia_original.dataRegistroInicial,
+                fiscRegistroInicial=pendencia_original.fiscRegistroInicial,
+                classeRegistroInicial=pendencia_original.classeRegistroInicial,
+                itemContr=pendencia_original.itemContr,
+                anexoContr=pendencia_original.anexoContr,
+                contrato=pendencia_original.contrato,
+                descrRegistroInicial=pendencia_original.descrRegistroInicial,
+                abertoBroa=pendencia_original.abertoBroa,
+                numeroBroa=pendencia_original.numeroBroa,
+                mantRegistroInicial=True
+            )
+            
+            print(f"[CRIAR PS] Pendência copiada: ID original={pendencia_original.id}, ID nova={nova_pendencia.id}")
+            
+            # Copiar comentários da pendência original
+            comentarios_originais = subAssunPendContr.objects.filter(
+                idxAssunPendContr=pendencia_original
+            ).order_by('dataRegistroComent')
+            
+            for comentario_original in comentarios_originais:
+                subAssunPendContr.objects.create(
+                    idxAssunPendContr=nova_pendencia,
+                    dataRegistroComent=comentario_original.dataRegistroComent,
+                    fiscRegistroComent=comentario_original.fiscRegistroComent,
+                    descrRegistroComent=comentario_original.descrRegistroComent
+                )
+            
+            print(f"[CRIAR PS] {comentarios_originais.count()} comentários copiados")
+        
+        print(f"[CRIAR PS] Cópia de pendências concluída")
+        # ========== FIM DA CÓPIA DE PENDÊNCIAS ==========
+        
         return JsonResponse({
             'success': True,
             'message': 'PS criada com sucesso',
@@ -357,6 +408,9 @@ def criar_nova_ps(request):
         }, status=201)
         
     except Exception as e:
+        print(f"[CRIAR PS ERROR] {str(e)}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({
             'success': False,
             'error': str(e)
@@ -3300,7 +3354,7 @@ def gerar_pdf_passagem(request, ps_id):
 @require_http_methods(["GET", "POST"])
 def assun_pend_contr_list(request):
     """
-    GET: Lista todos os registros ativos (mantRegistroInicial=True)
+    GET: Lista registros da PS específica
     POST: Cria novo registro
     """
     
@@ -3309,25 +3363,29 @@ def assun_pend_contr_list(request):
             # Obter ps_id do parâmetro da query
             ps_id = request.GET.get('ps_id')
             
-            if ps_id:
-                # Filtrar por embarcação da PS
-                try:
-                    ps_atual = PassServ.objects.get(id=ps_id)
-                    barco_ps = ps_atual.BarcoPS
-                    
-                    # Buscar todos os registros ativos da mesma embarcação
-                    registros = assunPendContr.objects.filter(
-                        mantRegistroInicial=True,
-                        idxAssunPendContr__BarcoPS=barco_ps
-                    ).order_by('-dataRegistroInicial')
-                    
-                    print(f"[API] GET /assun-pend-contr/ - Filtrando por embarcação: {barco_ps}")
-                except PassServ.DoesNotExist:
-                    print(f"[API] GET /assun-pend-contr/ - PS {ps_id} não encontrada")
-                    registros = assunPendContr.objects.none()
-            else:
-                # Sem filtro - retorna todos (caso geral)
-                registros = assunPendContr.objects.filter(mantRegistroInicial=True).order_by('-dataRegistroInicial')
+            if not ps_id:
+                print(f"[API ERROR] GET /assun-pend-contr/ - ps_id não informado")
+                return JsonResponse({
+                    'success': False,
+                    'error': 'PS não informada'
+                }, status=400)
+            
+            # Buscar PS atual
+            try:
+                ps_atual = PassServ.objects.get(id=ps_id)
+            except PassServ.DoesNotExist:
+                print(f"[API ERROR] GET /assun-pend-contr/ - PS {ps_id} não encontrada")
+                return JsonResponse({
+                    'success': False,
+                    'error': 'PS não encontrada'
+                }, status=404)
+            
+            # FILTRAR APENAS REGISTROS VINCULADOS À PS ATUAL
+            registros = assunPendContr.objects.filter(
+                idxAssunPendContr=ps_atual
+            ).order_by('-dataRegistroInicial')
+            
+            print(f"[API] GET /assun-pend-contr/ - PS {ps_id}: {registros.count()} registros encontrados")
             
             registros_list = []
             import re
@@ -3369,6 +3427,8 @@ def assun_pend_contr_list(request):
             
         except Exception as e:
             print(f"[API ERROR] GET /assun-pend-contr/ - {str(e)}")
+            import traceback
+            traceback.print_exc()
             return JsonResponse({
                 'success': False,
                 'error': str(e)
@@ -3516,7 +3576,10 @@ def assun_pend_contr_detail(request, assun_id):
                 })
             else:
                 # Edição de outros campos - validar fiscal e período
-                fiscal_editor = data.get('fiscalEditor')
+                fiscal_editor = data.get('fiscal_Editor')
+                #print(f"[DEBUG]  - Data {registro.dataRegistroInicial}")
+                #print(f"[DEBUG] - Editor - {fiscal_editor}")
+                #print(f"[DEBUG] - Fiscal Inicial- {registro.fiscRegistroInicial}")
                 if registro.fiscRegistroInicial != fiscal_editor:
                     return JsonResponse({
                         'success': False,
@@ -3524,10 +3587,14 @@ def assun_pend_contr_detail(request, assun_id):
                     }, status=403)
 
                 # Validar se está no período da PS
-                from datetime import date
-                hoje = date.today()
+                reg_init=registro.dataRegistroInicial
                 ps = registro.idxAssunPendContr
-                if not (ps.dataInicio <= hoje <= ps.dataFim):
+                #print("=====================================================================")
+                #print(f"[DEBUG] - tipo de dado DATA DO REGISTRO   ->{type(reg_init)} ")
+                #print(f"[DEBUG] - tipo de dado DATA INICIO DA PS  ->{type(ps.dataInicio)} ")
+                #print(f"[DEBUG] - tipo de dado DATA EMISSÃO DA PS ->{type(ps.dataEmissaoPS)} ")
+                #print("=====================================================================")
+                if not (ps.dataInicio <= reg_init <= ps.dataEmissaoPS):
                     return JsonResponse({
                         'success': False,
                         'error': 'Edição permitida apenas durante o período da PS'
@@ -3580,7 +3647,14 @@ def assun_pend_contr_detail(request, assun_id):
     
     elif request.method == 'DELETE':
         try:
-            # Ao deletar, remove também todos os comentários (CASCADE)
+            reg_init=registro.dataRegistroInicial
+            ps = registro.idxAssunPendContr
+            if not (ps.dataInicio <= reg_init <= ps.dataEmissaoPS):
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Edição permitida apenas durante o período da PS'
+                }, status=403)
+
             registro.delete()
             
             print(f"[API] DELETE /assun-pend-contr/{assun_id}/ - Registro removido")

@@ -89,7 +89,7 @@ const TrocaTurmaModule = (() => {
         Porto: elementos.porto.value.trim(),
         Terminal: elementos.terminal.value.trim(),
         OrdSerPorto: elementos.os.value.trim(),
-        AtracPorto: elementos.atracacao.value || '08:00'
+        AtracPorto: elementos.atracacao.value || '08:00',
         DuracPorto: elementos.duracao.value.trim(),
         ObservPorto: elementos.obs.value.trim()
       };

@@ -527,7 +527,6 @@ class LvSeg(models.Model):
     def __str__(self):
         return f"{self.idxPsLvSeg} - {self.idxPsLvSeg.numPS}"
     
-
 #================================3.3 LV DE MANGUEIRAS=========================================
 class lvMangueiras(models.Model):
     """Modelo Passagem de Serviço - LV de Mangueiras - SMS"""
@@ -555,22 +554,10 @@ class lvMangueiras(models.Model):
 
 
 
-
-#================================3.2 DESVIOS DE SMS===========================================
-
-
-#================================3.3  LV de Mangueiras====================================
-
-
-        
-
-
-#================================3.4 LV de Segurança====================================
-
         
 
     
-  #-==========================================================4.1 IAPO===================================================
+#-==========================================================4.1 IAPO===================================================
 class iapo(models.Model):
     """Modelo para cadastro de Passagem de Serviço - IAPO - Rotinas"""
 
@@ -621,7 +608,7 @@ class iapo(models.Model):
         super().save(*args, **kwargs)
 
 
-#-===============================4.2 SMS===================================================
+
 
 
 

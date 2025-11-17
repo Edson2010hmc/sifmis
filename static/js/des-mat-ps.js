@@ -69,7 +69,7 @@ const DesMatPsModule = (() => {
     if (!psId) return;
 
     if (sincronizandoEmAndamento) {
-      console.log('[DES-MAT-PS] Sincronização já em andamento, aguardando...');
+
       return;
     }
 
@@ -82,10 +82,10 @@ const DesMatPsModule = (() => {
       });
 
       const result = await response.json();
-      console.log('[DES-MAT-PS] Sincronização concluída:', result.message);
+
 
     } catch (error) {
-      console.error('[DES-MAT-PS] Erro na sincronização:', error);
+
     } finally {
       sincronizandoEmAndamento = false;
     }
@@ -101,7 +101,7 @@ const DesMatPsModule = (() => {
       await new Promise(resolve => setTimeout(resolve, 300));
       await atualizarTabela(psId);
     } catch (error) {
-      console.error('[DES-MAT-PS] Erro ao carregar dados:', error);
+
     }
   }
 
@@ -140,7 +140,7 @@ const DesMatPsModule = (() => {
         tbody.appendChild(tr);
       });
     } catch (error) {
-      console.error('[DES-MAT-PS] Erro ao atualizar tabela:', error);
+
     }
   }
 

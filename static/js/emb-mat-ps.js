@@ -69,7 +69,7 @@ const EmbMatPsModule = (() => {
     if (!psId) return;
 
     if (sincronizandoEmAndamento) {
-      console.log('[EMB-MAT-PS] Sincronização já em andamento, aguardando...');
+
       return;
     }
 
@@ -82,10 +82,10 @@ const EmbMatPsModule = (() => {
       });
 
       const result = await response.json();
-      console.log('[EMB-MAT-PS] Sincronização concluída:', result.message);
+
 
     } catch (error) {
-      console.error('[EMB-MAT-PS] Erro na sincronização:', error);
+
     } finally {
       sincronizandoEmAndamento = false;
     }
@@ -101,7 +101,7 @@ const EmbMatPsModule = (() => {
       await new Promise(resolve => setTimeout(resolve, 300));
       await atualizarTabela(psId);
     } catch (error) {
-      console.error('[EMB-MAT-PS] Erro ao carregar dados:', error);
+
     }
   }
 
@@ -141,7 +141,7 @@ const EmbMatPsModule = (() => {
         tbody.appendChild(tr);
       });
     } catch (error) {
-      console.error('[EMB-MAT-PS] Erro ao atualizar tabela:', error);
+
     }
   }
 

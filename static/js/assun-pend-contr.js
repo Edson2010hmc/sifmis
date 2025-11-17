@@ -6,6 +6,7 @@ const AssunPendContrModule = (() => {
     let registroEditandoId = null;
     let registroComentarioId = null;
     let modoEdicao = false;
+    let modoFinalizacao = false;
 
     //============REFERENCIAS DOM============
     const elementos = {
@@ -38,6 +39,8 @@ const AssunPendContrModule = (() => {
     let psAtualId = null;
     let fiscalDesembarcando = '';
     let psStatus = '';
+    let psDataInicio = null;
+    let psDataEmissao = null;
 
     //============INICIALIZAR============
     function init() {
@@ -58,7 +61,6 @@ const AssunPendContrModule = (() => {
 
     //============TOGGLE NUMERO BROA============
     function toggleNumeroBroa() {
-
         const abBroa = !elementos.abertoBroa.checked;
         elementos.divNumeroBroa.style.display = abBroa ? 'none' : 'block';
     }
@@ -79,8 +81,8 @@ const AssunPendContrModule = (() => {
             result.data.forEach(fiscal => {
                 const texto = `${fiscal.chave} - ${fiscal.nome}`;
                 options += `<option value="${texto}">${texto}</option>`;
-                //alert(fiscal.nome);
             });
+
 
             elementos.fiscal.innerHTML = opcaoVazia + options;
             elementos.comentFiscal.innerHTML = opcaoVazia + options;
@@ -105,9 +107,10 @@ const AssunPendContrModule = (() => {
                 throw new Error(result.error);
             }
 
-            fiscalDesembarcando = result.data.fiscalDes; //Armazenar o fiscal editor da PS
-            psStatus = result.data.statusPS; // Armazenar status da PS
+            fiscalDesembarcando = result.data.fiscalDes;
+            psStatus = result.data.statusPS;
 
+            // Controlar visibilidade dos botões
             controlarBotoes();
 
             // Carregar os contratos do barco para exibição na tabela
@@ -129,17 +132,17 @@ const AssunPendContrModule = (() => {
         }
     }
 
-    //============CONTROLAR BOTÕES DA TABELA - STATUS DA PS============
+    //============CONTROLAR VISIBILIDADE DOS BOTÕES - STATUS DA PS============
     function controlarBotoes() {
         const ehRascunho = psStatus === 'RASCUNHO';
 
-        // Desabilitar botão de cadastro
-        elementos.btnCadastro.disabled = !ehRascunho;
-
-        // Desabilitar botões na tabela (adicionar/finalizar)
-
+        // Controlar visibilidade do botão CADASTRO
+        if (ehRascunho) {
+            elementos.btnCadastro.style.display = 'block';
+        } else {
+            elementos.btnCadastro.style.display = 'none';
+        }
     }
-
 
     //============CARREGAR LISTA DE REGISTROS============
     async function carregarLista() {
@@ -184,18 +187,22 @@ const AssunPendContrModule = (() => {
         registros.forEach(reg => {
             const tr = document.createElement('tr');
             const item = `${reg.ano}/${reg.id}`;
-            const disabledAttr = ehRascunho ? '' : 'disabled';
+
+            // Se PS está FINALIZADA, não exibe os botões de ação
+            const botoesAcoes = ehRascunho ? `
+                <button class="btn small" onclick="AssunPendContrModule.abrirModalComentario(${reg.id})">Adicionar Comentário</button>
+                <button class="btn small ghost" onclick="AssunPendContrModule.finalizarItem(${reg.id})">Finalizar Item</button>
+            ` : '';
 
             tr.innerHTML = `
-        <td style="border:1px solid #ddd; padding:8px;">${item}</td>
-        <td style="border:1px solid #ddd; padding:8px;">
-          <textarea readonly style="width:100%; min-height:80px; border:none; background:transparent; resize:vertical;">${reg.descricaoCompleta || ''}</textarea>
-        </td>
-        <td style="border:1px solid #ddd; padding:8px; text-align:center;">
-          <button class="btn small" onclick="AssunPendContrModule.abrirModalComentario(${reg.id})">Adicionar Comentário</button>
-          <button class="btn small ghost" onclick="AssunPendContrModule.finalizarItem(${reg.id})">Finalizar Item</button>
-        </td>
-      `;
+                <td style="border:1px solid #ddd; padding:8px;">${item}</td>
+                <td style="border:1px solid #ddd; padding:8px;">
+                    <textarea readonly style="width:100%; min-height:80px; border:none; background:transparent; resize:vertical;">${reg.descricaoCompleta || ''}</textarea>
+                </td>
+                <td style="border:1px solid #ddd; padding:8px; text-align:center;">
+                    ${botoesAcoes}
+                </td>
+            `;
 
             elementos.tabelaBody.appendChild(tr);
         });
@@ -203,11 +210,15 @@ const AssunPendContrModule = (() => {
 
     //============ABRIR MODAL CADASTRO============
     function abrirModalCadastro() {
+
+
+
+
         limparFormulario();
         elementos.modalCadastro.classList.add('active');
         elementos.data.value = obterDataAtual();
-
-        // Aguardar um tick para garantir que o select está populado
+        document.getElementById('btnApcEditar').style.display = 'inline-block';
+        document.getElementById('btnApcExcluir').style.display = 'inline-block';
         setTimeout(() => {
             elementos.fiscal.value = fiscalDesembarcando;
             elementos.fiscal.disabled = true;
@@ -218,34 +229,58 @@ const AssunPendContrModule = (() => {
     function fecharModalCadastro() {
         elementos.modalCadastro.classList.remove('active');
         limparFormulario();
+        registroEditandoId = null;
+        modoEdicao = false;
+    }
+
+    //============LIMPAR FORMULÁRIO============
+    function limparFormulario() {
+        elementos.data.value = '';
+        elementos.fiscal.value = '';
+        elementos.fiscal.disabled = false;
+        elementos.classe.value = '';
+        elementos.contrato.value = '';
+        elementos.itemContr.value = '';
+        elementos.anexoContr.value = '';
+        elementos.descricao.value = '';
+        elementos.abertoBroa.checked = false;
+        elementos.numeroBroa.value = '';
+        elementos.divNumeroBroa.style.display = 'none';
+
+        elementos.selectCrud.value = '';
+        elementos.btnSalvar.style.display = 'inline-block';
+        elementos.btnEditar.style.display = 'none';
+        elementos.btnExcluir.style.display = 'none';
     }
 
     //============SELECIONAR REGISTRO============
     function selecionarRegistro() {
-        const option = elementos.selectCrud.options[elementos.selectCrud.selectedIndex];
+        const selectedOption = elementos.selectCrud.options[elementos.selectCrud.selectedIndex];
 
-        if (!option.value) {
+        if (!selectedOption || !selectedOption.value) {
             limparFormulario();
             return;
         }
 
-        const registro = JSON.parse(option.dataset.registro);
+        const registro = JSON.parse(selectedOption.dataset.registro);
+        registroEditandoId = registro.id;
+        modoEdicao = true;
+        const descricReg = registro.descrRegistroInicial;
+        const descric_filter = descricReg.split("Descrição:")[1]?.trim();
 
         elementos.data.value = registro.dataRegistroInicial || '';
         elementos.fiscal.value = registro.fiscRegistroInicial || '';
+        elementos.fiscal.disabled = true;
         elementos.classe.value = registro.classeRegistroInicial || '';
         elementos.contrato.value = registro.contrato || '';
         elementos.itemContr.value = registro.itemContr || '';
         elementos.anexoContr.value = registro.anexoContr || '';
-        let descricaoSplit = '';
-        if (registro.descrRegistroInicial) {
-            const match = registro.descrRegistroInicial.match(/DESCRIÇÃO:(.+)$/);
-            descricaoSplit = match ? match[1].trim() : '';
-        }
-        elementos.descricao.value = descricaoSplit;
+        elementos.descricao.value = descric_filter || '';
         elementos.abertoBroa.checked = registro.abertoBroa || false;
         elementos.numeroBroa.value = registro.numeroBroa || '';
+
         toggleNumeroBroa();
+
         registroEditandoId = registro.id;
         elementos.btnSalvar.disabled = true;
         elementos.btnEditar.disabled = false;
@@ -256,13 +291,11 @@ const AssunPendContrModule = (() => {
 
     //============SALVAR NOVO REGISTRO============
     async function salvarNovo() {
-        if (!validarCampos()) {
-            return;
-        }
 
         try {
-            const dados = obterDadosFormulario();
 
+            const dados = obterDadosFormulario();
+            if (!validarFormulario(dados)) return;
             const parteBroa = dados.abertoBroa && dados.numeroBroa
                 ? `BROA N.${dados.numeroBroa}`
                 : 'Sem registro no BROA';
@@ -270,12 +303,8 @@ const AssunPendContrModule = (() => {
 
             const [ano, mes, dia] = dados.dataRegistroInicial.split('-');
             const dataFormatada = `${dia}/${mes}/${ano}`;
-            const textoFormatado = `${dados.classeRegistroInicial}  (${dados.contrato}-${dados.anexoContr} Item:${dados.itemContr})   ${dados.fiscRegistroInicial} em ${dataFormatada}   ${parteBroa}      DESCRIÇÃO:${dados.descrRegistroInicial}`;
-
-
-
+            const textoFormatado = `${dados.fiscRegistroInicial} - ${dataFormatada} - ${dados.classeRegistroInicial} - ${parteBroa} - Descrição:${dados.descrRegistroInicial}`;
             dados.descrRegistroInicial = textoFormatado;
-
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -293,7 +322,7 @@ const AssunPendContrModule = (() => {
             carregarLista();
 
         } catch (error) {
-            alert('Erro ao salvar: ' + error.message);
+            alert('Erro ao Salvar: ' + error.message);
         }
     }
 
@@ -307,27 +336,27 @@ const AssunPendContrModule = (() => {
         elementos.btnEditar.addEventListener('click', salvarEdicao);
     }
 
+
     //============SALVAR EDIÇÃO============
     async function salvarEdicao() {
-        if (!validarCampos()) {
-            return;
-        }
+        if (!registroEditandoId) return;
+
+        const dados = obterDadosFormulario();
+
+        if (!validarFormulario(dados)) return;
 
         try {
-            const dados = obterDadosFormulario();
-            dados.fiscalEditor = fiscalDesembarcando;
 
-            // Reformatar o texto com os dados atualizados
             const parteBroa = dados.abertoBroa && dados.numeroBroa
                 ? `BROA N.${dados.numeroBroa}`
                 : 'Sem registro no BROA';
 
+
             const [ano, mes, dia] = dados.dataRegistroInicial.split('-');
             const dataFormatada = `${dia}/${mes}/${ano}`;
-            const textoFormatado = `${dados.classeRegistroInicial} (${dados.contrato}-${dados.anexoContr} Item:${dados.itemContr})   ${dados.fiscRegistroInicial} em ${dataFormatada}   ${parteBroa}      DESCRIÇÃO:${dados.descrRegistroInicial}`;
-
+            const textoFormatado = `${dados.fiscRegistroInicial} - ${dataFormatada} - ${dados.classeRegistroInicial} - ${parteBroa} - Descrição:${dados.descrRegistroInicial}`;
             dados.descrRegistroInicial = textoFormatado;
-
+            dados.fiscal_Editor = fiscalDesembarcando
             const response = await fetch(`${API_URL}${registroEditandoId}/`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -341,6 +370,9 @@ const AssunPendContrModule = (() => {
             }
 
             alert('Registro atualizado com sucesso!');
+            elementos.btnEditar.textContent = 'Editar';
+            elementos.btnEditar.removeEventListener('click', salvarEdicao);
+            elementos.btnEditar.addEventListener('click', confirmarEdicao);
             fecharModalCadastro();
             carregarLista();
 
@@ -349,11 +381,66 @@ const AssunPendContrModule = (() => {
         }
     }
 
+    //============VALIDAR FORMULÁRIO============
+    function validarFormulario(dados) {
+        if (!elementos.data.value) {
+            alert('Informe a data');
+            elementos.data.focus();
+            return false;
+        }
+
+        if (!elementos.fiscal.value) {
+            alert('Selecione o fiscal');
+            elementos.fiscal.focus();
+            return false;
+        }
+
+        if (!elementos.classe.value) {
+            alert('Selecione a classificação');
+            elementos.classe.focus();
+            return false;
+        }
+
+        if (!elementos.descricao.value.trim()) {
+            alert('Informe a descrição');
+            elementos.descricao.focus();
+            return false;
+        }
+
+        if (elementos.abertoBroa.checked && !elementos.numeroBroa.value.trim()) {
+            alert('Informe o número do BROA');
+            elementos.numeroBroa.focus();
+            return false;
+        }
+
+        if (!elementos.contrato.value) {
+            alert('Selecione o contrato');
+            elementos.contrato.focus();
+            return false;
+        }
+
+        if (elementos.classe.value !== 'OUTROS' && !elementos.itemContr.value.trim()) {
+            alert('Item contratual é obrigatório para esta classificação');
+            elementos.itemContr.focus();
+            return false;
+        }
+
+        if (!elementos.anexoContr.value.trim()) {
+            alert('Informe o anexo contratual');
+            elementos.anexoContr.focus();
+            return false;
+        }
+
+        return true;
+    }
+
+
     //============EXCLUIR REGISTRO============
     async function excluirRegistro() {
+        console.log('Botão excluir Pressionado')
         if (!registroEditandoId) return;
 
-        if (!confirm('Deseja realmente excluir este registro? Todos os comentários também serão removidos.')) {
+        if (!confirm('Confirma a exclusão deste registro? Todos os comentários também serão removidos.')) {
             return;
         }
 
@@ -369,6 +456,7 @@ const AssunPendContrModule = (() => {
             }
 
             alert('Registro excluído com sucesso!');
+            desabilitarCampos(false)
             fecharModalCadastro();
             carregarLista();
 
@@ -496,7 +584,6 @@ const AssunPendContrModule = (() => {
         }
     }
 
-
     //============FINALIZAR ITEM============
     function finalizarItem(registroId) {
         abrirModalComentario(registroId, true);
@@ -514,89 +601,10 @@ const AssunPendContrModule = (() => {
             anexoContr: elementos.anexoContr.value.trim(),
             descrRegistroInicial: elementos.descricao.value.trim(),
             abertoBroa: elementos.abertoBroa.checked,
-            numeroBroa: elementos.numeroBroa.value.trim() || null
+            numeroBroa: elementos.numeroBroa.value.trim()
         };
     }
 
-    //============VALIDAR CAMPOS============
-    function validarCampos() {
-        if (!elementos.data.value) {
-            alert('Informe a data');
-            elementos.data.focus();
-            return false;
-        }
-
-        if (!elementos.fiscal.value) {
-            alert('Selecione o fiscal');
-            elementos.fiscal.focus();
-            return false;
-        }
-
-        if (!elementos.classe.value) {
-            alert('Selecione a classificação');
-            elementos.classe.focus();
-            return false;
-        }
-
-        if (!elementos.descricao.value.trim()) {
-            alert('Informe a descrição');
-            elementos.descricao.focus();
-            return false;
-        }
-
-        if (elementos.abertoBroa.checked && !elementos.numeroBroa.value.trim()) {
-            alert('Informe o número do BROA');
-            elementos.numeroBroa.focus();
-            return false;
-        }
-
-        if (!elementos.contrato.value) {
-            alert('Selecione o contrato');
-            elementos.contrato.focus();
-            return false;
-        }
-
-        if (elementos.classe.value !== 'OUTROS' && !elementos.itemContr.value.trim()) {
-            alert('Item contratual é obrigatório para esta classificação');
-            elementos.itemContr.focus();
-            return false;
-        }
-
-        if (!elementos.anexoContr.value.trim()) {
-            alert('Informe o anexo contratual');
-            elementos.anexoContr.focus();
-            return false;
-        }
-
-        return true;
-    }
-
-    //============LIMPAR FORMULÁRIO============
-    function limparFormulario() {
-        elementos.selectCrud.value = '';
-        elementos.data.value = '';
-        elementos.classe.value = '';
-        elementos.descricao.value = '';
-        elementos.abertoBroa.checked = false;
-        elementos.numeroBroa.value = '';
-        elementos.divNumeroBroa.style.display = 'none';
-        elementos.btnSalvar.disabled = false;
-        elementos.btnEditar.disabled = true;
-        elementos.btnExcluir.disabled = true;
-        registroEditandoId = null;
-        modoEdicao = false;
-        desabilitarCampos(false);
-        elementos.fiscal.value = fiscalDesembarcando;
-        elementos.fiscal.disabled = true;
-        elementos.btnEditar.textContent = 'Editar';
-        elementos.btnEditar.removeEventListener('click', salvarEdicao);
-        elementos.btnEditar.addEventListener('click', confirmarEdicao);
-        elementos.contrato.value = '';
-        elementos.itemContr.value = '';
-        elementos.anexoContr.value = '';
-    }
-
-    //============DESABILITAR CAMPOS============
     function desabilitarCampos(desabilitar) {
         elementos.data.disabled = desabilitar;
         elementos.fiscal.disabled = desabilitar;
@@ -627,7 +635,7 @@ const AssunPendContrModule = (() => {
         const ano = agora.getFullYear();
         const hora = String(agora.getHours()).padStart(2, '0');
         const min = String(agora.getMinutes()).padStart(2, '0');
-        return `${dia}/${mes}/${ano}`
+        return `${dia}/${mes}/${ano} ${hora}:${min}`;
     }
 
     //============LIMPAR============
