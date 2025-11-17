@@ -3463,27 +3463,38 @@ def assun_pend_contr_list(request):
                 numeroBroa=data.get('numeroBroa'),
                 mantRegistroInicial=True
             )
-            
-            print(f"[API] POST /assun-pend-contr/ - Registro criado com ID: {registro.id}")
-            
-            return JsonResponse({
-                'success': True,
-                'message': 'Registro criado com sucesso',
-                'data': {
-                    'id': registro.id,
-                    'dataRegistroInicial': str(registro.dataRegistroInicial) if registro.dataRegistroInicial else '',
-                    'fiscRegistroInicial': registro.fiscRegistroInicial,
-                    'classeRegistroInicial': registro.classeRegistroInicial,
-                    'itemContr': registro.itemContr,
-                    'anexoContr': registro.anexoContr,  
-                    'contrato': registro.contrato,    
-                    'descrRegistroInicial': registro.descrRegistroInicial,
-                    'abertoBroa': registro.abertoBroa,                     
-                    'numeroBroa': registro.numeroBroa or '',               
-                    'mantRegistroInicial': registro.mantRegistroInicial,
-                    'ano': registro.dataRegistroInicial.year if registro.dataRegistroInicial else ''
-                }
-            }, status=201)
+            print("====================================================")
+            print(f"[DEBUG] Data Registro Inicial - {data_registro}")
+            print(f"[DEBUG] Data Inicio Quinzena  - {ps.dataInicio}")
+            print(f"[DEBUG] Data Emissão da PS    - {ps.dataEmissaoPS}")
+            print(f"===================================================")
+            reg_init=registro.dataRegistroInicial
+            if not (ps.dataInicio <= reg_init <= ps.dataEmissaoPS):
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Pendencia só pode ser criada dentro do periodo da passagem de serviço.'
+                    }, status=403)
+            else:
+
+                print(f"[API] POST /assun-pend-contr/ - Registro criado com ID: {registro.id}")
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Registro criado com sucesso',
+                    'data': {
+                        'id': registro.id,
+                        'dataRegistroInicial': str(registro.dataRegistroInicial) if registro.dataRegistroInicial else '',
+                        'fiscRegistroInicial': registro.fiscRegistroInicial,
+                        'classeRegistroInicial': registro.classeRegistroInicial,
+                        'itemContr': registro.itemContr,
+                        'anexoContr': registro.anexoContr,  
+                        'contrato': registro.contrato,    
+                        'descrRegistroInicial': registro.descrRegistroInicial,
+                        'abertoBroa': registro.abertoBroa,                     
+                        'numeroBroa': registro.numeroBroa or '',               
+                        'mantRegistroInicial': registro.mantRegistroInicial,
+                        'ano': registro.dataRegistroInicial.year if registro.dataRegistroInicial else ''
+                    }
+                }, status=201)
             
         except Exception as e:
             print(f"[API ERROR] POST /assun-pend-contr/ - {str(e)}")
