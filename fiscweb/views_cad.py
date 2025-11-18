@@ -1092,3 +1092,150 @@ def materiais_operacao_detail(request, material_id):
                 'success': False,
                 'error': str(e)
             }, status=400)
+        
+
+#========================================== FREQUÊNCIA LV SEGURANÇA API REST==========================================
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def freq_lv_seg_list(request):
+    """
+    GET: Lista todas as frequências de LV de Segurança
+    POST: Cria nova frequência de LV
+    """
+    
+    if request.method == 'GET':
+        try:
+            frequencias = freqLvSeg.objects.all()
+            
+            data = []
+            for freq in frequencias:
+                data.append({
+                    'id': freq.id,
+                    'temaLvSeg': freq.temaLvSeg,
+                    'freqLvSeg': freq.freqLvSeg
+                })
+            
+            print(f"[API] GET /api/freq-lv-seg/ - {len(data)} frequências retornadas")
+            
+            return JsonResponse({
+                'success': True,
+                'data': data
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] GET /api/freq-lv-seg/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            print(f"[API] POST /api/freq-lv-seg/ - Criando frequência")
+            
+            frequencia = freqLvSeg.objects.create(
+                temaLvSeg=data.get('temaLvSeg', ''),
+                freqLvSeg=int(data.get('freqLvSeg', 0))
+            )
+            
+            print(f"[API] POST /api/freq-lv-seg/ - Frequência {frequencia.id} criada")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Frequência criada com sucesso',
+                'data': {
+                    'id': frequencia.id,
+                    'temaLvSeg': frequencia.temaLvSeg,
+                    'freqLvSeg': frequencia.freqLvSeg
+                }
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] POST /api/freq-lv-seg/ - {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+
+@csrf_exempt
+@require_http_methods(["GET", "PUT", "DELETE"])
+def freq_lv_seg_detail(request, freq_id):
+    """
+    GET: Retorna dados da frequência
+    PUT: Atualiza frequência
+    DELETE: Remove frequência
+    """
+    
+    try:
+        frequencia = freqLvSeg.objects.get(id=freq_id)
+    except freqLvSeg.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Frequência não encontrada'
+        }, status=404)
+    
+    if request.method == 'GET':
+        try:
+            data = {
+                'id': frequencia.id,
+                'temaLvSeg': frequencia.temaLvSeg,
+                'freqLvSeg': frequencia.freqLvSeg
+            }
+            
+            return JsonResponse({
+                'success': True,
+                'data': data
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    elif request.method == 'PUT':
+        try:
+            data = json.loads(request.body)
+            
+            frequencia.temaLvSeg = data.get('temaLvSeg', frequencia.temaLvSeg)
+            frequencia.freqLvSeg = int(data.get('freqLvSeg', frequencia.freqLvSeg))
+            frequencia.save()
+            
+            print(f"[API] PUT /api/freq-lv-seg/{freq_id}/ - Frequência atualizada")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Frequência atualizada com sucesso',
+                'data': {
+                    'id': frequencia.id
+                }
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] PUT /api/freq-lv-seg/{freq_id}/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    elif request.method == 'DELETE':
+        try:
+            frequencia.delete()
+            
+            print(f"[API] DELETE /api/freq-lv-seg/{freq_id}/ - Frequência removida")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Frequência removida com sucesso'
+            })
+            
+        except Exception as e:
+            print(f"[API ERROR] DELETE /api/freq-lv-seg/{freq_id}/ - {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)

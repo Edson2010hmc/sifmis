@@ -48,6 +48,10 @@ urlpatterns = [
     path('api/materiais-operacao/', views_cad.materiais_operacao_list, name='materiais_operacao_list'),
     path('api/materiais-operacao/<int:material_id>/', views_cad.materiais_operacao_detail, name='materiais_operacao_detail'),
 
+    # API Frequência LV Segurança
+    path('api/freq-lv-seg/', views_cad.freq_lv_seg_list, name='freq_lv_seg_list'),
+    path('api/freq-lv-seg/<int:freq_id>/', views_cad.freq_lv_seg_detail, name='freq_lv_seg_detail'),
+
     #===========================================MODULO PASSAGEM DE SERVIÇO=================================
     # API Passagem de Serviço
     path('api/verificar-rascunho/', views_ps.verificar_rascunho, name='verificar_rascunho'),
