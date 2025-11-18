@@ -3,7 +3,7 @@
 const AbastModule = (() => {
   let abastId = null;
   let arquivoAtual = null;
-
+  let dataEmissaoPS = null;
   // Referências aos elementos DOM
   const elementos = {
     checkbox: document.getElementById('abNaoPrevisto'),
@@ -27,7 +27,7 @@ const AbastModule = (() => {
 
   // ===== CONFIGURAR EVENTOS =====
   function configurarEventos() {
-    elementos.checkbox.addEventListener('change', function() {
+    elementos.checkbox.addEventListener('change', function () {
       toggleCampos();
     });
   }
@@ -36,6 +36,16 @@ const AbastModule = (() => {
   function toggleCampos() {
     const previsto = !elementos.checkbox.checked;
     elementos.containerCampos.style.display = previsto ? 'block' : 'none';
+    if (elementos.checkbox.checked) {
+      elementos.os.value = '';
+      elementos.prevInicio.value = '';
+      elementos.qtd.value = '';
+      elementos.obs.value = '';
+      elementos.duracao.value = '';
+    }
+    else {
+      elementos.prevInicio.value = dataEmissaoPS;
+    }
   }
 
   // ===== CRIAR ABASTECIMENTO =====
@@ -58,7 +68,7 @@ const AbastModule = (() => {
       abastId = result.data.id;
       elementos.checkbox.checked = false;
       toggleCampos();
-      
+
       await buscarUltimoAbastecimento(psId);
 
     } catch (error) {
@@ -95,9 +105,11 @@ const AbastModule = (() => {
   }
 
   // ===== CARREGAR DADOS (chamado ao abrir PS) =====
-  async function carregarDados(psId) {
+  async function carregarDados(psId, dataEmissao) {
     if (!psId) return;
-
+    psAtualId = psId;
+    dataEmissaoPS = dataEmissao;
+    console.log(dataEmissao)
     try {
       const response = await fetch(`/api/ps/${psId}/abast/`);
       const result = await response.json();
@@ -120,7 +132,7 @@ const AbastModule = (() => {
       elementos.ultAbast.value = result.data.UltAbast || '';
       elementos.ultQtd.value = result.data.QuantUltAbast || '';
       elementos.obs.value = result.data.ObservAbast || '';
-      
+
       arquivoAtual = result.data.Anexos ? {
         url: result.data.Anexos,
         nome: result.data.AnexosNome
@@ -128,7 +140,7 @@ const AbastModule = (() => {
 
       mostrarLinkDownload();
       toggleCampos();
-      
+
       if (!result.data.UltAbast && !result.data.QuantUltAbast) {
         await buscarUltimoAbastecimento(psId);
       }
@@ -162,18 +174,18 @@ const AbastModule = (() => {
       const formData = new FormData();
       formData.append('prevAbast', (!elementos.checkbox.checked).toString());
       formData.append('OrdSerAbast', elementos.os.value.trim());
-      
+
       if (elementos.prevInicio.value) {
         formData.append('DataHoraPrevAbast', elementos.prevInicio.value);
       }
-      
+
       formData.append('QuantAbast', elementos.qtd.value.trim() || '');
       formData.append('DuracPrev', elementos.duracao.value.trim() || '');
-      
+
       if (elementos.ultAbast.value) {
         formData.append('UltAbast', elementos.ultAbast.value);
       }
-      
+
       formData.append('QuantUltAbast', elementos.ultQtd.value.trim() || '');
       formData.append('ObservAbast', elementos.obs.value.trim());
 

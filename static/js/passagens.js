@@ -251,7 +251,7 @@ const PassagensModule = (() => {
       ManutPrevModule.carregarDados(psData.id);
     }
     if (typeof AbastModule !== 'undefined' && AbastModule.carregarDados) {
-      AbastModule.carregarDados(psData.id);
+      AbastModule.carregarDados(psData.id, psData.dataEmissaoPS);
     }
     if (typeof InspNormModule !== 'undefined' && InspNormModule.carregarDados) {
       InspNormModule.carregarDados(psData.id);

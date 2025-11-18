@@ -343,16 +343,27 @@ def criar_nova_ps(request):
         
         print(f"[CRIAR PS] PS criada: ID={ps.id}, Barco={ps.BarcoPS}")
         
-        # ========== COPIAR PENDÊNCIAS ATIVAS PARA A NOVA PS ==========
+        # ========== COPIAR PENDÊNCIAS ATIVAS DA PS ANTERIOR ==========
         barco_nome = ps.BarcoPS
-        
-        # Buscar pendências ativas da mesma embarcação
-        pendencias_ativas = assunPendContr.objects.filter(
-            mantRegistroInicial=True,
-            idxAssunPendContr__BarcoPS=barco_nome
-        )
-        
-        print(f"[CRIAR PS] Encontradas {pendencias_ativas.count()} pendências ativas para copiar")
+
+        # Buscar PS anterior (mais recente) da mesma embarcação
+        ps_anterior = PassServ.objects.filter(
+            BarcoPS=barco_nome
+        ).exclude(id=ps.id).order_by('-dataEmissaoPS').first()
+
+        if ps_anterior:
+            print(f"[CRIAR PS] PS anterior encontrada: ID={ps_anterior.id}, Num={ps_anterior.numPS}/{ps_anterior.anoPS}")
+            
+            # Buscar pendências ativas APENAS da PS anterior
+            pendencias_ativas = assunPendContr.objects.filter(
+                mantRegistroInicial=True,
+                idxAssunPendContr=ps_anterior
+            )
+            
+            print(f"[CRIAR PS] Encontradas {pendencias_ativas.count()} pendências ativas para copiar da PS anterior")
+        else:
+            print(f"[CRIAR PS] Nenhuma PS anterior encontrada para {barco_nome}")
+            pendencias_ativas = []
         
         for pendencia_original in pendencias_ativas:
             # Copiar pendência para nova PS

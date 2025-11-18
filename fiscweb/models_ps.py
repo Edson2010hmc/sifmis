@@ -351,7 +351,7 @@ class portoMatDesemb(models.Model):
 #================================2  PENDENCIAS OCORRENCIAS E ORIENTAÇÕES =================================================================
 #================================2.1 ASSUNTOS E PENDÊNCIAS CONTRATUAIS=======================================
 class assunPendContr(models.Model):
-    """Modelo para  PASSAGEM DE SERVIÇOAssuntos e Pendências Contratuais"""
+    """Modelo para  PASSAGEM DE SERVIÇO Assuntos e Pendências Contratuais"""
 
     CLASS_PEND_CHOICES = [
                             ('PENDENCIA DE ACEITAÇÃO' ,'PENDENCIA DE ACEITAÇÃO'),
