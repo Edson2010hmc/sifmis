@@ -146,7 +146,12 @@ const AssunPendContrModule = (() => {
 
     //============CARREGAR LISTA DE REGISTROS============
     async function carregarLista() {
+
+        console.log(psAtualId);
+
         try {
+
+
             const response = await fetch(`${API_URL}?ps_id=${psAtualId}`);
             const result = await response.json();
 
